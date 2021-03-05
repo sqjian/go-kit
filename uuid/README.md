@@ -1,0 +1,1 @@
+uuid 全称 universally unique identifier，即通用唯一辨识码
