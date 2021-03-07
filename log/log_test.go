@@ -19,8 +19,18 @@ func TestLogger(t *testing.T) {
 		t.Fatal(loggerErr)
 	}
 
-	logger.Debugf("testing infof...")
-	logger.Infof("testing Infof...")
-	logger.Warnf("testing Warnf...")
-	logger.Errorf("testing Errorf...")
+	{
+		t.Log(logger.SetLevelOTF(log.Warn))
+		logger.Debugf("testing infof...")
+		logger.Infof("testing Infof...")
+		logger.Warnf("testing Warnf...")
+		logger.Errorf("testing Errorf...")
+	}
+	{
+		t.Log(logger.SetLevelOTF(log.Warn))
+		logger.Debugf("testing infof...")
+		logger.Infof("testing Infof...")
+		logger.Warnf("testing Warnf...")
+		logger.Errorf("testing Errorf...")
+	}
 }

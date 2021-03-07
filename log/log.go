@@ -7,9 +7,10 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
+	"sync/atomic"
 )
 
-type Level int
+type Level = int64
 
 const (
 	Unknown Level = iota
@@ -63,6 +64,8 @@ type logger struct {
 		Console    bool   /*是否向控制台输出*/
 	}
 
+	ready bool
+
 	Logger *zap.SugaredLogger
 }
 
@@ -75,7 +78,26 @@ func (l *logger) String() string {
 	return string(res)
 }
 
-func (l *logger) init() error {
+func (l *logger) SetLevelOTF(Level Level) error {
+
+	if !l.ready {
+		return fmt.Errorf("logger not ready,please init first")
+	}
+
+	atomic.StoreInt64(&l.MetaData.Level, Level)
+
+	l.Errorf("reset the level,params:%v", l)
+
+	return nil
+}
+
+func (l *logger) init() (err error) {
+
+	defer func() {
+		if err == nil {
+			l.ready = true
+		}
+	}()
 
 	userPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 		if l.MetaData.Level == None {
