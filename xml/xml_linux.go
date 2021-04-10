@@ -24,7 +24,7 @@ func ValidateXmlWithXsd(xmlData, xsdData []byte) error {
 		for _, e := range ValidateErr.(xsd.SchemaValidationError).Errors() {
 			errDesc = append(errDesc, e.Error())
 		}
-		return fmt.Errorf("ValidateErr:%v,errDesc:%v", ValidateErr, errDesc)
+		return fmt.Errorf("validate_failed:%v,errDesc:%v", ValidateErr, errDesc)
 	}
 	return nil
 }
