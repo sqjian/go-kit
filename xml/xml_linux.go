@@ -1,6 +1,7 @@
 package xml
 
 import (
+	"fmt"
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
 )
@@ -19,7 +20,11 @@ func ValidateXmlWithXsd(xmlData, xsdData []byte) error {
 	defer xmlInstance.Free()
 
 	if ValidateErr := xsdInstance.Validate(xmlInstance); ValidateErr != nil {
-		return ValidateErr
+		var errDesc []string
+		for _, e := range ValidateErr.(xsd.SchemaValidationError).Errors() {
+			errDesc = append(errDesc, e.Error())
+		}
+		return fmt.Errorf("ValidateErr:%v,errDesc:%v", ValidateErr, errDesc)
 	}
-    return nil
+	return nil
 }
