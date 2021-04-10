@@ -1,3 +1,5 @@
+IMG:='registry.cn-hangzhou.aliyuncs.com/sqjian/venv:ubuntu20_04'
+
 .PHONY: build env
 
 export GO111MODULE=on
