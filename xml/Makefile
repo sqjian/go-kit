@@ -6,8 +6,17 @@ export GO111MODULE=on
 export GOPROXY=https://goproxy.cn
 
 build: env
-  go build -v
-env:
-  go mod tidy
-  apt-get install -y pkg-config
-  apt-get install -y libxml2-dev
+	go build -v
+venv:
+	docker run \
+			-it \
+			--rm \
+			--net=host \
+			--name=venv \
+			-v ${PWD}:/lab \
+			-w /lab \
+			${IMG} bash
+dep:
+	go mod tidy
+	apt-get install -y pkg-config
+	apt-get install -y libxml2-dev
