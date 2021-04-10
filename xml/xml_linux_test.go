@@ -1,7 +1,9 @@
 package xml_test
 
 import (
+	"io/ioutil"
 	"testing"
+	"xml"
 )
 
 func TestValidateXmlWithXsd(t *testing.T) {
