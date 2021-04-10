@@ -5,7 +5,7 @@ IMG:='registry.cn-hangzhou.aliyuncs.com/sqjian/venv:ubuntu20_04'
 export GO111MODULE=on
 export GOPROXY=https://goproxy.cn
 
-build: env
+build: dep
 	go build -v
 venv:
 	docker run \
