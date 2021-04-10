@@ -6,7 +6,7 @@ export GO111MODULE=on
 export GOPROXY=https://goproxy.cn
 
 build: dep
-	go build -v
+	go test -v
 venv:
 	docker run \
 			-it \

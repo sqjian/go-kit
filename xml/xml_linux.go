@@ -1,4 +1,4 @@
-package main
+package xml
 
 import (
 	"github.com/lestrrat-go/libxml2"
@@ -21,4 +21,5 @@ func ValidateXmlWithXsd(xmlData, xsdData []byte) error {
 	if ValidateErr := xsdInstance.Validate(xmlInstance); ValidateErr != nil {
 		return ValidateErr
 	}
+    return nil
 }
