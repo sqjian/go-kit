@@ -1,8 +1,8 @@
-package id
+package uid
 
 import (
 	"github.com/google/uuid"
-	"github.com/sqjian/toolkit/id/internal/snowflake"
+	"github.com/sqjian/toolkit/uid/snowflake"
 )
 
 type Generator interface {
