@@ -1,4 +1,4 @@
-package id
+package uid
 
 type Option interface {
 	apply(*generator)

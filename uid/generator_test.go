@@ -1,7 +1,7 @@
-package id_test
+package uid_test
 
 import (
-	"github.com/sqjian/toolkit/id"
+	"github.com/sqjian/toolkit/uid"
 	"testing"
 )
 
@@ -11,7 +11,7 @@ func TestGenerator_NewUuidV1(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	generator, generatorErr := id.NewGenerator()
+	generator, generatorErr := uid.NewGenerator()
 	checkErr(generatorErr)
 
 	uuidV1, uuidV1Err := generator.NewUuidV1()
@@ -26,8 +26,8 @@ func TestGenerator_NewSnowflake(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	generator, generatorErr := id.NewGenerator(
-		id.WithNodeId(1),
+	generator, generatorErr := uid.NewGenerator(
+		uid.WithNodeId(1),
 	)
 	checkErr(generatorErr)
 
