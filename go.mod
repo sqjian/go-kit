@@ -1,4 +1,4 @@
-module github.com/sqjian/toolkit
+module github.com/sqjian/go-kit
 
 go 1.14
 

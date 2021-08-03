@@ -2,7 +2,7 @@ package uid
 
 import (
 	"github.com/google/uuid"
-	"github.com/sqjian/toolkit/uid/snowflake"
+	"github.com/sqjian/go-kit/uid/snowflake"
 )
 
 type Generator interface {
