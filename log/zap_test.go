@@ -1,7 +1,7 @@
 package log_test
 
 import (
-	"github.com/sqjian/toolkit/log"
+	"github.com/sqjian/go-kit/log"
 	"testing"
 )
 

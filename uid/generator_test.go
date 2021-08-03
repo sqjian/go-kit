@@ -1,7 +1,7 @@
 package uid_test
 
 import (
-	"github.com/sqjian/toolkit/uid"
+	"github.com/sqjian/go-kit/uid"
 	"testing"
 )
 
