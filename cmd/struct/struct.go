@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -41,8 +40,16 @@ func main() {
 			dir = args[0]
 		} else {
 			file = args[0]
-			dir = filepath.Dir(args[0])
 		}
 		log.Printf("dir:%v,file:%v", dir, file)
+
+		{
+			astParser := newAstParser()
+			err := astParser.parseFile("test_data/geek.go", nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Println(astParser.struct2string("geek2"))
+		}
 	}
 }
