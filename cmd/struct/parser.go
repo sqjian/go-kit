@@ -15,14 +15,14 @@ type structType struct {
 	node *ast.StructType
 }
 
-type structCollector struct {
+type astParser struct {
 	rwMu    sync.RWMutex
 	fSet    *token.FileSet
 	structs map[token.Pos]*structType
 }
 
-func newStructCollector() *structCollector {
-	return &structCollector{
+func newAstParser() *astParser {
+	return &astParser{
 		rwMu: sync.RWMutex{},
 		structs: make(
 			map[token.Pos]*structType, 0,
@@ -30,7 +30,7 @@ func newStructCollector() *structCollector {
 		fSet: token.NewFileSet(),
 	}
 }
-func (s *structCollector) struct2string(structName string) (string, error) {
+func (s *astParser) struct2string(structName string) (string, error) {
 	expectedStruct, expectedStructErr := s.getStruct(structName)
 	if expectedStructErr != nil {
 		return "", expectedStructErr
@@ -44,7 +44,7 @@ func (s *structCollector) struct2string(structName string) (string, error) {
 	return buf.String(), nil
 
 }
-func (s *structCollector) getStruct(structName string) (*structType, error) {
+func (s *astParser) getStruct(structName string) (*structType, error) {
 	s.rwMu.RLock()
 	defer s.rwMu.RUnlock()
 
@@ -59,7 +59,7 @@ func (s *structCollector) getStruct(structName string) (*structType, error) {
 	}
 	return expectedStruct, nil
 }
-func (s *structCollector) parseFile(filename string, src interface{}) error {
+func (s *astParser) parseFile(filename string, src interface{}) error {
 	s.rwMu.Lock()
 	defer s.rwMu.Unlock()
 
@@ -99,29 +99,4 @@ func (s *structCollector) parseFile(filename string, src interface{}) error {
 	ast.Inspect(node, collectStructs)
 	s.structs = structs
 	return nil
-}
-
-func main() {
-
-	var t = `package geek
-
-type geek1 struct {
-	tag11 string
-	tag21 string
-}
-type geek2 struct {
-	tag12 string
-	tag22 string
-}
-type geek3 struct {
-	tag13 string
-	tag23 string
-}
-`
-	collector := newStructCollector()
-	err := collector.parseFile("", []byte(t))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(collector.struct2string("geek2"))
 }
