@@ -1,4 +1,4 @@
-package uid
+package unique
 
 type Option interface {
 	apply(*generator)
@@ -10,8 +10,8 @@ func (f optionFunc) apply(log *generator) {
 	f(log)
 }
 
-func WithNodeId(NodeId int64) Option {
+func WithSnowflakeNodeId(NodeId int64) Option {
 	return optionFunc(func(generator *generator) {
-		generator.MetaData.nodeId = NodeId
+		generator.snowflake.id = NodeId
 	})
 }

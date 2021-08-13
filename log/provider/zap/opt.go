@@ -1,4 +1,4 @@
-package log
+package zap
 
 type Option interface {
 	apply(*logger)
