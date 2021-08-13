@@ -1,4 +1,4 @@
-package log
+package zap
 
 import (
 	"encoding/json"
@@ -23,35 +23,42 @@ const (
 
 func NewLogger(opts ...Option) (*logger, error) {
 
-	loggerTmp := new(logger)
+	loggerInst := new(logger)
 
 	for _, opt := range opts {
-		opt.apply(loggerTmp)
+		opt.apply(loggerInst)
 	}
 
-	if len(loggerTmp.MetaData.FileName) == 0 {
-		return nil, fmt.Errorf("empty fileName")
-	}
-	if loggerTmp.MetaData.MaxSize == 0 {
-		return nil, fmt.Errorf("empty MaxSize")
-	}
-	if loggerTmp.MetaData.MaxBackups == 0 {
-		return nil, fmt.Errorf("empty MaxBackups")
-	}
-	if loggerTmp.MetaData.MaxAge == 0 {
-		return nil, fmt.Errorf("empty MaxAge")
-	}
-	if loggerTmp.MetaData.Level == Unknown {
-		return nil, fmt.Errorf("empty Level")
+	switch {
+	case len(loggerInst.MetaData.FileName) == 0:
+		{
+			return nil, fmt.Errorf("empty fileName")
+		}
+	case loggerInst.MetaData.MaxSize == 0:
+		{
+			return nil, fmt.Errorf("empty MaxSize")
+		}
+	case loggerInst.MetaData.MaxBackups == 0:
+		{
+			return nil, fmt.Errorf("empty MaxBackups")
+		}
+	case loggerInst.MetaData.MaxAge == 0:
+		{
+			return nil, fmt.Errorf("empty MaxAge")
+		}
+	case loggerInst.MetaData.Level == Unknown:
+		{
+			return nil, fmt.Errorf("empty Level")
+		}
 	}
 
-	err := loggerTmp.init()
+	err := loggerInst.init()
 	if err != nil {
 		return nil, err
 	}
-	loggerTmp.Errorf("init params:%v", loggerTmp)
+	loggerInst.Errorf("init params:%v", loggerInst)
 
-	return loggerTmp, nil
+	return loggerInst, nil
 }
 
 type logger struct {

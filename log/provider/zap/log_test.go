@@ -1,18 +1,18 @@
-package log_test
+package zap_test
 
 import (
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/log/provider/zap"
 	"testing"
 )
 
 func TestLogger(t *testing.T) {
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("test.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Info),
-		log.WithConsole(false),
+	logger, loggerErr := zap.NewLogger(
+		zap.WithFileName("test.log"),
+		zap.WithMaxSize(3),
+		zap.WithMaxBackups(3),
+		zap.WithMaxAge(3),
+		zap.WithLevel(zap.Info),
+		zap.WithConsole(false),
 	)
 
 	if loggerErr != nil {
@@ -20,14 +20,14 @@ func TestLogger(t *testing.T) {
 	}
 
 	{
-		t.Log(logger.SetLevelOTF(log.Warn))
+		t.Log(logger.SetLevelOTF(zap.Warn))
 		logger.Debugf("testing infof...")
 		logger.Infof("testing Infof...")
 		logger.Warnf("testing Warnf...")
 		logger.Errorf("testing Errorf...")
 	}
 	{
-		t.Log(logger.SetLevelOTF(log.Warn))
+		t.Log(logger.SetLevelOTF(zap.Warn))
 		logger.Debugf("testing infof...")
 		logger.Infof("testing Infof...")
 		logger.Warnf("testing Warnf...")
