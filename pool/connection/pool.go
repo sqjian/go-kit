@@ -39,7 +39,7 @@ type ClientPool struct {
 	isStopped     bool
 }
 
-func NewClientPool(ctx context.Context, opts ...option) (*ClientPool, error) {
+func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 
 	pool := &ClientPool{
 		KeepAliveInterval: DefaultKeepAliveInterval,
