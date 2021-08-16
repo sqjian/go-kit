@@ -3,22 +3,12 @@ package zap
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sqjian/go-kit/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"sync/atomic"
-)
-
-type Level = int64
-
-const (
-	Unknown Level = iota
-	None
-	Debug
-	Info
-	Warn
-	Error
 )
 
 func NewLogger(opts ...Option) (*logger, error) {
@@ -46,7 +36,7 @@ func NewLogger(opts ...Option) (*logger, error) {
 		{
 			return nil, fmt.Errorf("empty MaxAge")
 		}
-	case loggerInst.MetaData.Level == Unknown:
+	case loggerInst.MetaData.Level == log.UnknownLevel:
 		{
 			return nil, fmt.Errorf("empty Level")
 		}
@@ -63,12 +53,12 @@ func NewLogger(opts ...Option) (*logger, error) {
 
 type logger struct {
 	MetaData struct {
-		FileName   string /*日志的名字*/
-		MaxSize    int    /*日志大小，单位MB*/
-		MaxBackups int    /*日志备份个数*/
-		MaxAge     int    /*日志备份时间，单位Day*/
-		Level      Level  /*日志级别，可选：none、debug、info、warn、error*/
-		Console    bool   /*是否向控制台输出*/
+		FileName   string    /*日志的名字*/
+		MaxSize    int       /*日志大小，单位MB*/
+		MaxBackups int       /*日志备份个数*/
+		MaxAge     int       /*日志备份时间，单位Day*/
+		Level      log.Level /*日志级别，可选：none、debug、info、warn、error*/
+		Console    bool      /*是否向控制台输出*/
 	}
 
 	ready bool
@@ -85,7 +75,7 @@ func (l *logger) String() string {
 	return string(res)
 }
 
-func (l *logger) SetLevelOTF(Level Level) error {
+func (l *logger) SetLevelOTF(Level log.Level) error {
 
 	if !l.ready {
 		return fmt.Errorf("logger not ready,please init first")
@@ -107,24 +97,24 @@ func (l *logger) init() (err error) {
 	}()
 
 	userPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		if l.MetaData.Level == None {
+		if l.MetaData.Level == log.None {
 			return false
 		}
 		return lvl >= func() zapcore.Level {
 			switch l.MetaData.Level {
-			case Debug:
+			case log.Debug:
 				{
 					return zapcore.DebugLevel
 				}
-			case Info:
+			case log.Info:
 				{
 					return zapcore.InfoLevel
 				}
-			case Warn:
+			case log.Warn:
 				{
 					return zapcore.WarnLevel
 				}
-			case Error:
+			case log.Error:
 				{
 					return zapcore.ErrorLevel
 				}

@@ -14,7 +14,8 @@ func GenErr(errCode ErrCode) error {
 }
 
 const (
-	Code1 ErrCode = iota //this is error code1
-	Code2                //this is error code2
-	Code3                //this is error code3
+	UnknownCode ErrCode = iota
+	Code1               //this is error code1
+	Code2               //this is error code2
+	Code3               //this is error code3
 )

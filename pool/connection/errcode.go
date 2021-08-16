@@ -10,7 +10,8 @@ func GenErr(errCode ErrCode) error {
 }
 
 const (
-	IllegalParams  ErrCode = iota // illegal params
-	GetConnTimeout                // Get Connection Timeout
-	PoolExhausted                 // Pool Was Exhausted
+	UnknownErrCode ErrCode = iota
+	IllegalParams          // illegal params
+	GetConnTimeout         // Get Connection Timeout
+	PoolExhausted          // Pool Was Exhausted
 )

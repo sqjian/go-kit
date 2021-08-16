@@ -4,13 +4,6 @@ import (
 	"github.com/sqjian/go-kit/digest/provider/md5"
 )
 
-//go:generate stringer -type=KeyType  -linecomment
-type KeyType int
-
-const (
-	MD5 KeyType = iota
-)
-
 type Generator interface {
 	Calc(KeyType, []byte) (string, error)
 }
