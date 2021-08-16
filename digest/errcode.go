@@ -14,5 +14,6 @@ func GenErr(errCode ErrCode) error {
 }
 
 const (
-	IllegalKeyType ErrCode = iota //Illegal KeyType
+	UnknownErrCode ErrCode = iota
+	IllegalKeyType         //Illegal KeyType
 )

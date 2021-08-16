@@ -8,12 +8,13 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[IllegalKeyType-0]
+	_ = x[UnknownErrCode-0]
+	_ = x[IllegalKeyType-1]
 }
 
-const _ErrCode_name = "Illegal KeyType"
+const _ErrCode_name = "UnknownErrCodeIllegalKeyType"
 
-var _ErrCode_index = [...]uint8{0, 15}
+var _ErrCode_index = [...]uint8{0, 14, 28}
 
 func (i ErrCode) String() string {
 	if i < 0 || i >= ErrCode(len(_ErrCode_index)-1) {

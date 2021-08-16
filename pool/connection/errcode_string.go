@@ -8,14 +8,15 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[IllegalParams-0]
-	_ = x[GetConnTimeout-1]
-	_ = x[PoolExhausted-2]
+	_ = x[UnknownErrCode-0]
+	_ = x[IllegalParams-1]
+	_ = x[GetConnTimeout-2]
+	_ = x[PoolExhausted-3]
 }
 
-const _ErrCode_name = "illegal paramsGet Connection TimeoutPool Was Exhausted"
+const _ErrCode_name = "UnknownErrCodeillegal paramsGet Connection TimeoutPool Was Exhausted"
 
-var _ErrCode_index = [...]uint8{0, 14, 36, 54}
+var _ErrCode_index = [...]uint8{0, 14, 28, 50, 68}
 
 func (i ErrCode) String() string {
 	if i < 0 || i >= ErrCode(len(_ErrCode_index)-1) {
