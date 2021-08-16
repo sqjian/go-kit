@@ -1,4 +1,4 @@
-package digest
+package preset
 
 import "fmt"
 
@@ -15,5 +15,6 @@ func ErrWrapper(err Err) error {
 
 const (
 	UnknownErrCode Err = iota
-	IllegalKeyType     //Illegal KeyType
+	IllegalParams
+	IllegalKeyType
 )

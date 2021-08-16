@@ -18,7 +18,7 @@ func (g *generator) Calc(keyType KeyType, data []byte) (string, error) {
 			return md5.Calc(data), nil
 		}
 	}
-	return "", GenErr(IllegalKeyType)
+	return "", ErrWrapper(IllegalKeyType)
 }
 
 func NewGenerator(opts ...Option) (Generator, error) {
