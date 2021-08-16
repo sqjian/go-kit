@@ -3,7 +3,8 @@ package connection_test
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/log/provider/zap"
+	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/log/preset"
 	"github.com/sqjian/go-kit/pool/connection"
 	"net"
 	"testing"
@@ -16,13 +17,13 @@ func TestClientPool(t *testing.T) {
 		}
 	}
 
-	logger, loggerErr := zap.NewLogger(
-		zap.WithFileName("test.log"),
-		zap.WithMaxSize(3),
-		zap.WithMaxBackups(3),
-		zap.WithMaxAge(3),
-		zap.WithLevel(zap.Info),
-		zap.WithConsole(false),
+	logger, loggerErr := log.NewLogger(
+		log.WithFileName("test.log"),
+		log.WithMaxSize(3),
+		log.WithMaxBackups(3),
+		log.WithMaxAge(3),
+		log.WithLevel(preset.Info),
+		log.WithConsole(false),
 	)
 
 	checkErr(loggerErr)

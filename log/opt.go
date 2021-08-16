@@ -1,5 +1,7 @@
 package log
 
+import "github.com/sqjian/go-kit/log/preset"
+
 type Option interface {
 	apply(*logger)
 }
@@ -34,7 +36,7 @@ func WithMaxAge(MaxAge int) Option {
 	})
 }
 
-func WithLevel(Level Level) Option {
+func WithLevel(Level preset.Level) Option {
 	return optionFunc(func(log *logger) {
 		log.metaData.Level = Level
 	})
@@ -46,7 +48,7 @@ func WithConsole(Console bool) Option {
 	})
 }
 
-func WithLogType(logType KeyType) Option {
+func WithLogType(logType preset.LogType) Option {
 	return optionFunc(func(log *logger) {
 		log.logType = logType
 	})

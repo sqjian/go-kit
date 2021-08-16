@@ -1,7 +1,7 @@
-package log
+package preset
 
 //go:generate stringer -type=Level  -linecomment
-type Level = int64
+type Level int64
 
 const (
 	UnknownLevel Level = iota
