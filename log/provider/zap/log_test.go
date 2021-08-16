@@ -1,6 +1,7 @@
 package zap_test
 
 import (
+	"github.com/sqjian/go-kit/log/preset"
 	"github.com/sqjian/go-kit/log/provider/zap"
 	"testing"
 )
@@ -11,7 +12,7 @@ func TestLogger(t *testing.T) {
 		zap.WithMaxSize(3),
 		zap.WithMaxBackups(3),
 		zap.WithMaxAge(3),
-		zap.WithLevel(zap.Info),
+		zap.WithLevel(preset.Info),
 		zap.WithConsole(false),
 	)
 
@@ -20,14 +21,14 @@ func TestLogger(t *testing.T) {
 	}
 
 	{
-		t.Log(logger.SetLevelOTF(zap.Warn))
+		t.Log(logger.SetLevelOTF(preset.Warn))
 		logger.Debugf("testing infof...")
 		logger.Infof("testing Infof...")
 		logger.Warnf("testing Warnf...")
 		logger.Errorf("testing Errorf...")
 	}
 	{
-		t.Log(logger.SetLevelOTF(zap.Warn))
+		t.Log(logger.SetLevelOTF(preset.Warn))
 		logger.Debugf("testing infof...")
 		logger.Infof("testing Infof...")
 		logger.Warnf("testing Warnf...")

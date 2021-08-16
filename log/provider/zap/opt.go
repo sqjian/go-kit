@@ -1,5 +1,9 @@
 package zap
 
+import (
+	"github.com/sqjian/go-kit/log/preset"
+)
+
 type Option interface {
 	apply(*logger)
 }
@@ -12,36 +16,36 @@ func (f optionFunc) apply(log *logger) {
 
 func WithFileName(FileName string) Option {
 	return optionFunc(func(log *logger) {
-		log.MetaData.FileName = FileName
+		log.metaData.FileName = FileName
 	})
 }
 
 func WithMaxSize(MaxSize int) Option {
 	return optionFunc(func(log *logger) {
-		log.MetaData.MaxSize = MaxSize
+		log.metaData.MaxSize = MaxSize
 	})
 }
 
 func WithMaxBackups(MaxBackups int) Option {
 	return optionFunc(func(log *logger) {
-		log.MetaData.MaxBackups = MaxBackups
+		log.metaData.MaxBackups = MaxBackups
 	})
 }
 
 func WithMaxAge(MaxAge int) Option {
 	return optionFunc(func(log *logger) {
-		log.MetaData.MaxAge = MaxAge
+		log.metaData.MaxAge = MaxAge
 	})
 }
 
-func WithLevel(Level Level) Option {
+func WithLevel(Level preset.Level) Option {
 	return optionFunc(func(log *logger) {
-		log.MetaData.Level = Level
+		log.metaData.Level = Level
 	})
 }
 
 func WithConsole(Console bool) Option {
 	return optionFunc(func(log *logger) {
-		log.MetaData.Console = Console
+		log.metaData.Console = Console
 	})
 }

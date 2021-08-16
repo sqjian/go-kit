@@ -3,7 +3,7 @@ package zap
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/log/preset"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -20,23 +20,23 @@ func NewLogger(opts ...Option) (*logger, error) {
 	}
 
 	switch {
-	case len(loggerInst.MetaData.FileName) == 0:
+	case len(loggerInst.metaData.FileName) == 0:
 		{
 			return nil, fmt.Errorf("empty fileName")
 		}
-	case loggerInst.MetaData.MaxSize == 0:
+	case loggerInst.metaData.MaxSize == 0:
 		{
 			return nil, fmt.Errorf("empty MaxSize")
 		}
-	case loggerInst.MetaData.MaxBackups == 0:
+	case loggerInst.metaData.MaxBackups == 0:
 		{
 			return nil, fmt.Errorf("empty MaxBackups")
 		}
-	case loggerInst.MetaData.MaxAge == 0:
+	case loggerInst.metaData.MaxAge == 0:
 		{
 			return nil, fmt.Errorf("empty MaxAge")
 		}
-	case loggerInst.MetaData.Level == log.UnknownLevel:
+	case loggerInst.metaData.Level == preset.UnknownLevel:
 		{
 			return nil, fmt.Errorf("empty Level")
 		}
@@ -52,13 +52,13 @@ func NewLogger(opts ...Option) (*logger, error) {
 }
 
 type logger struct {
-	MetaData struct {
-		FileName   string    /*日志的名字*/
-		MaxSize    int       /*日志大小，单位MB*/
-		MaxBackups int       /*日志备份个数*/
-		MaxAge     int       /*日志备份时间，单位Day*/
-		Level      log.Level /*日志级别，可选：none、debug、info、warn、error*/
-		Console    bool      /*是否向控制台输出*/
+	metaData struct {
+		FileName   string       /*日志的名字*/
+		MaxSize    int          /*日志大小，单位MB*/
+		MaxBackups int          /*日志备份个数*/
+		MaxAge     int          /*日志备份时间，单位Day*/
+		Level      preset.Level /*日志级别，可选：none、debug、info、warn、error*/
+		Console    bool         /*是否向控制台输出*/
 	}
 
 	ready bool
@@ -69,19 +69,19 @@ type logger struct {
 func (l *logger) String() string {
 
 	m := make(map[string]interface{})
-	m["metaData"] = l.MetaData
+	m["metaData"] = l.metaData
 	res, _ := json.Marshal(m)
 
 	return string(res)
 }
 
-func (l *logger) SetLevelOTF(Level log.Level) error {
+func (l *logger) SetLevelOTF(Level preset.Level) error {
 
 	if !l.ready {
 		return fmt.Errorf("logger not ready,please init first")
 	}
 
-	atomic.StoreInt64(&l.MetaData.Level, Level)
+	atomic.StoreInt64((*int64)(&l.metaData.Level), int64(Level))
 
 	l.Errorf("reset the level,params:%v", l)
 
@@ -97,24 +97,24 @@ func (l *logger) init() (err error) {
 	}()
 
 	userPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		if l.MetaData.Level == log.None {
+		if l.metaData.Level == preset.None {
 			return false
 		}
 		return lvl >= func() zapcore.Level {
-			switch l.MetaData.Level {
-			case log.Debug:
+			switch l.metaData.Level {
+			case preset.Debug:
 				{
 					return zapcore.DebugLevel
 				}
-			case log.Info:
+			case preset.Info:
 				{
 					return zapcore.InfoLevel
 				}
-			case log.Warn:
+			case preset.Warn:
 				{
 					return zapcore.WarnLevel
 				}
-			case log.Error:
+			case preset.Error:
 				{
 					return zapcore.ErrorLevel
 				}
@@ -127,15 +127,15 @@ func (l *logger) init() (err error) {
 	})
 
 	fileLogRotateUserWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   l.MetaData.FileName,
-		MaxSize:    l.MetaData.MaxSize,
-		MaxBackups: l.MetaData.MaxBackups,
-		MaxAge:     l.MetaData.MaxAge,
+		Filename:   l.metaData.FileName,
+		MaxSize:    l.metaData.MaxSize,
+		MaxBackups: l.metaData.MaxBackups,
+		MaxAge:     l.metaData.MaxAge,
 	})
 
 	consoleWriter := zapcore.Lock(os.Stdout)
 
-	commonEncoder := zapcore.NewJSONEncoder(zapcore.EncoderConfig{
+	presetEncoder := zapcore.NewJSONEncoder(zapcore.EncoderConfig{
 		TimeKey:        "ts",
 		LevelKey:       "level",
 		CallerKey:      "caller",
@@ -151,17 +151,17 @@ func (l *logger) init() (err error) {
 
 	var core zapcore.Core
 	switch {
-	case l.MetaData.Console:
+	case l.metaData.Console:
 		{
 			core = zapcore.NewTee(
-				zapcore.NewCore(commonEncoder, fileLogRotateUserWriter, userPriority),
-				zapcore.NewCore(commonEncoder, consoleWriter, userPriority),
+				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userPriority),
+				zapcore.NewCore(presetEncoder, consoleWriter, userPriority),
 			)
 		}
 	default:
 		{
 			core = zapcore.NewTee(
-				zapcore.NewCore(commonEncoder, fileLogRotateUserWriter, userPriority),
+				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userPriority),
 			)
 		}
 	}
