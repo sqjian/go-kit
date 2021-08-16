@@ -53,29 +53,29 @@ func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 	}
 
 	if pool.Logger == nil {
-		return nil, GenErr(IllegalParams)
+		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.Dial == nil ||
 		pool.Close == nil ||
 		pool.KeepAlive == nil {
 		pool.Logger.Errorf("illegal params => pool.Dial | pool.Close | pool.KeepAlive")
-		return nil, GenErr(IllegalParams)
+		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.InitialPoolSize < 0 {
 		pool.Logger.Errorf("illegal params => pool.InitialPoolSize < 0")
-		return nil, GenErr(IllegalParams)
+		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.MaxPoolSize < 1 {
 		pool.Logger.Errorf("illegal params => pool.MaxPoolSize < 1")
-		return nil, GenErr(IllegalParams)
+		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.InitialPoolSize > pool.MaxPoolSize {
 		pool.Logger.Errorf("illegal params => pool.InitialPoolSize > pool.MaxPoolSize")
-		return nil, GenErr(IllegalParams)
+		return nil, ErrWrapper(IllegalParams)
 	}
 
 	pool.retryPool = make(chan int, pool.MaxPoolSize)
@@ -125,7 +125,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 			}
 		} else {
 			p.Logger.Errorf("Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.", p.workConnCount, len(p.alivePool), len(p.retryPool))
-			return nil, GenErr(PoolExhausted)
+			return nil, ErrWrapper(PoolExhausted)
 		}
 	case connection = <-p.alivePool:
 		p.Logger.Infof("Get new connection from alive pool.")
@@ -137,7 +137,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 		return
 	}
 
-	return nil, GenErr(GetConnTimeout)
+	return nil, ErrWrapper(GetConnTimeout)
 }
 
 func (p *ClientPool) Put(connection interface{}) (err error) {

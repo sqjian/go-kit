@@ -1,10 +1,6 @@
-package digest
+package connection
 
 import "fmt"
-
-/*
-	go get golang.org/x/tools/cmd/stringer
-*/
 
 //go:generate stringer -type=Err  -linecomment
 type Err int
@@ -15,5 +11,7 @@ func ErrWrapper(err Err) error {
 
 const (
 	UnknownErrCode Err = iota
-	IllegalKeyType     //Illegal KeyType
+	IllegalParams      // illegal params
+	GetConnTimeout     // Get Connection Timeout
+	PoolExhausted      // Pool Was Exhausted
 )

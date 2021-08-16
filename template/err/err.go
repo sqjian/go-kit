@@ -1,4 +1,4 @@
-package digest
+package err
 
 import "fmt"
 
@@ -14,6 +14,8 @@ func ErrWrapper(err Err) error {
 }
 
 const (
-	UnknownErrCode Err = iota
-	IllegalKeyType     //Illegal KeyType
+	UnknownCode Err = iota
+	Code1           //this is error code1
+	Code2           //this is error code2
+	Code3           //this is error code3
 )

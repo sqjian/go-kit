@@ -40,7 +40,7 @@ func (g *generator) UniqueKey(keyType KeyType) (string, error) {
 			return i.String(), nil
 		}
 	}
-	return "", GenErr(IllegalKeyType)
+	return "", ErrWrapper(IllegalKeyType)
 }
 
 func NewGenerator(opts ...Option) (Generator, error) {
