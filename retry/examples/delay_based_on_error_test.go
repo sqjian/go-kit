@@ -1,16 +1,14 @@
-// This test delay is based on kind of error
-// e.g. HTTP response [Retry-After](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After)
 package retry_test
 
 import (
 	"fmt"
+	"github.com/sqjian/go-kit/retry"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/avast/retry-go/v3"
 	"github.com/stretchr/testify/assert"
 )
 

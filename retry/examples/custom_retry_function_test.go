@@ -2,6 +2,7 @@ package retry_test
 
 import (
 	"fmt"
+	"github.com/sqjian/go-kit/retry"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/avast/retry-go/v3"
 	"github.com/stretchr/testify/assert"
 )
 
