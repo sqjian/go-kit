@@ -8,11 +8,11 @@ import (
 
 
 var (
-	GitTag         = "unknown"
-	GitCommitLog   = "unknown"
-	GitStatus      = "unknown"
-	BuildTime      = "unknown"
-	BuildGoVersion = "unknown"
+	GitTag         = "Unknown"
+	GitCommitLog   = "Unknown"
+	GitStatus      = "Unknown"
+	BuildTime      = "Unknown"
+	BuildGoVersion = "Unknown"
 )
 
 func StringifySingleLine() string {

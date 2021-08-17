@@ -2,7 +2,7 @@ package bininfo_test
 
 import (
 	"fmt"
-	"github.com/sqjian/go-kit/bininfo"
+	"github.com/sqjian/go-kit/template/bininfo"
 	"testing"
 )
 
