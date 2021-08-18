@@ -26,6 +26,7 @@ func TestDo(t *testing.T) {
 			"content": "你好",
 		},
 		nil,
+		nil,
 		httpUtil.WithContext(func() context.Context {
 			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
 			return ctx

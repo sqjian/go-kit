@@ -49,6 +49,7 @@ func newDefaultHttpConfig() *Config {
 func Do(
 	target string,
 	method Method,
+	query map[string]string,
 	header map[string]string,
 	data []byte,
 	opts ...Option,
@@ -70,7 +71,7 @@ func Do(
 		}
 
 		q := u.Query()
-		for k, v := range header {
+		for k, v := range query {
 			q.Set(k, v)
 		}
 		u.RawQuery = q.Encode()
