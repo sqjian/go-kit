@@ -19,7 +19,7 @@ const (
 	defaultDialTimeout         = 30 * time.Second
 	defaultHttpTimeout         = 60 * time.Second
 	defaultDialKeepAlive       = 30 * time.Second
-	defaultMaxConnsPerHost     = 10
+	defaultMaxConnsPerHost     = 1000
 	defaultIdleConnTimeout     = time.Minute
 	defaultTLSHandshakeTimeout = 2 * time.Second
 )
