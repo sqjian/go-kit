@@ -28,6 +28,8 @@ func Do(userFunc UserFunc, opts ...Option) error {
 		err := userFunc()
 
 		if err != nil {
+			errorLog = append(errorLog, err)
+
 			if !config.retryIf(err) {
 				break
 			}
@@ -72,7 +74,6 @@ func (e Error) Error() string {
 			logWithNumber[i] = fmt.Sprintf("#%d: %s", i+1, l.Error())
 		}
 	}
-
 	return fmt.Sprintf("All attempts fail:\n%s", strings.Join(logWithNumber, "\n"))
 }
 
