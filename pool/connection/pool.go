@@ -16,7 +16,6 @@ var (
 	DefaultCreateNewInterval = time.Second * 1
 )
 
-
 type ClientPool struct {
 	Address           string
 	Port              string
@@ -105,7 +104,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 		p.sync.Lock()
 		defer p.sync.Unlock()
 
-		p.Logger.Infof("Get new connection from new create.")
+		p.Logger.Warnw("Get new connection from new create.")
 		if int(p.workConnCount)+len(p.retryPool)+len(p.alivePool)+len(p.swapPool) < p.MaxPoolSize {
 
 			retry := 0
@@ -180,7 +179,6 @@ func (p *ClientPool) Release() {
 func (p *ClientPool) retryLoop() {
 	p.Logger.Infof("retry loop start.")
 
-exit:
 	for {
 		select {
 		case <-time.After(p.DialRetryInterval):
@@ -191,17 +189,15 @@ exit:
 					p.alivePool <- connection
 					p.Logger.Infof("Retry Pool Success.")
 				} else {
-					p.Logger.Infof("Retry Pool Failed.")
+					p.Logger.Errorw("Retry Pool Failed.")
 				}
 			}
 
 			if p.isStopped {
-				break exit
+				break
 			}
 		}
 	}
-
-	p.Logger.Infof("retry loop end.")
 }
 
 func (p *ClientPool) keepAliveLoop() {
@@ -218,7 +214,7 @@ func (p *ClientPool) keepAliveLoop() {
 					if err := p.KeepAlive(context.TODO(), connection); err == nil {
 						p.swapPool <- connection
 					} else {
-						p.Logger.Infof("Keepalive Pool Failed on %v\n", fmt.Sprintf("%v:%v", p.Address, p.Port))
+						p.Logger.Errorw("Keepalive Pool Failed on %v\n", fmt.Sprintf("%v:%v", p.Address, p.Port))
 						p.retryPool <- 0
 					}
 
