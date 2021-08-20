@@ -110,18 +110,18 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 		p.sync.Lock()
 		defer p.sync.Unlock()
 
-		p.Logger.Warnw("Get new connection from new create.")
+		p.Logger.Warnf("addr:%v => Get new connection from new create.", p.Address)
 		if int(p.workConnCount)+len(p.retryPool)+len(p.alivePool)+len(p.swapPool) < p.MaxPoolSize {
 
 			retry := 0
 			for retry < p.DialRetryCount {
 				if connection, err = p.Dial(context.TODO(), p.Address, p.Port); err != nil {
-					p.Logger.Errorf("get conn => Dial %v:%v failed,err:%v", p.Address, p.Port, err.Error())
+					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v failed,err:%v", p.Address, p.Address, p.Port, err.Error())
 					retry++
 					continue
 				} else {
 					atomic.AddInt32(&p.workConnCount, 1)
-					p.Logger.Errorf("get conn => Dial %v:%v successfully", p.Address, p.Port)
+					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v successfully", p.Address, p.Address, p.Port)
 					return
 				}
 			}
@@ -131,15 +131,15 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 				return nil, err
 			}
 		} else {
-			p.Logger.Errorf("Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.", p.workConnCount, len(p.alivePool), len(p.retryPool))
+			p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.", p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
 			return nil, ErrWrapper(PoolExhausted)
 		}
 	case connection = <-p.alivePool:
-		p.Logger.Infof("Get new connection from alive pool.")
+		p.Logger.Infof("addr:%v => Get new connection from alive pool.", p.Address)
 		atomic.AddInt32(&p.workConnCount, 1)
 		return
 	case connection = <-p.swapPool:
-		p.Logger.Infof("Get new connection from swap pool.")
+		p.Logger.Infof("addr:%v => Get new connection from swap pool.", p.Address)
 		atomic.AddInt32(&p.workConnCount, 1)
 		return
 	}
@@ -155,7 +155,7 @@ func (p *ClientPool) Put(connection interface{}) (err error) {
 		if p.isStopped {
 			err := p.Close(context.TODO(), connection)
 			if err != nil {
-				p.Logger.Errorf("Put conn => Close conn failed,err:%v", err.Error())
+				p.Logger.Errorf("addr:%v => Put conn => Close conn failed,err:%v", p.Address, err.Error())
 				return err
 			}
 		} else {
@@ -177,7 +177,7 @@ func (p *ClientPool) Release() {
 
 	for connection := range p.alivePool {
 		if err := p.Close(context.TODO(), connection); err != nil {
-			p.Logger.Infof("Release connection error: ", err)
+			p.Logger.Infof("addr:%v => Release connection error:%v", p.Address, err)
 		}
 		atomic.SwapInt32(&p.workConnCount, p.workConnCount-1)
 	}
@@ -186,7 +186,7 @@ func (p *ClientPool) Release() {
 }
 
 func (p *ClientPool) retryLoop() {
-	p.Logger.Infof("retry loop start.")
+	p.Logger.Infof("addr:%v => retry loop start.", p.Address)
 
 	for {
 		select {
@@ -196,9 +196,9 @@ func (p *ClientPool) retryLoop() {
 				if connection, err := p.Dial(context.TODO(), p.Address, p.Port); err == nil {
 					<-p.retryPool
 					p.alivePool <- connection
-					p.Logger.Infof("Retry Pool Success.")
+					p.Logger.Infof("addr:%v => Retry Pool Success.", p.Address)
 				} else {
-					p.Logger.Errorw("Retry Pool Failed.")
+					p.Logger.Errorw("addr:%v => Retry Pool Failed.", p.Address)
 				}
 			}
 
@@ -211,7 +211,7 @@ func (p *ClientPool) retryLoop() {
 
 func (p *ClientPool) keepAliveLoop() {
 
-	p.Logger.Infof("keepAlive loop start.")
+	p.Logger.Infof("addr:%v => keepAlive loop start.", p.Address)
 
 	for {
 		select {
@@ -223,7 +223,7 @@ func (p *ClientPool) keepAliveLoop() {
 					if err := p.KeepAlive(context.TODO(), connection); err == nil {
 						p.swapPool <- connection
 					} else {
-						p.Logger.Errorw("Keepalive Pool Failed on %v\n", fmt.Sprintf("%v:%v", p.Address, p.Port))
+						p.Logger.Errorw("addr:%v => Keepalive Pool Failed on %v\n", p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
 						p.retryPool <- 0
 					}
 
@@ -256,5 +256,5 @@ func (p *ClientPool) keepAliveLoop() {
 		}
 	}
 
-	p.Logger.Infof("keepAlive loop end.")
+	p.Logger.Infof("addr:%v => keepAlive loop end.", p.Address)
 }
