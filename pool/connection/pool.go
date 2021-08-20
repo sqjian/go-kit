@@ -200,7 +200,7 @@ func (p *ClientPool) retryLoop() {
 					p.alivePool <- connection
 					p.Logger.Infof("addr:%v => Retry Pool Success.", p.Address)
 				} else {
-					p.Logger.Errorw("addr:%v => Retry Pool Failed.", p.Address)
+					p.Logger.Errorf("addr:%v => Retry Pool Failed.", p.Address)
 				}
 			}
 
@@ -225,7 +225,7 @@ func (p *ClientPool) keepAliveLoop() {
 					if err := p.KeepAlive(context.TODO(), connection); err == nil {
 						p.swapPool <- connection
 					} else {
-						p.Logger.Errorw("addr:%v => Keepalive Pool Failed on %v\n", p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
+						p.Logger.Errorf("addr:%v => Keepalive Pool Failed on %v\n", p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
 						p.retryPool <- 0
 					}
 
