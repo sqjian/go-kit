@@ -52,6 +52,12 @@ func WithInitialPoolSize(InitialPoolSize int) Option {
 	})
 }
 
+func WithBestPoolSize(BestPoolSize int) Option {
+	return OptionFunc(func(options *ClientPool) {
+		options.BestPoolSize = BestPoolSize
+	})
+}
+
 func WithMaxPoolSize(MaxPoolSize int) Option {
 	return OptionFunc(func(options *ClientPool) {
 		options.MaxPoolSize = MaxPoolSize
@@ -67,6 +73,12 @@ func WithDialRetryCount(DialRetryCount int) Option {
 func WithKeepAliveInterval(KeepAliveInterval time.Duration) Option {
 	return OptionFunc(func(options *ClientPool) {
 		options.KeepAliveInterval = KeepAliveInterval
+	})
+}
+
+func WithCleanInterval(CleanInterval time.Duration) Option {
+	return OptionFunc(func(options *ClientPool) {
+		options.CleanInterval = CleanInterval
 	})
 }
 

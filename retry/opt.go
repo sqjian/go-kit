@@ -2,6 +2,7 @@ package retry
 
 import (
 	"context"
+	"github.com/sqjian/go-kit/log"
 	"time"
 )
 
@@ -15,6 +16,7 @@ type Config struct {
 	onRetry   OnRetryFunc
 	retryIf   IfFunc
 	context   context.Context
+	logger    log.Logger
 }
 
 type Option func(*Config)

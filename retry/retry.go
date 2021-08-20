@@ -3,13 +3,14 @@ package retry
 import (
 	"context"
 	"fmt"
+	"github.com/sqjian/go-kit/log"
 	"strings"
 	"time"
 )
 
 type UserFunc func() error
 
-func Do(userFunc UserFunc, opts ...Option) error {
+func Do(userFn UserFunc, opts ...Option) error {
 	var n uint
 
 	config := newDefaultRetryConfig()
@@ -19,15 +20,18 @@ func Do(userFunc UserFunc, opts ...Option) error {
 	}
 
 	if err := config.context.Err(); err != nil {
+		config.logger.Errorf("config.context.Err:%v", err.Error())
 		return err
 	}
 
 	var errorLog Error
 
 	for n < config.attempts {
-		err := userFunc()
+		err := userFn()
 
 		if err != nil {
+			config.logger.Errorf("call userFn failed,err:%v", err.Error())
+
 			errorLog = append(errorLog, err)
 
 			if !config.retryIf(err) {
@@ -62,6 +66,7 @@ func newDefaultRetryConfig() *Config {
 		onRetry:   func(n uint, err error) {},
 		retryIf:   func(err error) bool { return true },
 		delayTime: 100 * time.Millisecond,
+		logger:    log.DummyLogger,
 	}
 }
 
