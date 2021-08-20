@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"github.com/sqjian/go-kit/log"
 	"net/http"
 )
 
@@ -9,6 +10,7 @@ type Config struct {
 	retry   int
 	client  *http.Client
 	context context.Context
+	logger  log.Logger
 }
 
 type Option interface {
@@ -36,5 +38,11 @@ func WithContext(ctx context.Context) Option {
 func WithRetry(retry int) Option {
 	return optionFunc(func(options *Config) {
 		options.retry = retry
+	})
+}
+
+func WithLogger(Logger log.Logger) Option {
+	return optionFunc(func(options *Config) {
+		options.logger = Logger
 	})
 }
