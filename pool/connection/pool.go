@@ -121,6 +121,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 					continue
 				} else {
 					atomic.AddInt32(&p.workConnCount, 1)
+					p.Logger.Errorf("get conn => Dial %v:%v successfully", p.Address, p.Port)
 					return
 				}
 			}
