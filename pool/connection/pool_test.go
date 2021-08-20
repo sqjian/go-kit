@@ -22,8 +22,9 @@ func TestClientPool(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(preset.Info),
-		log.WithConsole(true),
+		log.WithLevel(preset.Warn),
+		log.WithLogType(preset.Zap),
+		log.WithConsole(false),
 	)
 
 	checkErr(loggerErr)

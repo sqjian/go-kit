@@ -116,6 +116,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 			retry := 0
 			for retry < p.DialRetryCount {
 				if connection, err = p.Dial(context.TODO(), p.Address, p.Port); err != nil {
+					p.Logger.Errorf("get conn => Dial %v:%v failed,err:%v", p.Address, p.Port, err.Error())
 					retry++
 					continue
 				} else {
@@ -153,6 +154,7 @@ func (p *ClientPool) Put(connection interface{}) (err error) {
 		if p.isStopped {
 			err := p.Close(context.TODO(), connection)
 			if err != nil {
+				p.Logger.Errorf("Put conn => Close conn failed,err:%v", err.Error())
 				return err
 			}
 		} else {

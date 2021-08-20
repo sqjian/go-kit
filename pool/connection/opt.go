@@ -84,7 +84,6 @@ func WithCreateNewInterval(CreateNewInterval time.Duration) Option {
 
 func WithLogger(Logger log.Logger) Option {
 	return OptionFunc(func(options *ClientPool) {
-		print(777777777777777777)
 		options.Logger = Logger
 	})
 }
