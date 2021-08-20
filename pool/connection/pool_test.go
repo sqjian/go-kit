@@ -30,7 +30,7 @@ func TestClientPool(t *testing.T) {
 	checkErr(loggerErr)
 
 	const (
-		address = "www.baid777u.com"
+		address = "www.baidu.com"
 		port    = "80"
 	)
 
