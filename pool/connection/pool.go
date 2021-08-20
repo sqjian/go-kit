@@ -146,7 +146,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 			}
 		} else {
 			p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.", p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
-			return nil, ErrWrapper(PoolExhausted)
+			return nil, ErrWrapper(PoolExhausted, fmt.Sprintf("addr:%v", p.Address))
 		}
 	case connection = <-p.alivePool:
 		p.Logger.Infof("addr:%v => Get new connection from alive pool.", p.Address)
