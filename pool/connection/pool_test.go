@@ -18,22 +18,27 @@ func TestClientPool(t *testing.T) {
 	}
 
 	logger, loggerErr := log.NewLogger(
-		log.WithFileName("test.log"),
+		log.WithFileName("go-kit.log"),
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
 		log.WithLevel(preset.Info),
-		log.WithConsole(false),
+		log.WithConsole(true),
 	)
 
 	checkErr(loggerErr)
 
+	const (
+		address = "www.baid777u.com"
+		port    = "80"
+	)
+
 	pool, poolErr := connection.NewClientPool(
 		context.TODO(),
-		connection.WithAddress("www.baidu.com"),
-		connection.WithPort("80"),
+		connection.WithAddress(address),
+		connection.WithPort(port),
 		connection.WithDial(func(ctx context.Context, address, port string) (connection interface{}, err error) {
-			return net.Dial("tcp", "www.baidu.com:80")
+			return net.Dial("tcp", fmt.Sprintf("%v:%v", address, port))
 		}),
 		connection.WithClose(func(ctx context.Context, connection interface{}) (err error) {
 			conn, connOk := connection.(net.Conn)

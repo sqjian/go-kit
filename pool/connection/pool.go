@@ -16,6 +16,16 @@ var (
 	DefaultCreateNewInterval = time.Second * 1
 )
 
+func newDefaultClientPool() *ClientPool {
+	return &ClientPool{
+		Logger:            log.DummyLogger,
+		KeepAliveInterval: DefaultKeepAliveInterval,
+		CreateNewInterval: DefaultCreateNewInterval,
+		DialRetryCount:    DefaultDialRetryCount,
+		DialRetryInterval: DefaultRetryInterval,
+	}
+}
+
 type ClientPool struct {
 	Address           string
 	Port              string
@@ -40,12 +50,7 @@ type ClientPool struct {
 
 func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 
-	pool := &ClientPool{
-		KeepAliveInterval: DefaultKeepAliveInterval,
-		CreateNewInterval: DefaultCreateNewInterval,
-		DialRetryCount:    DefaultDialRetryCount,
-		DialRetryInterval: DefaultRetryInterval,
-	}
+	pool := newDefaultClientPool()
 
 	for _, opt := range opts {
 		opt.apply(pool)
@@ -85,6 +90,7 @@ func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 		if c, err := pool.Dial(ctx, pool.Address, pool.Port); err == nil {
 			pool.alivePool <- c
 		} else {
+			pool.Logger.Errorf("initialize pool => Dial %v:%v failed,err:%v", pool.Address, pool.Port, err.Error())
 			pool.retryPool <- 0
 		}
 	}

@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/sqjian/go-kit/log/preset"
+	"github.com/sqjian/go-kit/log/provider/dummy"
 	"github.com/sqjian/go-kit/log/provider/zap"
 )
 
@@ -20,7 +21,11 @@ type Logger interface {
 }
 
 const (
-	defaultLogType = preset.Zap
+	defaultLogType = preset.Dummy
+)
+
+var (
+	DummyLogger = func() Logger { logger, _ := dummy.NewLogger(); return logger }()
 )
 
 type logger struct {
@@ -71,6 +76,10 @@ func NewLogger(opts ...Option) (Logger, error) {
 				zap.WithLevel(loggerInst.metaData.Level),
 				zap.WithConsole(loggerInst.metaData.Console),
 			)
+		}
+	case preset.Dummy:
+		{
+			return dummy.NewLogger()
 		}
 	default:
 		{
