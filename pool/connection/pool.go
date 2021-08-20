@@ -95,10 +95,12 @@ func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 		}
 	}
 
+	go pool.start()
+
 	return pool, nil
 }
 
-func (p *ClientPool) Start() {
+func (p *ClientPool) start() {
 	go p.retryLoop()
 	go p.keepAliveLoop()
 }
