@@ -6,3 +6,6 @@ service toolkit
 [![Software License](https://img.shields.io/github/license/sqjian/go-kit?style=flat-square)](LICENSE.md)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sqjian/go-kit?style=flat-square)](https://goreportcard.com/report/github.com/sqjian/go-kit)
 [![Go Report Card](https://img.shields.io/badge/os-linux%2C%20win%2C%20mac-pink.svg?style=flat-square)](https://goreportcard.com/report/github.com/sqjian/go-kit)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/sqjian/go-kit)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/sqjian/go-kit)
+![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/sqjian/go-kit)
