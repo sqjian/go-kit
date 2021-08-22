@@ -22,7 +22,7 @@ const (
 	defaultDialTimeout         = 30 * time.Second
 	defaultHttpTimeout         = 60 * time.Second
 	defaultDialKeepAlive       = 30 * time.Second
-	defaultMaxConnsPerHost     = 1000
+	defaultMaxConnPerHost      = 1000
 	defaultIdleConnTimeout     = time.Minute
 	defaultTLSHandshakeTimeout = 2 * time.Second
 )
@@ -35,7 +35,7 @@ func init() {
 				Timeout:   defaultDialTimeout,
 				KeepAlive: defaultDialKeepAlive,
 			}).DialContext,
-			MaxConnsPerHost:     defaultMaxConnsPerHost,
+			MaxConnsPerHost:     defaultMaxConnPerHost,
 			IdleConnTimeout:     defaultIdleConnTimeout,
 			TLSHandshakeTimeout: defaultTLSHandshakeTimeout,
 		},
@@ -51,11 +51,8 @@ func newDefaultHttpConfig() *Config {
 	}
 }
 func Do(
-	target string,
 	method Method,
-	query map[string]string,
-	header map[string]string,
-	data []byte,
+	target string,
 	opts ...Option,
 ) ([]byte, error) {
 	config := newDefaultHttpConfig()
@@ -75,25 +72,25 @@ func Do(
 		}
 
 		q := u.Query()
-		for k, v := range query {
+		for k, v := range config.query {
 			q.Set(k, v)
 		}
 		u.RawQuery = q.Encode()
 		urlEncode := u.String()
 
-		req, err := http.NewRequest(method.String(), urlEncode, bytes.NewReader(data))
+		req, err := http.NewRequest(method.String(), urlEncode, bytes.NewReader(config.body))
 		if err != nil {
 			return nil, err
 		}
 
-		for k, v := range header {
+		for k, v := range config.header {
 			req.Header.Set(k, v)
 		}
 		req = req.WithContext(config.context)
 		return req, nil
 	}
 
-	httpSend := func(req *http.Request) ([]byte, error) {
+	do := func(req *http.Request) ([]byte, error) {
 		resp, err := config.client.Do(req)
 		if err != nil {
 			return nil, err
@@ -162,7 +159,7 @@ func Do(
 				return reqErr
 			}
 			req = req.WithContext(traceCtx)
-			body, err := httpSend(req)
+			body, err := do(req)
 			if err != nil {
 				return err
 			}

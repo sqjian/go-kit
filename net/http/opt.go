@@ -8,9 +8,13 @@ import (
 
 type Config struct {
 	retry   int
+	logger  log.Logger
 	client  *http.Client
 	context context.Context
-	logger  log.Logger
+
+	body   []byte
+	query  map[string]string
+	header map[string]string
 }
 
 type Option interface {
@@ -21,6 +25,24 @@ type optionFunc func(*Config)
 
 func (f optionFunc) apply(options *Config) {
 	f(options)
+}
+
+func WithHeader(header map[string]string) Option {
+	return optionFunc(func(options *Config) {
+		options.header = header
+	})
+}
+
+func WithQuery(query map[string]string) Option {
+	return optionFunc(func(options *Config) {
+		options.query = query
+	})
+}
+
+func WithBody(body []byte) Option {
+	return optionFunc(func(options *Config) {
+		options.body = body
+	})
 }
 
 func WithClient(client *http.Client) Option {

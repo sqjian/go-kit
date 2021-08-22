@@ -24,15 +24,13 @@ func TestDo(t *testing.T) {
 	}))
 
 	rst, err := httpUtil.Do(
-		ts.URL,
 		httpUtil.GET,
-		map[string]string{
+		ts.URL,
+		httpUtil.WithQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
-		},
-		nil,
-		nil,
+		}),
 		httpUtil.WithContext(func() context.Context {
 			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
 			return ctx
@@ -70,15 +68,13 @@ func BenchmarkDo(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			_, err := httpUtil.Do(
-				ts.URL,
 				httpUtil.GET,
-				map[string]string{
+				ts.URL,
+				httpUtil.WithQuery(map[string]string{
 					"from":    "cn",
 					"to":      "en",
 					"content": "你好",
-				},
-				nil,
-				nil,
+				}),
 				httpUtil.WithContext(func() context.Context {
 					ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
 					return ctx
