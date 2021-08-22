@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-
 var (
 	GitTag         = "Unknown"
 	GitCommitLog   = "Unknown"
