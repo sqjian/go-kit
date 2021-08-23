@@ -10,11 +10,13 @@ type IfFunc func(error) bool
 
 type OnRetryFunc func(n uint, err error)
 
+type DelayTypeFunc func(n uint, err error, config *Config) time.Duration
+
 type Config struct {
 	attempts  uint
-	delayTime time.Duration
-	onRetry   OnRetryFunc
 	retryIf   IfFunc
+	onRetry   OnRetryFunc
+	delayType DelayTypeFunc
 	context   context.Context
 	logger    log.Logger
 }
@@ -27,9 +29,9 @@ func WithAttempts(attempts uint) Option {
 	}
 }
 
-func WithDelay(delay time.Duration) Option {
+func WithDelayFn(delayTypeFn DelayTypeFunc) Option {
 	return func(c *Config) {
-		c.delayTime = delay
+		c.delayType = delayTypeFn
 	}
 }
 

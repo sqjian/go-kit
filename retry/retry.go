@@ -44,8 +44,10 @@ func Do(userFn UserFunc, opts ...Option) error {
 				break
 			}
 
+			delayTime := config.delayType(n, err, config)
+
 			select {
-			case <-time.After(config.delayTime):
+			case <-time.After(delayTime):
 			case <-config.context.Done():
 				return config.context.Err()
 			}
@@ -61,12 +63,14 @@ func Do(userFn UserFunc, opts ...Option) error {
 
 func newDefaultRetryConfig() *Config {
 	return &Config{
-		attempts:  uint(10),
-		context:   context.Background(),
-		onRetry:   func(n uint, err error) {},
-		retryIf:   func(err error) bool { return true },
-		delayTime: 100 * time.Millisecond,
-		logger:    log.DummyLogger,
+		attempts: uint(10),
+		logger:   log.DummyLogger,
+		context:  context.Background(),
+		onRetry:  func(n uint, err error) {},
+		retryIf:  func(err error) bool { return true },
+		delayType: func(_ uint, _ error, _ *Config) time.Duration {
+			return 100 * time.Millisecond
+		},
 	}
 }
 
