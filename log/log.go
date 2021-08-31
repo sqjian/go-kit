@@ -52,11 +52,16 @@ type logger struct {
 	}
 }
 
-func NewLogger(opts ...Option) (Logger, error) {
-
-	loggerInst := &logger{
+func newDefaultLoggerConfig() *logger {
+	return &logger{
 		logType: defaultLogType,
 	}
+
+}
+
+func NewLogger(opts ...Option) (Logger, error) {
+
+	loggerInst := newDefaultLoggerConfig()
 
 	for _, opt := range opts {
 		opt.apply(loggerInst)

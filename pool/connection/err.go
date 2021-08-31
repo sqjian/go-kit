@@ -6,7 +6,7 @@ import "fmt"
 type Err int
 
 func ErrWrapper(err Err, ps ...string) error {
-	return fmt.Errorf("err:%d,errDesc:%s,ps:%v", err, err.String(), ps)
+	return fmt.Errorf("code:%d,errDesc:%s,ps:%v", err, err.String(), ps)
 }
 
 const (
