@@ -15,11 +15,11 @@ BuildGoVersion=$(go version)
 
 # 将以上变量序列化至 LDFlags 变量中
 LDFlags=" \
-    -X 'github.com/sqjian/go-kit/template/bininfo.GitTag=${GitTag}' \
-    -X 'github.com/sqjian/go-kit/template/bininfo.GitCommitLog=${GitCommitLog}' \
-    -X 'github.com/sqjian/go-kit/template/bininfo.GitStatus=${GitStatus}' \
-    -X 'github.com/sqjian/go-kit/template/bininfo.BuildTime=${BuildTime}' \
-    -X 'github.com/sqjian/go-kit/template/bininfo.BuildGoVersion=${BuildGoVersion}' \
+    -X 'github.com/sqjian/go-kit/template/tag.GitTag=${GitTag}' \
+    -X 'github.com/sqjian/go-kit/template/tag.GitCommitLog=${GitCommitLog}' \
+    -X 'github.com/sqjian/go-kit/template/tag.GitStatus=${GitStatus}' \
+    -X 'github.com/sqjian/go-kit/template/tag.BuildTime=${BuildTime}' \
+    -X 'github.com/sqjian/go-kit/template/tag.BuildGoVersion=${BuildGoVersion}' \
 "
 
 go test -c -ldflags "${LDFlags}"

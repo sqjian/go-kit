@@ -1,12 +1,11 @@
 package validator_test
 
 import (
+	_ "embed"
 	"github.com/sqjian/go-kit/validator"
 	"os"
 	"testing"
 )
-
-import _ "embed"
 
 //go:embed testdata/test-schema.json
 var testSchema []byte

@@ -1,4 +1,4 @@
-package bininfo
+package tag
 
 import (
 	"fmt"
