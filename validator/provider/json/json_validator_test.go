@@ -17,7 +17,10 @@ var testExample []byte
 var testExampleFake []byte
 
 func TestValidateJson(t *testing.T) {
-	validatorInst, _ := validator.NewValidator()
+	validatorInst, validatorInstErr := validator.NewValidator(validator.WithValidatorType(validator.Json))
+	if validatorInstErr != nil {
+		t.Fatal(validatorInstErr)
+	}
 	{
 		t.Log(validatorInst.Validate(testSchema, testExample))
 		t.Log(validatorInst.Validate(testSchema, testExampleFake))
