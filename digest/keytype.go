@@ -6,4 +6,5 @@ type KeyType int
 const (
 	UnknownKeyType KeyType = iota
 	MD5
+	SHA1
 )

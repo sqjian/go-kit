@@ -10,11 +10,12 @@ func _() {
 	var x [1]struct{}
 	_ = x[UnknownKeyType-0]
 	_ = x[MD5-1]
+	_ = x[SHA1-2]
 }
 
-const _KeyType_name = "UnknownKeyTypeMD5"
+const _KeyType_name = "UnknownKeyTypeMD5SHA1"
 
-var _KeyType_index = [...]uint8{0, 14, 17}
+var _KeyType_index = [...]uint8{0, 14, 17, 21}
 
 func (i KeyType) String() string {
 	if i < 0 || i >= KeyType(len(_KeyType_index)-1) {
