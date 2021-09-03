@@ -6,6 +6,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
+	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/zap v1.19.0
@@ -18,6 +19,7 @@ require (
 	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.9.3 // indirect
