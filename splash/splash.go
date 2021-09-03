@@ -2,6 +2,7 @@ package splash
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 )
 
@@ -35,6 +36,8 @@ type Tag struct {
 }
 
 func Stringify() string {
+	fmt.Println("BinInfo:", BinInfo)
+
 	buf := bytes.NewBuffer(nil)
 
 	err := tpl.Execute(buf, BinInfo)
