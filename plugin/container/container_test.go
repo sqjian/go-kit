@@ -1,8 +1,9 @@
-package container
+package container_test
 
 import (
 	"github.com/spf13/viper"
 	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/plugin/container"
 	"github.com/sqjian/go-kit/plugin/loader"
 	"github.com/sqjian/go-kit/plugin/preset/go_native/enter"
 	"github.com/sqjian/go-kit/plugin/preset/go_native/leave"
@@ -10,7 +11,7 @@ import (
 )
 
 func Test_Container(t *testing.T) {
-	container := NewContainer(&Cfg{viper.New(), log.DebugLogger})
+	container := container.NewContainer(&container.Cfg{Viper: viper.New(), Logger: log.DebugLogger})
 	if err := container.Init(); err != nil {
 		t.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-package embedtpl
+package fs
 
 import (
 	"embed"
