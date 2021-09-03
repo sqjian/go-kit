@@ -12,6 +12,5 @@ func TestStringifyMultiLine(t *testing.T) {
 		"xxx",
 		"xxx",
 		"xxx",
-		"xxx",
 	))
 }
