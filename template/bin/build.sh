@@ -15,4 +15,4 @@ LDFlags=" \
     -X 'github.com/sqjian/go-kit/splash.BinInfo.BuildGoVersion=${BuildGoVersion}' \
 "
 
-go test -c -ldflags "${LDFlags}"
+go build -ldflags "${LDFlags}"
