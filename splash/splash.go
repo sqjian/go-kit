@@ -2,7 +2,6 @@ package splash
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 )
 
@@ -23,8 +22,7 @@ BuildGoVersion: {{if .BuildGoVersion}}{{.BuildGoVersion}}{{else}}Unknown{{end}}
 `
 
 var (
-	BinInfo Tag
-	tpl     = template.Must(template.New("splash").Parse(splash))
+	tpl = template.Must(template.New("splash").Parse(splash))
 )
 
 type Tag struct {
@@ -35,12 +33,17 @@ type Tag struct {
 	BuildGoVersion string
 }
 
-func Stringify() string {
-	fmt.Println("BinInfo:", BinInfo)
+func Stringify(GitTag string, GitCommitLog string, GitStatus string, BuildTime string, BuildGoVersion string) string {
 
 	buf := bytes.NewBuffer(nil)
 
-	err := tpl.Execute(buf, BinInfo)
+	err := tpl.Execute(buf, Tag{
+		GitTag:         GitTag,
+		GitCommitLog:   GitCommitLog,
+		GitStatus:      GitStatus,
+		BuildTime:      BuildTime,
+		BuildGoVersion: BuildGoVersion,
+	})
 	if err != nil {
 		return err.Error()
 	}

@@ -7,7 +7,13 @@ import (
 )
 
 func init() {
-	fmt.Println(splash.Stringify())
+	fmt.Println(splash.Stringify(
+		"xxx",
+		"xxx",
+		"xxx",
+		"xxx",
+		"xxx",
+	))
 }
 func main() {
 	cmd.Execute()
