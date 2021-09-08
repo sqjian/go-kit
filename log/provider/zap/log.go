@@ -46,7 +46,6 @@ func NewLogger(opts ...Option) (*logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	loggerInst.Errorf("init params:%v", loggerInst)
 
 	return loggerInst, nil
 }
