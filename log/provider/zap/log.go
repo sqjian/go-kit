@@ -46,7 +46,6 @@ func NewLogger(opts ...Option) (*logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	loggerInst.Errorf("init params:%v", loggerInst)
 
 	return loggerInst, nil
 }
@@ -168,7 +167,7 @@ func (l *logger) init() (err error) {
 
 	l.Logger = zap.New(
 		core,
-		zap.AddCaller(),
+		/*zap.AddCaller(),*/
 		zap.AddCallerSkip(1),
 		zap.Fields(
 			zapcore.Field{

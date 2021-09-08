@@ -18,6 +18,19 @@ func TestDo(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+
+	logger, loggerErr := log.NewLogger(
+		log.WithFileName("go-kit.log"),
+		log.WithMaxSize(3),
+		log.WithMaxBackups(3),
+		log.WithMaxAge(3),
+		log.WithLevel(vars.Debug),
+		log.WithLogType(vars.Zap),
+		log.WithConsole(false),
+	)
+
+	checkErr(loggerErr)
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(500 * 1e6)
 		fmt.Fprintln(w, "hello")
@@ -36,6 +49,51 @@ func TestDo(t *testing.T) {
 			return ctx
 		}()),
 		httpUtil.WithRetry(3),
+		httpUtil.WithLogger(logger),
+	)
+	checkErr(err)
+	t.Logf("rst:%v,err:%v", string(rst), err)
+}
+
+func TestDoWithId(t *testing.T) {
+	checkErr := func(err error) {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	logger, loggerErr := log.NewLogger(
+		log.WithFileName("go-kit.log"),
+		log.WithMaxSize(3),
+		log.WithMaxBackups(3),
+		log.WithMaxAge(3),
+		log.WithLevel(vars.Debug),
+		log.WithLogType(vars.Zap),
+		log.WithConsole(false),
+	)
+
+	checkErr(loggerErr)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(500 * 1e6)
+		fmt.Fprintln(w, "hello")
+	}))
+
+	rst, err := httpUtil.Do(
+		httpUtil.GET,
+		ts.URL,
+		httpUtil.WithQuery(map[string]string{
+			"from":    "cn",
+			"to":      "en",
+			"content": "你好",
+		}),
+		httpUtil.WithContext(func() context.Context {
+			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
+			return ctx
+		}()),
+		httpUtil.WithRetry(3),
+		httpUtil.WithUniqueId("xxx"),
+		httpUtil.WithLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
