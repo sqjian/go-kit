@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"fmt"
 	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/retry"
 	"io/ioutil"
@@ -78,6 +79,12 @@ func Do(
 		u.RawQuery = q.Encode()
 		urlEncode := u.String()
 
+		config.logger.Infow("log req",
+			"method", method.String(),
+			"urlEncode", urlEncode,
+			"bodyLen", len(config.body),
+			"header", fmt.Sprintf("%v", config.header),
+		)
 		req, err := http.NewRequest(method.String(), urlEncode, bytes.NewReader(config.body))
 		if err != nil {
 			return nil, err
@@ -86,6 +93,7 @@ func Do(
 		for k, v := range config.header {
 			req.Header.Set(k, v)
 		}
+
 		req = req.WithContext(config.context)
 		return req, nil
 	}
