@@ -28,6 +28,10 @@ const (
 	defaultTLSHandshakeTimeout = 2 * time.Second
 )
 
+const (
+	defaultBodyVerbose = 512
+)
+
 func init() {
 	defaultHttpClient = &http.Client{
 		Transport: &http.Transport{
@@ -82,7 +86,12 @@ func Do(
 		config.logger.Infow("log req",
 			"method", method.String(),
 			"urlEncode", urlEncode,
-			"bodyLen", len(config.body),
+			"body", func() string {
+				if len(config.body) > defaultBodyVerbose {
+					return fmt.Sprintf("%v...", string(config.body[:defaultBodyVerbose]))
+				}
+				return string(config.body)
+			}(),
 			"header", fmt.Sprintf("%v", config.header),
 		)
 		req, err := http.NewRequest(method.String(), urlEncode, bytes.NewReader(config.body))
