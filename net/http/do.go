@@ -173,11 +173,13 @@ func Do(
 		func() error {
 			req, reqErr := newReq()
 			if reqErr != nil {
+				config.logger.Errorf("http.Do->newReq failed,err:%v", reqErr)
 				return reqErr
 			}
 			req = req.WithContext(traceCtx)
 			body, err := do(req)
 			if err != nil {
+				config.logger.Errorf("http.Do->do failed,err:%v", err)
 				return err
 			}
 			rst = body
