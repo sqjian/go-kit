@@ -7,6 +7,8 @@ import (
 )
 
 type Config struct {
+	logId string
+
 	retry   int
 	logger  log.Logger
 	client  *http.Client
@@ -48,6 +50,12 @@ func WithBody(body []byte) Option {
 func WithClient(client *http.Client) Option {
 	return optionFunc(func(options *Config) {
 		options.client = client
+	})
+}
+
+func WithUniqueId(uniqueId string) Option {
+	return optionFunc(func(options *Config) {
+		options.logId = uniqueId
 	})
 }
 

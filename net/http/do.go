@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/retry"
+	"github.com/sqjian/go-kit/unique"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -16,7 +17,8 @@ import (
 )
 
 var (
-	defaultHttpClient *http.Client
+	defaultHttpClient      *http.Client
+	defaultUniqueGenerator unique.Generator
 )
 
 const (
@@ -46,13 +48,29 @@ func init() {
 		},
 		Timeout: defaultHttpTimeout,
 	}
+	defaultUniqueGenerator = func() unique.Generator {
+		uniqueGenerator, uniqueGeneratorErr := unique.NewGenerator(
+			unique.WithSnowflakeNodeId(1),
+		)
+		if uniqueGeneratorErr != nil {
+			panic(fmt.Sprintf("internal err:%v", uniqueGeneratorErr))
+		}
+		return uniqueGenerator
+	}()
 }
 func newDefaultHttpConfig() *Config {
 	return &Config{
-		client:  defaultHttpClient,
-		context: context.Background(),
 		retry:   3,
 		logger:  log.DummyLogger,
+		client:  defaultHttpClient,
+		context: context.Background(),
+		logId: func() string {
+			snowflake, snowflakeErr := defaultUniqueGenerator.UniqueKey(unique.Snowflake)
+			if snowflakeErr != nil {
+				panic(fmt.Sprintf("internal err:%v", snowflakeErr))
+			}
+			return snowflake
+		}(),
 	}
 }
 func Do(
@@ -67,6 +85,7 @@ func Do(
 	}
 
 	if err := config.context.Err(); err != nil {
+		config.logger.Errorw("context.Err not nil", "id", config.logId, "err", err)
 		return nil, err
 	}
 
@@ -84,6 +103,7 @@ func Do(
 		urlEncode := u.String()
 
 		config.logger.Infow("log req",
+			"id", config.logId,
 			"method", method.String(),
 			"urlEncode", urlEncode,
 			"body", func() string {
@@ -110,6 +130,10 @@ func Do(
 	do := func(req *http.Request) ([]byte, error) {
 		resp, err := config.client.Do(req)
 		if err != nil {
+			config.logger.Errorw("client.do failed",
+				"id", config.logId,
+				"err", err,
+			)
 			return nil, err
 		}
 		defer resp.Body.Close()
@@ -118,53 +142,53 @@ func Do(
 
 	traceCtx := httptrace.WithClientTrace(context.Background(), &httptrace.ClientTrace{
 		GetConn: func(hostPort string) {
-			config.logger.Infof("Prepare to get a connection for %s.\n", hostPort)
+			config.logger.Infof("logId:%v,Prepare to get a connection for %s.", config.logId, hostPort)
 		},
 		GotConn: func(info httptrace.GotConnInfo) {
-			config.logger.Infof("Got a connection: reused: %v, from the idle pool: %v.\n",
-				info.Reused, info.WasIdle)
+			config.logger.Infof("logId:%v,Got a connection: reused: %v, from the idle pool: %v.",
+				config.logId, info.Reused, info.WasIdle)
 		},
 		PutIdleConn: func(err error) {
 			if err == nil {
-				config.logger.Infof("Put a connection to the idle pool: ok.")
+				config.logger.Infof("logId:%v,Put a connection to the idle pool: ok.", config.logId)
 			} else {
-				config.logger.Infof("Put a connection to the idle pool:", err.Error())
+				config.logger.Infof("logId:%v,Put a connection to the idle pool:%v", config.logId, err.Error())
 			}
 		},
 		DNSStart: func(dnsStartInfo httptrace.DNSStartInfo) {
-			config.logger.Infof("Begin DNS lookup for %v.\n", dnsStartInfo.Host)
+			config.logger.Infof("logId:%v,Begin DNS lookup for %v.", config.logId, dnsStartInfo.Host)
 		},
 		DNSDone: func(dnsDoneInfo httptrace.DNSDoneInfo) {
-			config.logger.Infof("End DNS lookup, detail:%+v\n", dnsDoneInfo)
+			config.logger.Infof("logId:%v,End DNS lookup, detail:%+v\n", config.logId, dnsDoneInfo)
 		},
 		ConnectStart: func(network, addr string) {
-			config.logger.Infof("Dialing... (%s:%s).\n", network, addr)
+			config.logger.Infof("logId:%v,Dialing... (%s:%s).", config.logId, network, addr)
 		},
 		ConnectDone: func(network, addr string, err error) {
 			if err == nil {
-				config.logger.Infof("Dial is done. (%s:%s)\n", network, addr)
+				config.logger.Infof("logId:%v,Dial is done. (%s:%s)", config.logId, network, addr)
 			} else {
-				config.logger.Infof("Dial is done with error: %s. (%s:%s)\n", err, network, addr)
+				config.logger.Infof("logId:%v,Dial is done with error: %s. (%s:%s)", config.logId, err, network, addr)
 			}
 		},
 		TLSHandshakeStart: func() {
-			config.logger.Infof("Begin TLSHandshake.\n")
+			config.logger.Infof("logId:%v,Begin TLSHandshake.", config.logId)
 		},
 		TLSHandshakeDone: func(connectionState tls.ConnectionState, i error) {
-			config.logger.Infof("End TLSHandshake, detail:%+v\n", connectionState)
+			config.logger.Infof("logId:%v,End TLSHandshake, detail:%+v", config.logId, connectionState)
 		},
 		WroteHeaders: func() {
-			config.logger.Infof("Wrote headers: ok.\n")
+			config.logger.Infof("logId:%v,Wrote headers: ok.", config.logId)
 		},
 		WroteRequest: func(info httptrace.WroteRequestInfo) {
 			if info.Err == nil {
-				config.logger.Infof("Wrote a request: ok.")
+				config.logger.Infof("logId:%v,Wrote a request: ok.", config.logId)
 			} else {
-				config.logger.Infof("Wrote a request:", info.Err.Error())
+				config.logger.Infof("logId:%v,Wrote a request:%v", config.logId, info.Err.Error())
 			}
 		},
 		GotFirstResponseByte: func() {
-			config.logger.Infof("Got the first response byte.")
+			config.logger.Infof("logId:%v,Got the first response byte.", config.logId)
 		},
 	})
 
@@ -173,13 +197,13 @@ func Do(
 		func() error {
 			req, reqErr := newReq()
 			if reqErr != nil {
-				config.logger.Errorf("http.Do->newReq failed,err:%v", reqErr)
+				config.logger.Errorf("logId:%v,http.Do->newReq failed,err:%v", config.logId, reqErr)
 				return reqErr
 			}
 			req = req.WithContext(traceCtx)
 			body, err := do(req)
 			if err != nil {
-				config.logger.Errorf("http.Do->do failed,err:%v", err)
+				config.logger.Errorf("logId:%v,http.Do->do failed,err:%v", config.logId, err)
 				return err
 			}
 			rst = body
