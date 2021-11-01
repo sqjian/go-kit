@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	defaultBodyVerbose = 512
+	defaultBodyVerbose = 2048
 )
 
 func init() {
