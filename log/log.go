@@ -21,23 +21,7 @@ type Logger interface {
 }
 
 const (
-	defaultLogType = vars.Dummy
-)
-
-var (
-	DummyLogger = func() Logger { logger, _ := dummy.NewLogger(); return logger }()
-	DebugLogger = func() Logger {
-		logger, _ := NewLogger(
-			WithFileName("go-kit.log"),
-			WithMaxSize(3),
-			WithMaxBackups(3),
-			WithMaxAge(3),
-			WithLevel(vars.Debug),
-			WithLogType(vars.Zap),
-			WithConsole(true),
-		)
-		return logger
-	}()
+	defaultLogType = vars.Zap
 )
 
 type logger struct {
@@ -67,19 +51,17 @@ func NewLogger(opts ...Option) (Logger, error) {
 		opt.apply(loggerInst)
 	}
 
-	{
-		switch {
-		case len(loggerInst.metaData.FileName) == 0:
-			fallthrough
-		case loggerInst.metaData.MaxSize == 0:
-			fallthrough
-		case loggerInst.metaData.MaxBackups == 0:
-			fallthrough
-		case loggerInst.metaData.MaxAge == 0:
-			fallthrough
-		case loggerInst.metaData.Level == vars.UnknownLevel:
-			return nil, vars.ErrWrapper(vars.IllegalParams)
-		}
+	switch {
+	case len(loggerInst.metaData.FileName) == 0:
+		fallthrough
+	case loggerInst.metaData.MaxSize == 0:
+		fallthrough
+	case loggerInst.metaData.MaxBackups == 0:
+		fallthrough
+	case loggerInst.metaData.MaxAge == 0:
+		fallthrough
+	case loggerInst.metaData.Level == vars.UnknownLevel:
+		return nil, vars.ErrWrapper(vars.IllegalParams)
 	}
 
 	switch loggerInst.logType {
