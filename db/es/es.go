@@ -3,31 +3,49 @@ package es
 import (
 	"context"
 	"github.com/olivere/elastic/v7"
+	"log"
+	"net/http"
+	"os"
 )
 
 type Cli struct {
-	hosts []string
+	meta struct {
+		cli   *http.Client
+		debug bool
+		hosts []string
+	}
 
 	cli *elastic.Client
+
+	debugLogger elastic.Logger
 }
 
-func newEsCli(hosts []string) (*Cli, error) {
-	cli := &Cli{hosts: hosts}
-	return cli, cli.init()
-}
+func newEsCli(opts ...Option) (*Cli, error) {
+	cli := &Cli{}
 
-func (es *Cli) init() error {
-	if len(es.hosts) == 0 {
-		return ErrWrapper(IllegalParams)
+	for _, opt := range opts {
+		opt.apply(cli)
 	}
-	cli, err := elastic.NewClient(
-		elastic.SetURL(es.hosts...),
+
+	if len(cli.meta.hosts) == 0 {
+		return nil, ErrWrapper(IllegalParams)
+	}
+	if cli.meta.debug {
+		cli.debugLogger = log.New(os.Stderr, "", log.LstdFlags)
+	}
+	esCli, err := elastic.NewClient(
+		elastic.SetURL(cli.meta.hosts...),
 		elastic.SetSniff(false),
+		elastic.SetTraceLog(cli.debugLogger),
+		elastic.SetHttpClient(cli.meta.cli),
 	)
+	if err != nil {
+		return nil, err
+	}
 
-	es.cli = cli
+	cli.cli = esCli
 
-	return err
+	return cli, nil
 }
 
 func (es *Cli) indexExists(ctx context.Context, index string) (bool, error) {

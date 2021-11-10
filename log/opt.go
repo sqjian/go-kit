@@ -14,37 +14,37 @@ func (f optionFunc) apply(log *logger) {
 
 func WithFileName(FileName string) Option {
 	return optionFunc(func(log *logger) {
-		log.metaData.FileName = FileName
+		log.meta.FileName = FileName
 	})
 }
 
 func WithMaxSize(MaxSize int) Option {
 	return optionFunc(func(log *logger) {
-		log.metaData.MaxSize = MaxSize
+		log.meta.MaxSize = MaxSize
 	})
 }
 
 func WithMaxBackups(MaxBackups int) Option {
 	return optionFunc(func(log *logger) {
-		log.metaData.MaxBackups = MaxBackups
+		log.meta.MaxBackups = MaxBackups
 	})
 }
 
 func WithMaxAge(MaxAge int) Option {
 	return optionFunc(func(log *logger) {
-		log.metaData.MaxAge = MaxAge
+		log.meta.MaxAge = MaxAge
 	})
 }
 
 func WithLevel(Level vars.Level) Option {
 	return optionFunc(func(log *logger) {
-		log.metaData.Level = Level
+		log.meta.Level = Level
 	})
 }
 
 func WithConsole(Console bool) Option {
 	return optionFunc(func(log *logger) {
-		log.metaData.Console = Console
+		log.meta.Console = Console
 	})
 }
 
