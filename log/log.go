@@ -25,8 +25,7 @@ const (
 )
 
 type logger struct {
-	logType  vars.LogType
-	metaData struct {
+	meta struct {
 		FileName   string     /*日志的名字*/
 		MaxSize    int        /*日志大小，单位MB*/
 		MaxBackups int        /*日志备份个数*/
@@ -34,13 +33,13 @@ type logger struct {
 		Level      vars.Level /*日志级别，可选：none、debug、info、warn、error*/
 		Console    bool       /*是否向控制台输出*/
 	}
+	logType vars.LogType
 }
 
 func newDefaultLoggerConfig() *logger {
 	return &logger{
 		logType: defaultLogType,
 	}
-
 }
 
 func NewLogger(opts ...Option) (Logger, error) {
@@ -52,15 +51,15 @@ func NewLogger(opts ...Option) (Logger, error) {
 	}
 
 	switch {
-	case len(loggerInst.metaData.FileName) == 0:
+	case len(loggerInst.meta.FileName) == 0:
 		fallthrough
-	case loggerInst.metaData.MaxSize == 0:
+	case loggerInst.meta.MaxSize == 0:
 		fallthrough
-	case loggerInst.metaData.MaxBackups == 0:
+	case loggerInst.meta.MaxBackups == 0:
 		fallthrough
-	case loggerInst.metaData.MaxAge == 0:
+	case loggerInst.meta.MaxAge == 0:
 		fallthrough
-	case loggerInst.metaData.Level == vars.UnknownLevel:
+	case loggerInst.meta.Level == vars.UnknownLevel:
 		return nil, vars.ErrWrapper(vars.IllegalParams)
 	}
 
@@ -68,12 +67,12 @@ func NewLogger(opts ...Option) (Logger, error) {
 	case vars.Zap:
 		{
 			return zap.NewLogger(
-				zap.WithFileName(loggerInst.metaData.FileName),
-				zap.WithMaxSize(loggerInst.metaData.MaxSize),
-				zap.WithMaxBackups(loggerInst.metaData.MaxBackups),
-				zap.WithMaxAge(loggerInst.metaData.MaxAge),
-				zap.WithLevel(loggerInst.metaData.Level),
-				zap.WithConsole(loggerInst.metaData.Console),
+				zap.WithFileName(loggerInst.meta.FileName),
+				zap.WithMaxSize(loggerInst.meta.MaxSize),
+				zap.WithMaxBackups(loggerInst.meta.MaxBackups),
+				zap.WithMaxAge(loggerInst.meta.MaxAge),
+				zap.WithLevel(loggerInst.meta.Level),
+				zap.WithConsole(loggerInst.meta.Console),
 			)
 		}
 	case vars.Dummy:

@@ -34,6 +34,10 @@ const (
 	defaultBodyVerbose = 2048
 )
 
+func GetDefaultHttpClient() *http.Client {
+	return defaultHttpClient
+}
+
 func init() {
 	defaultHttpClient = &http.Client{
 		Transport: &http.Transport{
