@@ -3,6 +3,7 @@ package es
 import (
 	"context"
 	"github.com/sqjian/go-kit/net/http"
+	"strings"
 	"testing"
 )
 
@@ -29,12 +30,35 @@ func Test_Es(t *testing.T) {
 	)
 	checkErr(esCLiErr)
 
-	t.Log("1")
-	exists, err := cli.indexExists(ctx, esIndex)
-	checkErr(err)
-	if !exists {
-		t.Log("2")
-		err := cli.createIndex(ctx, esIndex)
+	{
+		exists, err := cli.indexExists(ctx, esIndex)
 		checkErr(err)
+		if !exists {
+			err := cli.createIndex(ctx, esIndex)
+			checkErr(err)
+		}
+	}
+	{
+		err := cli.writeDocs(
+			ctx,
+			esIndex,
+			map[string]interface{}{
+				"name": "sqjian",
+				"age":  18,
+			},
+		)
+		checkErr(err)
+	}
+	{
+		rst, err := cli.queryDocs(
+			ctx,
+			esIndex,
+			map[string]interface{}{
+				"name": "sqjian",
+				"age":  18,
+			},
+		)
+		checkErr(err)
+		t.Logf("rst:%v", strings.Join(rst, "\n"))
 	}
 }
