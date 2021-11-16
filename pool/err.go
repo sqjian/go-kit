@@ -1,4 +1,4 @@
-package connection
+package pool
 
 import "fmt"
 
@@ -10,8 +10,8 @@ func ErrWrapper(err Err, ps ...string) error {
 }
 
 const (
-	UnknownErrCode Err = iota
-	IllegalParams      // illegal params
-	GetConnTimeout     // Get Connection Timeout
-	PoolExhausted      // Pool Was Exhausted
+	UnknownErrCode    Err = iota
+	IllegalParams         // illegal params
+	GetConnTimeout        // Get Connection Timeout
+	ResourceExhausted     // Pool Was Exhausted
 )

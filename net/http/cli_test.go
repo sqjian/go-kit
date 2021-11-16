@@ -37,19 +37,16 @@ func TestDo(t *testing.T) {
 	}))
 
 	rst, err := httpUtil.Do(
+		context.Background(),
 		httpUtil.GET,
 		ts.URL,
-		httpUtil.WithQuery(map[string]string{
+		httpUtil.WithCliQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
 		}),
-		httpUtil.WithContext(func() context.Context {
-			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-			return ctx
-		}()),
-		httpUtil.WithRetry(3),
-		httpUtil.WithLogger(logger),
+		httpUtil.WithCliRetry(3),
+		httpUtil.WithCliLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
@@ -80,20 +77,17 @@ func TestDoWithId(t *testing.T) {
 	}))
 
 	rst, err := httpUtil.Do(
+		context.Background(),
 		httpUtil.GET,
 		ts.URL,
-		httpUtil.WithQuery(map[string]string{
+		httpUtil.WithCliQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
 		}),
-		httpUtil.WithContext(func() context.Context {
-			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-			return ctx
-		}()),
-		httpUtil.WithRetry(3),
-		httpUtil.WithUniqueId("xxx"),
-		httpUtil.WithLogger(logger),
+		httpUtil.WithCliRetry(3),
+		httpUtil.WithCliUniqueId("xxx"),
+		httpUtil.WithCliLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
@@ -126,19 +120,16 @@ func BenchmarkDo(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			_, err := httpUtil.Do(
+				context.Background(),
 				httpUtil.GET,
 				ts.URL,
-				httpUtil.WithQuery(map[string]string{
+				httpUtil.WithCliQuery(map[string]string{
 					"from":    "cn",
 					"to":      "en",
 					"content": "你好",
 				}),
-				httpUtil.WithContext(func() context.Context {
-					ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-					return ctx
-				}()),
-				httpUtil.WithRetry(3),
-				httpUtil.WithLogger(logger),
+				httpUtil.WithCliRetry(3),
+				httpUtil.WithCliLogger(logger),
 			)
 			if err != nil {
 				b.Fatal(err)
