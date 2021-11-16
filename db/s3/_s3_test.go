@@ -17,6 +17,7 @@ func Test_S3(t *testing.T) {
 		WithSecret("12345678"),
 		WithAddr("http://172.31.243.215:9091"),
 		WithConcurrency(3),
+		WithDebugInfo(true),
 	)
 	checkErr(err)
 
