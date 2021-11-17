@@ -1,8 +1,9 @@
 package s3
 
 import (
+	"fmt"
 	"github.com/aws/smithy-go/logging"
-	"log"
+	"time"
 )
 
 type DefLogger struct {
@@ -13,6 +14,6 @@ func (l *DefLogger) Logf(classification logging.Classification, format string, v
 	if l.dummy {
 		return
 	}
-	log.Println(classification)
-	log.Printf(format, v...)
+	fmt.Printf("%v => level:%v,msg:", time.Now().UnixNano(), classification)
+	fmt.Printf(format, v...)
 }

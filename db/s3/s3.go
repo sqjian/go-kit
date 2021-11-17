@@ -42,7 +42,6 @@ func newS3Cli(opts ...Option) (*S3, error) {
 		for _, opt := range opts {
 			opt.apply(cli)
 		}
-
 		if len(cli.meta.key) == 0 {
 			return nil, ErrWrapper(IllegalParams)
 		}
@@ -108,6 +107,15 @@ func newS3Cli(opts ...Option) (*S3, error) {
 				downloader.Logger = &DefLogger{dummy: !cli.meta.debug}
 			},
 		)
+	}
+	{
+		_, err := cli.cli.ListBuckets(
+			context.Background(),
+			&s3.ListBucketsInput{},
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return cli, nil
