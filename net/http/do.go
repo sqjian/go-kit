@@ -118,7 +118,11 @@ func Do(
 			}(),
 			"header", fmt.Sprintf("%v", config.header),
 		)
-		req, err := http.NewRequest(method.String(), urlEncode, bytes.NewReader(config.body))
+		req, err := http.NewRequest(
+			method.String(),
+			urlEncode,
+			bytes.NewReader(config.body),
+		)
 		if err != nil {
 			return nil, err
 		}
