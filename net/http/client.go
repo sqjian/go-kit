@@ -183,11 +183,14 @@ func genReq(method Method, target string, config *Config) (*http.Request, error)
 	return req, nil
 }
 
-func Do(method Method, target string, opts ...Option) ([]byte, error) {
+func Do(ctx context.Context, method Method, target string, opts ...Option) ([]byte, error) {
 	config := newDefaultHttpConfig()
 
-	for _, opt := range opts {
-		opt.apply(config)
+	{
+		for _, opt := range opts {
+			opt.apply(config)
+		}
+		config.context = ctx
 	}
 
 	if err := config.context.Err(); err != nil {

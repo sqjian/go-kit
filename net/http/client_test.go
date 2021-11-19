@@ -37,6 +37,7 @@ func TestDo(t *testing.T) {
 	}))
 
 	rst, err := httpUtil.Do(
+		context.Background(),
 		httpUtil.GET,
 		ts.URL,
 		httpUtil.WithQuery(map[string]string{
@@ -44,10 +45,6 @@ func TestDo(t *testing.T) {
 			"to":      "en",
 			"content": "你好",
 		}),
-		httpUtil.WithContext(func() context.Context {
-			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-			return ctx
-		}()),
 		httpUtil.WithRetry(3),
 		httpUtil.WithLogger(logger),
 	)
@@ -80,6 +77,7 @@ func TestDoWithId(t *testing.T) {
 	}))
 
 	rst, err := httpUtil.Do(
+		context.Background(),
 		httpUtil.GET,
 		ts.URL,
 		httpUtil.WithQuery(map[string]string{
@@ -87,10 +85,6 @@ func TestDoWithId(t *testing.T) {
 			"to":      "en",
 			"content": "你好",
 		}),
-		httpUtil.WithContext(func() context.Context {
-			ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-			return ctx
-		}()),
 		httpUtil.WithRetry(3),
 		httpUtil.WithUniqueId("xxx"),
 		httpUtil.WithLogger(logger),
@@ -126,6 +120,7 @@ func BenchmarkDo(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			_, err := httpUtil.Do(
+				context.Background(),
 				httpUtil.GET,
 				ts.URL,
 				httpUtil.WithQuery(map[string]string{
@@ -133,10 +128,6 @@ func BenchmarkDo(b *testing.B) {
 					"to":      "en",
 					"content": "你好",
 				}),
-				httpUtil.WithContext(func() context.Context {
-					ctx, _ := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-					return ctx
-				}()),
 				httpUtil.WithRetry(3),
 				httpUtil.WithLogger(logger),
 			)

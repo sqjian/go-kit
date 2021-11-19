@@ -60,12 +60,6 @@ func WithUniqueId(uniqueId string) Option {
 	})
 }
 
-func WithContext(ctx context.Context) Option {
-	return optionFunc(func(options *Config) {
-		options.context = ctx
-	})
-}
-
 func WithRetry(retry int) Option {
 	return optionFunc(func(options *Config) {
 		options.retry = retry
