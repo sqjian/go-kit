@@ -63,11 +63,10 @@ func init() {
 	}()
 }
 
-
-
 func newDefaultHttpConfig() *Config {
 	return &Config{
 		retry:   3,
+		trace:   true,
 		logger:  log.DummyLogger,
 		client:  defaultHttpClient,
 		context: context.Background(),
@@ -80,78 +79,9 @@ func newDefaultHttpConfig() *Config {
 		}(),
 	}
 }
-func Do(
-	method Method,
-	target string,
-	opts ...Option,
-) ([]byte, error) {
-	config := newDefaultHttpConfig()
 
-	for _, opt := range opts {
-		opt.apply(config)
-	}
-
-	if err := config.context.Err(); err != nil {
-		config.logger.Errorw("context.Err not nil", "id", config.logId, "err", err)
-		return nil, err
-	}
-
-	newReq := func() (*http.Request, error) {
-		u, err := url.Parse(target)
-		if err != nil {
-			return nil, err
-		}
-
-		q := u.Query()
-		for k, v := range config.query {
-			q.Set(k, v)
-		}
-		u.RawQuery = q.Encode()
-		urlEncode := u.String()
-
-		config.logger.Infow("log req",
-			"id", config.logId,
-			"method", method.String(),
-			"urlEncode", urlEncode,
-			"body", func() string {
-				if len(config.body) > defaultBodyVerbose {
-					return fmt.Sprintf("%v...", string(config.body[:defaultBodyVerbose]))
-				}
-				return string(config.body)
-			}(),
-			"header", fmt.Sprintf("%v", config.header),
-		)
-		req, err := http.NewRequest(
-			method.String(),
-			urlEncode,
-			bytes.NewReader(config.body),
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		for k, v := range config.header {
-			req.Header.Set(k, v)
-		}
-
-		req = req.WithContext(config.context)
-		return req, nil
-	}
-
-	do := func(req *http.Request) ([]byte, error) {
-		resp, err := config.client.Do(req)
-		if err != nil {
-			config.logger.Errorw("client.do failed",
-				"id", config.logId,
-				"err", err,
-			)
-			return nil, err
-		}
-		defer resp.Body.Close()
-		return ioutil.ReadAll(resp.Body)
-	}
-
-	traceCtx := httptrace.WithClientTrace(context.Background(), &httptrace.ClientTrace{
+func genTraceCtx(config *Config) context.Context {
+	traceCtx := httptrace.WithClientTrace(config.context, &httptrace.ClientTrace{
 		GetConn: func(hostPort string) {
 			config.logger.Infof("logId:%v,Prepare to get a connection for %s.", config.logId, hostPort)
 		},
@@ -202,16 +132,87 @@ func Do(
 			config.logger.Infof("logId:%v,Got the first response byte.", config.logId)
 		},
 	})
+	return traceCtx
+}
+
+func genReq(method Method, target string, config *Config) (*http.Request, error) {
+	u, err := url.Parse(target)
+	if err != nil {
+		return nil, err
+	}
+
+	q := u.Query()
+	for k, v := range config.query {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
+	urlEncode := u.String()
+
+	req, err := http.NewRequest(
+		method.String(),
+		urlEncode,
+		bytes.NewReader(config.body),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range config.header {
+		req.Header.Set(k, v)
+	}
+
+	config.logger.Infow("log req",
+		"id", config.logId,
+		"method", req.Method,
+		"urlEncode", req.RequestURI,
+		"body", func() string {
+			if len(config.body) > defaultBodyVerbose {
+				return fmt.Sprintf("%v...", string(config.body[:defaultBodyVerbose]))
+			}
+			return string(config.body)
+		}(),
+		"header", fmt.Sprintf("%v", req.Header),
+	)
+
+	if config.trace {
+		req = req.WithContext(genTraceCtx(config))
+	} else {
+		req = req.WithContext(config.context)
+	}
+
+	return req, nil
+}
+
+func Do(method Method, target string, opts ...Option) ([]byte, error) {
+	config := newDefaultHttpConfig()
+
+	for _, opt := range opts {
+		opt.apply(config)
+	}
+
+	if err := config.context.Err(); err != nil {
+		config.logger.Errorw("context.Err not nil", "id", config.logId, "err", err)
+		return nil, err
+	}
+
+	do := func(req *http.Request) ([]byte, error) {
+		resp, err := config.client.Do(req)
+		if err != nil {
+			config.logger.Errorw("client.do failed", "id", config.logId, "err", err)
+			return nil, err
+		}
+		defer resp.Body.Close()
+		return ioutil.ReadAll(resp.Body)
+	}
 
 	var rst []byte
 	err := retry.Do(
 		func() error {
-			req, reqErr := newReq()
+			req, reqErr := genReq(method, target, config)
 			if reqErr != nil {
-				config.logger.Errorf("logId:%v,http.Do->newReq failed,err:%v", config.logId, reqErr)
+				config.logger.Errorf("logId:%v,http.Do->genReq failed,err:%v", config.logId, reqErr)
 				return reqErr
 			}
-			req = req.WithContext(traceCtx)
 			body, err := do(req)
 			if err != nil {
 				config.logger.Errorf("logId:%v,http.Do->do failed,err:%v", config.logId, err)

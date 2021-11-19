@@ -10,6 +10,7 @@ type Config struct {
 	logId string
 
 	retry   int
+	trace   bool
 	logger  log.Logger
 	client  *http.Client
 	context context.Context
@@ -71,8 +72,14 @@ func WithRetry(retry int) Option {
 	})
 }
 
-func WithLogger(Logger log.Logger) Option {
+func WithLogger(logger log.Logger) Option {
 	return optionFunc(func(options *Config) {
-		options.logger = Logger
+		options.logger = logger
+	})
+}
+
+func WithTrace(trace bool) Option {
+	return optionFunc(func(options *Config) {
+		options.trace = trace
 	})
 }
