@@ -63,8 +63,8 @@ func init() {
 	}()
 }
 
-func newDefaultHttpConfig() *Config {
-	return &Config{
+func newDefaultCliCfg() *cliCfg {
+	return &cliCfg{
 		retry:   3,
 		trace:   true,
 		logger:  log.DummyLogger,
@@ -80,7 +80,7 @@ func newDefaultHttpConfig() *Config {
 	}
 }
 
-func genTraceCtx(config *Config) context.Context {
+func genTraceCtx(config *cliCfg) context.Context {
 	traceCtx := httptrace.WithClientTrace(config.context, &httptrace.ClientTrace{
 		GetConn: func(hostPort string) {
 			config.logger.Infof("logId:%v,Prepare to get a connection for %s.", config.logId, hostPort)
@@ -135,7 +135,7 @@ func genTraceCtx(config *Config) context.Context {
 	return traceCtx
 }
 
-func genReq(method Method, target string, config *Config) (*http.Request, error) {
+func genReq(method Method, target string, config *cliCfg) (*http.Request, error) {
 	u, err := url.Parse(target)
 	if err != nil {
 		return nil, err
@@ -183,25 +183,24 @@ func genReq(method Method, target string, config *Config) (*http.Request, error)
 	return req, nil
 }
 
-func Do(ctx context.Context, method Method, target string, opts ...Option) ([]byte, error) {
-	config := newDefaultHttpConfig()
-
+func Do(ctx context.Context, method Method, target string, opts ...CliOption) ([]byte, error) {
+	cfg := newDefaultCliCfg()
 	{
 		for _, opt := range opts {
-			opt.apply(config)
+			opt.apply(cfg)
 		}
-		config.context = ctx
+		cfg.context = ctx
 	}
 
-	if err := config.context.Err(); err != nil {
-		config.logger.Errorw("context.Err not nil", "id", config.logId, "err", err)
+	if err := cfg.context.Err(); err != nil {
+		cfg.logger.Errorw("context.Err not nil", "id", cfg.logId, "err", err)
 		return nil, err
 	}
 
 	do := func(req *http.Request) ([]byte, error) {
-		resp, err := config.client.Do(req)
+		resp, err := cfg.client.Do(req)
 		if err != nil {
-			config.logger.Errorw("client.do failed", "id", config.logId, "err", err)
+			cfg.logger.Errorw("client.do failed", "id", cfg.logId, "err", err)
 			return nil, err
 		}
 		defer resp.Body.Close()
@@ -211,21 +210,21 @@ func Do(ctx context.Context, method Method, target string, opts ...Option) ([]by
 	var rst []byte
 	err := retry.Do(
 		func() error {
-			req, reqErr := genReq(method, target, config)
+			req, reqErr := genReq(method, target, cfg)
 			if reqErr != nil {
-				config.logger.Errorf("logId:%v,http.Do->genReq failed,err:%v", config.logId, reqErr)
+				cfg.logger.Errorf("logId:%v,http.Do->genReq failed,err:%v", cfg.logId, reqErr)
 				return reqErr
 			}
 			body, err := do(req)
 			if err != nil {
-				config.logger.Errorf("logId:%v,http.Do->do failed,err:%v", config.logId, err)
+				cfg.logger.Errorf("logId:%v,http.Do->do failed,err:%v", cfg.logId, err)
 				return err
 			}
 			rst = body
 			return nil
 		},
-		retry.WithAttempts(uint(config.retry)),
-		retry.WithContext(config.context),
+		retry.WithAttempts(uint(cfg.retry)),
+		retry.WithContext(cfg.context),
 	)
 	return rst, err
 }
