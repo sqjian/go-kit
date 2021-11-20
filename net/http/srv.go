@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/netutil"
 	"net"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -32,6 +33,7 @@ func newDefaultSrvCfg() *srvCfg {
 		context:    context.Background(),
 	}
 }
+
 func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOption) error {
 	cfg := newDefaultSrvCfg()
 	{
@@ -62,17 +64,24 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOpt
 		MaxHeaderBytes: cfg.MaxHeaderBytes,
 	}
 
-	go func() {
-		<-cfg.context.Done()
+	var wg sync.WaitGroup
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		<-cfg.context.Done()
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.gracefully)
 		defer cancel()
 		if err := srv.Shutdown(ctx); nil != err {
 			cfg.logger.Errorw("server shutdown failed", "id", cfg.logId, "err", err)
 			return
 		}
-		cfg.logger.Infof("server gracefully shutdown", "id", cfg.logId)
+		cfg.logger.Infow("server gracefully shutdown", "id", cfg.logId)
+
 	}()
+
+	wg.Wait()
 
 	cfg.logger.Infof("About to listen on %v,id:%v", addr, cfg.logId)
 	if err := srv.Serve(listener); err != nil {
