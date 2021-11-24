@@ -66,6 +66,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-retract (
-    v0.0.31 // 废弃的版本，请使用v0.0.32
-)
+retract v0.0.31 // 废弃的版本，请使用v0.0.32
