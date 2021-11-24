@@ -135,14 +135,14 @@ func genTraceCtx(config *cliCfg) context.Context {
 	return traceCtx
 }
 
-func genReq(method Method, target string, config *cliCfg) (*http.Request, error) {
+func genReq(method Method, target string, cfg *cliCfg) (*http.Request, error) {
 	u, err := url.Parse(target)
 	if err != nil {
 		return nil, err
 	}
 
 	q := u.Query()
-	for k, v := range config.query {
+	for k, v := range cfg.query {
 		q.Set(k, v)
 	}
 	u.RawQuery = q.Encode()
@@ -151,33 +151,31 @@ func genReq(method Method, target string, config *cliCfg) (*http.Request, error)
 	req, err := http.NewRequest(
 		method.String(),
 		urlEncode,
-		bytes.NewReader(config.body),
+		bytes.NewReader(cfg.body),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	for k, v := range config.header {
+	for k, v := range cfg.header {
 		req.Header.Set(k, v)
 	}
 
-	config.logger.Infow("log req",
-		"id", config.logId,
-		"method", req.Method,
-		"urlEncode", req.RequestURI,
-		"body", func() string {
-			if len(config.body) > defaultBodyVerbose {
-				return fmt.Sprintf("%v...", string(config.body[:defaultBodyVerbose]))
+	{
+		cfg.logger.Infof("log req => id:%v,method:%v,urlEncode:%v", cfg.logId, req.Method, req.RequestURI)
+		cfg.logger.Infof("log req => id:%v,header:%v", cfg.logId, req.Header)
+		cfg.logger.Infof("log req => id:%v,body:%v", cfg.logId, func() string {
+			if len(cfg.body) > defaultBodyVerbose {
+				return fmt.Sprintf("%v...", string(cfg.body[:defaultBodyVerbose]))
 			}
-			return string(config.body)
-		}(),
-		"header", fmt.Sprintf("%v", req.Header),
-	)
+			return string(cfg.body)
+		}())
+	}
 
-	if config.trace {
-		req = req.WithContext(genTraceCtx(config))
+	if cfg.trace {
+		req = req.WithContext(genTraceCtx(cfg))
 	} else {
-		req = req.WithContext(config.context)
+		req = req.WithContext(cfg.context)
 	}
 
 	return req, nil
@@ -193,14 +191,14 @@ func Do(ctx context.Context, method Method, target string, opts ...CliOption) ([
 	}
 
 	if err := cfg.context.Err(); err != nil {
-		cfg.logger.Errorw("context.Err not nil", "id", cfg.logId, "err", err)
+		cfg.logger.Errorf("context.Err not nil => id:%v,err:%v", cfg.logId, err)
 		return nil, err
 	}
 
 	do := func(req *http.Request) ([]byte, error) {
 		resp, err := cfg.client.Do(req)
 		if err != nil {
-			cfg.logger.Errorw("client.do failed", "id", cfg.logId, "err", err)
+			cfg.logger.Errorf("client.do failed => id:%v,err:%v", cfg.logId, err)
 			return nil, err
 		}
 		defer resp.Body.Close()

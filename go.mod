@@ -14,6 +14,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/olivere/elastic/v7 v7.0.29
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
@@ -65,3 +66,5 @@ require (
 	gopkg.in/ini.v1 v1.64.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+retract v0.0.31 // 废弃的版本，请使用v0.0.32

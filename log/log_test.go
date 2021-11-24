@@ -1,8 +1,8 @@
 package log_test
 
 import (
+	"fmt"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/log/vars"
 	"testing"
 )
 
@@ -12,8 +12,7 @@ func TestLoggerZap(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(vars.Info),
-		log.WithLogType(vars.Zap),
+		log.WithLevel(log.Info),
 		log.WithConsole(false),
 	)
 
@@ -31,11 +30,11 @@ func TestLoggerZap(t *testing.T) {
 
 func TestLoggerDef(t *testing.T) {
 	logger, loggerErr := log.NewLogger(
-		log.WithFileName("test.log"),
+		log.WithFileName("go-kit.log"),
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(vars.Info),
+		log.WithLevel(log.Info),
 		log.WithConsole(false),
 	)
 
@@ -57,8 +56,7 @@ func TestLoggerDummy(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(vars.Info),
-		log.WithLogType(vars.Dummy),
+		log.WithLevel(log.Info),
 		log.WithConsole(false),
 	)
 
@@ -74,16 +72,6 @@ func TestLoggerDummy(t *testing.T) {
 	}
 }
 
-func TestDummyLogger(t *testing.T) {
-
-	{
-		log.DummyLogger.Debugf("testing infof...")
-		log.DummyLogger.Infof("testing Infof...")
-		log.DummyLogger.Warnf("testing Warnf...")
-		log.DummyLogger.Errorf("testing Errorf...")
-	}
-}
-
 func TestDebugLogger(t *testing.T) {
 
 	{
@@ -91,5 +79,48 @@ func TestDebugLogger(t *testing.T) {
 		log.DebugLogger.Infof("testing Infof...")
 		log.DebugLogger.Warnf("testing Warnf...")
 		log.DebugLogger.Errorf("testing Errorf...")
+	}
+}
+
+type Builder struct{}
+
+func (b Builder) Debugf(template string, args ...interface{}) {
+	fmt.Println("implement me")
+}
+
+func (b Builder) Infof(template string, args ...interface{}) {
+	fmt.Println("implement me")
+}
+
+func (b Builder) Warnf(template string, args ...interface{}) {
+	fmt.Println("implement me")
+}
+
+func (b Builder) Errorf(template string, args ...interface{}) {
+	fmt.Println("implement me")
+}
+
+func TestBuilder(t *testing.T) {
+	logger, loggerErr := log.NewLogger(
+		log.WithFileName("test.log"),
+		log.WithMaxSize(3),
+		log.WithMaxBackups(3),
+		log.WithMaxAge(3),
+		log.WithLevel(log.Info),
+		log.WithConsole(false),
+		log.WithBuilder(func(_ *log.Meta) (log.API, error) {
+			return &Builder{}, nil
+		}),
+	)
+
+	if loggerErr != nil {
+		t.Fatal(loggerErr)
+	}
+
+	{
+		logger.Debugf("testing infof...")
+		logger.Infof("testing Infof...")
+		logger.Warnf("testing Warnf...")
+		logger.Errorf("testing Errorf...")
 	}
 }

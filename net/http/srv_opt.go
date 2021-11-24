@@ -15,7 +15,7 @@ type srvCfg struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
-	logger     log.Logger
+	logger     log.API
 	gracefully time.Duration
 	context    context.Context
 }
@@ -30,7 +30,7 @@ func (f srvOptionFunc) apply(options *srvCfg) {
 	f(options)
 }
 
-func WithSrvLogger(logger log.Logger) SrvOption {
+func WithSrvLogger(logger log.API) SrvOption {
 	return srvOptionFunc(func(options *srvCfg) {
 		options.logger = logger
 	})

@@ -41,7 +41,7 @@ type Cfg struct {
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
 	CreateNewInterval time.Duration
-	Logger            log.Logger
+	Logger            log.API
 }
 
 type Option interface {
@@ -138,7 +138,7 @@ func WithCreateNewInterval(CreateNewInterval time.Duration) Option {
 	})
 }
 
-func WithLogger(Logger log.Logger) Option {
+func WithLogger(Logger log.API) Option {
 	return OptionFunc(func(options *Cfg) {
 		options.Logger = Logger
 	})

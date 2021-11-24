@@ -1,4 +1,4 @@
-package vars
+package rdb
 
 import "fmt"
 
@@ -16,5 +16,4 @@ func ErrWrapper(err Err) error {
 const (
 	UnknownErrCode Err = iota
 	IllegalParams
-	IllegalKeyType
 )

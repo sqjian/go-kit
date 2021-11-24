@@ -44,7 +44,7 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOpt
 	}
 
 	if err := parseIp(addr); err != nil {
-		cfg.logger.Errorw("parseIp failed", "id", cfg.logId, "err", err)
+		cfg.logger.Errorf("parseIp failed => id:%v,err:%v", cfg.logId, err)
 		return err
 	}
 
@@ -74,21 +74,23 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOpt
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.gracefully)
 		defer cancel()
 		if err := srv.Shutdown(ctx); nil != err {
-			cfg.logger.Errorw("server shutdown failed", "id", cfg.logId, "err", err)
+			cfg.logger.Errorf("server shutdown failed => id:%v,err:%v", cfg.logId, err)
 			return
 		}
-		cfg.logger.Infow("server gracefully shutdown", "id", cfg.logId)
+		cfg.logger.Infof("server gracefully shutdown => id:%v", cfg.logId)
 
 	}()
 
+	cfg.logger.Infof("About to listen on %v,id:%v", addr, cfg.logId)
+	err = srv.Serve(listener)
 	wg.Wait()
 
-	cfg.logger.Infof("About to listen on %v,id:%v", addr, cfg.logId)
-	if err := srv.Serve(listener); err != nil {
-		cfg.logger.Errorw("srv.Serve failed", "id", cfg.logId, "err", err)
-		return err
+	if http.ErrServerClosed == err {
+		return nil
 	}
-	return nil
+	cfg.logger.Errorf("server not gracefully shutdown => id:%v,err:%v", cfg.logId, err)
+
+	return err
 }
 
 func parseIp(ip string) error {
