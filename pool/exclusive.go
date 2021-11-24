@@ -1,4 +1,4 @@
-package connection
+package pool
 
 import (
 	"context"
@@ -9,26 +9,26 @@ import (
 	"time"
 )
 
-var (
-	DefaultDialRetryCount    = 3
-	DefaultRetryInterval     = time.Second * 10
-	DefaultKeepAliveInterval = time.Second * 3
-	DefaultCreateNewInterval = time.Second * 1
-	DefaultCleanInterval     = time.Second * 60
-)
-
-func newDefaultClientPool() *ClientPool {
-	return &ClientPool{
-		Logger:            log.DummyLogger,
-		KeepAliveInterval: DefaultKeepAliveInterval,
-		CreateNewInterval: DefaultCreateNewInterval,
-		DialRetryCount:    DefaultDialRetryCount,
-		DialRetryInterval: DefaultRetryInterval,
-		CleanInterval:     DefaultCleanInterval,
+func newExclusivePool(cfg *Cfg) *ExclusivePool {
+	return &ExclusivePool{
+		Address:           cfg.Address,
+		Port:              cfg.Port,
+		Dial:              cfg.Dial,
+		Close:             cfg.Close,
+		KeepAlive:         cfg.KeepAlive,
+		InitialPoolSize:   cfg.InitialPoolSize,
+		BestPoolSize:      cfg.BestPoolSize,
+		MaxPoolSize:       cfg.MaxPoolSize,
+		DialRetryCount:    cfg.DialRetryCount,
+		KeepAliveInterval: cfg.KeepAliveInterval,
+		CleanInterval:     cfg.CleanInterval,
+		DialRetryInterval: cfg.DialRetryInterval,
+		CreateNewInterval: cfg.CreateNewInterval,
+		Logger:            cfg.Logger,
 	}
 }
 
-type ClientPool struct {
+type ExclusivePool struct {
 	Address           string
 	Port              string
 	Dial              func(ctx context.Context, address, port string) (connection interface{}, err error)
@@ -53,13 +53,9 @@ type ClientPool struct {
 	isStopped      bool
 }
 
-func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
+func NewExclusivePool(ctx context.Context, cfg *Cfg) (*ExclusivePool, error) {
 
-	pool := newDefaultClientPool()
-
-	for _, opt := range opts {
-		opt.apply(pool)
-	}
+	pool := newExclusivePool(cfg)
 
 	if pool.Logger == nil {
 		return nil, ErrWrapper(IllegalParams)
@@ -88,7 +84,8 @@ func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 	}
 
 	if pool.BestPoolSize == 0 {
-		pool.Logger.Errorf("initialize pool => BestPoolSize is not set,use MaxPoolSize(%v) instead", pool.MaxPoolSize)
+		pool.Logger.Errorf("initialize pool => BestPoolSize is not set,use MaxPoolSize(%v) instead",
+			pool.MaxPoolSize)
 		pool.BestPoolSize = pool.MaxPoolSize
 	}
 
@@ -100,7 +97,8 @@ func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 		if c, err := pool.Dial(ctx, pool.Address, pool.Port); err == nil {
 			pool.alivePool <- c
 		} else {
-			pool.Logger.Errorf("initialize pool => Dial %v:%v failed,err:%v", pool.Address, pool.Port, err.Error())
+			pool.Logger.Errorf("initialize pool => Dial %v:%v failed,err:%v",
+				pool.Address, pool.Port, err.Error())
 			pool.retryPool <- 0
 		}
 	}
@@ -110,13 +108,13 @@ func NewClientPool(ctx context.Context, opts ...Option) (*ClientPool, error) {
 	return pool, nil
 }
 
-func (p *ClientPool) start() {
+func (p *ExclusivePool) start() {
 	go p.clean()
 	go p.retryLoop()
 	go p.keepAliveLoop()
 }
 
-func (p *ClientPool) Get() (connection interface{}, err error) {
+func (p *ExclusivePool) Get() (connection interface{}, err error) {
 
 	select {
 	case <-time.After(p.CreateNewInterval):
@@ -129,13 +127,15 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 			retry := 0
 			for retry < p.DialRetryCount {
 				if connection, err = p.Dial(context.TODO(), p.Address, p.Port); err != nil {
-					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v failed,err:%v", p.Address, p.Address, p.Port, err.Error())
+					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v failed,err:%v",
+						p.Address, p.Address, p.Port, err.Error())
 					retry++
 					continue
 				} else {
 					atomic.AddInt32(&p.workConnCount, 1)
 					atomic.AddInt32(&p.newlyConnCount, 1)
-					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v successfully", p.Address, p.Address, p.Port)
+					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v successfully",
+						p.Address, p.Address, p.Port)
 					return
 				}
 			}
@@ -145,8 +145,9 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 				return nil, err
 			}
 		} else {
-			p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.", p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
-			return nil, ErrWrapper(PoolExhausted, fmt.Sprintf("addr:%v", p.Address))
+			p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.",
+				p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
+			return nil, ErrWrapper(ResourceExhausted, fmt.Sprintf("addr:%v", p.Address))
 		}
 	case connection = <-p.alivePool:
 		p.Logger.Infof("addr:%v => Get new connection from alive pool.", p.Address)
@@ -161,7 +162,7 @@ func (p *ClientPool) Get() (connection interface{}, err error) {
 	return nil, ErrWrapper(GetConnTimeout)
 }
 
-func (p *ClientPool) Put(connection interface{}) (err error) {
+func (p *ExclusivePool) Put(connection interface{}) (err error) {
 
 	p.sync.Lock()
 
@@ -185,7 +186,7 @@ func (p *ClientPool) Put(connection interface{}) (err error) {
 	return
 }
 
-func (p *ClientPool) Release() {
+func (p *ExclusivePool) Release() {
 	p.sync.Lock()
 	p.isStopped = true
 
@@ -199,7 +200,7 @@ func (p *ClientPool) Release() {
 	p.sync.Unlock()
 }
 
-func (p *ClientPool) retryLoop() {
+func (p *ExclusivePool) retryLoop() {
 	p.Logger.Infof("addr:%v => retry loop start.", p.Address)
 	defer p.Logger.Infof("addr:%v => retry loop end.", p.Address)
 
@@ -226,7 +227,7 @@ func (p *ClientPool) retryLoop() {
 	}
 }
 
-func (p *ClientPool) keepAliveLoop() {
+func (p *ExclusivePool) keepAliveLoop() {
 
 	p.Logger.Infof("addr:%v => keepAlive loop start.", p.Address)
 	defer p.Logger.Infof("addr:%v => keepAlive loop end.", p.Address)
@@ -236,12 +237,12 @@ func (p *ClientPool) keepAliveLoop() {
 		case <-time.After(p.KeepAliveInterval):
 			{
 				if len(p.alivePool) > 0 {
-					// send keep alive message to each connection
 					for connection := range p.alivePool {
 						if err := p.KeepAlive(context.TODO(), connection); err == nil {
 							p.swapPool <- connection
 						} else {
-							p.Logger.Errorf("addr:%v => Keepalive Pool Failed on %v\n", p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
+							p.Logger.Errorf("addr:%v => Keepalive Pool Failed on %v\n",
+								p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
 							p.retryPool <- 0
 						}
 
@@ -252,7 +253,6 @@ func (p *ClientPool) keepAliveLoop() {
 				}
 
 				if len(p.swapPool) > 0 {
-					// restore alive connection pool.
 					for connection := range p.swapPool {
 						p.alivePool <- connection
 
@@ -276,7 +276,7 @@ func (p *ClientPool) keepAliveLoop() {
 	}
 }
 
-func (p *ClientPool) clean() {
+func (p *ExclusivePool) clean() {
 
 	p.Logger.Infof("addr:%v => clean loop start.", p.Address)
 	defer p.Logger.Infof("addr:%v => clean loop end.", p.Address)
@@ -317,5 +317,4 @@ func (p *ClientPool) clean() {
 			}
 		}
 	}
-
 }

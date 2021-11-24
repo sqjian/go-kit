@@ -1,16 +1,16 @@
-package connection_test
+package pool_test
 
 import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/log/vars"
-	"github.com/sqjian/go-kit/pool/connection"
+	pool "github.com/sqjian/go-kit/pool"
 	"net"
 	"testing"
 )
 
-func TestClientPool(t *testing.T) {
+func TestExclusivePool(t *testing.T) {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)
@@ -33,28 +33,29 @@ func TestClientPool(t *testing.T) {
 		address = "www.baidu.com"
 		port    = "80"
 	)
-
-	pool, poolErr := connection.NewClientPool(
+	pool, poolErr := pool.NewPool(
 		context.TODO(),
-		connection.WithAddress(address),
-		connection.WithPort(port),
-		connection.WithDial(func(ctx context.Context, address, port string) (connection interface{}, err error) {
+		pool.WithType(pool.Exclusive),
+		pool.WithAddress(address),
+		pool.WithPort(port),
+		pool.WithDial(func(ctx context.Context, address, port string) (connection interface{}, err error) {
 			return net.Dial("tcp", fmt.Sprintf("%v:%v", address, port))
 		}),
-		connection.WithClose(func(ctx context.Context, connection interface{}) (err error) {
+		pool.WithClose(func(ctx context.Context, connection interface{}) (err error) {
 			conn, connOk := connection.(net.Conn)
 			if !connOk {
 				return fmt.Errorf("can't convert to net.Conn")
 			}
 			return conn.Close()
 		}),
-		connection.WithKeepAlive(func(ctx context.Context, connection interface{}) (err error) {
+		pool.WithKeepAlive(func(ctx context.Context, connection interface{}) (err error) {
 			return nil
 		}),
-		connection.WithInitialPoolSize(1),
-		connection.WithMaxPoolSize(1),
-		connection.WithLogger(logger),
+		pool.WithInitialPoolSize(1),
+		pool.WithMaxPoolSize(1),
+		pool.WithLogger(logger),
 	)
+
 	checkErr(poolErr)
 
 	conn, connErr := pool.Get()
