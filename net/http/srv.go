@@ -81,14 +81,16 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOpt
 
 	}()
 
+	cfg.logger.Infof("About to listen on %v,id:%v", addr, cfg.logId)
+	err = srv.Serve(listener)
 	wg.Wait()
 
-	cfg.logger.Infof("About to listen on %v,id:%v", addr, cfg.logId)
-	if err := srv.Serve(listener); err != nil {
-		cfg.logger.Errorw("srv.Serve failed", "id", cfg.logId, "err", err)
-		return err
+	if http.ErrServerClosed == err {
+		return nil
 	}
-	return nil
+	cfg.logger.Errorw("server not gracefully shutdown", "id", cfg.logId, "err", err)
+
+	return err
 }
 
 func parseIp(ip string) error {
