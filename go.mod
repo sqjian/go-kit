@@ -65,3 +65,7 @@ require (
 	gopkg.in/ini.v1 v1.64.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+retract (
+    v0.0.31 // 废弃的版本，请使用v0.0.32
+)
