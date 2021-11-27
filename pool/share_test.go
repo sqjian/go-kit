@@ -51,7 +51,7 @@ func TestSharePool(t *testing.T) {
 		pool.WithKeepAlive(func(ctx context.Context, connection interface{}) (err error) {
 			return nil
 		}),
-		pool.WithInitialPoolSize(1),
+		pool.WithInitialPoolSize(1e3),
 		pool.WithLogger(logger),
 	)
 
