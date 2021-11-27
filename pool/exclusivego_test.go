@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/log/vars"
-	pool "github.com/sqjian/go-kit/pool"
+	"github.com/sqjian/go-kit/pool"
 	"net"
 	"testing"
 )
@@ -22,8 +21,7 @@ func TestExclusivePool(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(vars.Warn),
-		log.WithLogType(vars.Zap),
+		log.WithLevel(log.Warn),
 		log.WithConsole(false),
 	)
 

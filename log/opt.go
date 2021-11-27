@@ -1,55 +1,53 @@
 package log
 
-import "github.com/sqjian/go-kit/log/vars"
-
 type Option interface {
-	apply(*logger)
+	apply(*Meta)
 }
 
-type optionFunc func(*logger)
+type optionFunc func(*Meta)
 
-func (f optionFunc) apply(log *logger) {
+func (f optionFunc) apply(log *Meta) {
 	f(log)
 }
 
 func WithFileName(FileName string) Option {
-	return optionFunc(func(log *logger) {
-		log.meta.FileName = FileName
+	return optionFunc(func(m *Meta) {
+		m.FileName = FileName
 	})
 }
 
 func WithMaxSize(MaxSize int) Option {
-	return optionFunc(func(log *logger) {
-		log.meta.MaxSize = MaxSize
+	return optionFunc(func(m *Meta) {
+		m.MaxSize = MaxSize
 	})
 }
 
 func WithMaxBackups(MaxBackups int) Option {
-	return optionFunc(func(log *logger) {
-		log.meta.MaxBackups = MaxBackups
+	return optionFunc(func(m *Meta) {
+		m.MaxBackups = MaxBackups
 	})
 }
 
 func WithMaxAge(MaxAge int) Option {
-	return optionFunc(func(log *logger) {
-		log.meta.MaxAge = MaxAge
+	return optionFunc(func(m *Meta) {
+		m.MaxAge = MaxAge
 	})
 }
 
-func WithLevel(Level vars.Level) Option {
-	return optionFunc(func(log *logger) {
-		log.meta.Level = Level
+func WithLevel(Level Level) Option {
+	return optionFunc(func(m *Meta) {
+		m.Level = Level
 	})
 }
 
 func WithConsole(Console bool) Option {
-	return optionFunc(func(log *logger) {
-		log.meta.Console = Console
+	return optionFunc(func(m *Meta) {
+		m.Console = Console
 	})
 }
 
-func WithLogType(logType vars.LogType) Option {
-	return optionFunc(func(log *logger) {
-		log.logType = logType
+func WithBuilder(builder func(*Meta) (API, error)) Option {
+	return optionFunc(func(m *Meta) {
+		m.builder = builder
 	})
 }
