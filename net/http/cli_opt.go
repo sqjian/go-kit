@@ -11,7 +11,7 @@ type cliCfg struct {
 
 	retry   int
 	trace   bool
-	logger  log.Logger
+	logger  log.API
 	client  *http.Client
 	context context.Context
 
@@ -66,7 +66,7 @@ func WithCliRetry(retry int) CliOption {
 	})
 }
 
-func WithCliLogger(logger log.Logger) CliOption {
+func WithCliLogger(logger log.API) CliOption {
 	return cliOptionFunc(func(options *cliCfg) {
 		options.logger = logger
 	})

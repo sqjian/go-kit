@@ -42,7 +42,7 @@ type ExclusivePool struct {
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
 	CreateNewInterval time.Duration
-	Logger            log.Logger
+	Logger            log.API
 
 	workConnCount  int32
 	newlyConnCount int32

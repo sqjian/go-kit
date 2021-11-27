@@ -12,7 +12,7 @@ import (
 
 type Cfg struct {
 	Viper              *viper.Viper
-	Logger             log.Logger
+	Logger             log.API
 	GoNativeGenerators []schema.NewPlugin
 }
 
@@ -29,7 +29,7 @@ func NewMinimal(cfg *Cfg) (*Minimal, error) {
 }
 
 type Minimal struct {
-	logger             log.Logger
+	logger             log.API
 	viper              *viper.Viper
 	goNativeGenerators []schema.NewPlugin
 	container          container.Container
@@ -97,13 +97,13 @@ func (m *Minimal) Process(dag Dag, msg *proto.Msg, opts ...Option) ([]byte, erro
 func (m *Minimal) Init() error {
 	m.container = container.NewContainer(&container.Cfg{Viper: m.viper, Logger: m.logger})
 	if err := m.container.Init(); err != nil {
-		m.logger.Errorw(err.Error())
+		m.logger.Errorf("%v", err.Error())
 		return err
 	}
 
 	loader := loader.NewLoader(&loader.Cfg{Viper: m.viper, Logger: m.logger})
 	if err := loader.Init(); err != nil {
-		m.logger.Errorw(err.Error())
+		m.logger.Errorf(err.Error())
 		return err
 	}
 
@@ -111,13 +111,13 @@ func (m *Minimal) Init() error {
 		// init go naive
 		plugins, pluginsErr := loader.Load(m.goNativeGenerators...)
 		if pluginsErr != nil {
-			m.logger.Errorw(pluginsErr.Error())
+			m.logger.Errorf(pluginsErr.Error())
 			return pluginsErr
 		}
 
 		addErr := m.container.Add(plugins)
 		if addErr != nil {
-			m.logger.Errorw(addErr.Error())
+			m.logger.Errorf(addErr.Error())
 			return addErr
 		}
 	}

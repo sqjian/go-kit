@@ -10,13 +10,13 @@ import (
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.Logger
+	Logger log.API
 }
 
 type Container struct {
 	sync.RWMutex
 	viper   *viper.Viper
-	logger  log.Logger
+	logger  log.API
 	plugins []schema.Plugin
 }
 

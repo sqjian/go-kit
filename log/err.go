@@ -1,4 +1,4 @@
-package vars
+package log
 
 import "fmt"
 

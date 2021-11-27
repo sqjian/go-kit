@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/log/vars"
 	httpUtil "github.com/sqjian/go-kit/net/http"
 	"net/http"
 	"testing"
@@ -32,8 +31,7 @@ func TestServe(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(vars.Debug),
-		log.WithLogType(vars.Zap),
+		log.WithLevel(log.Debug),
 		log.WithConsole(false),
 	)
 
