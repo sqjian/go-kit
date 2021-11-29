@@ -10,11 +10,12 @@ func _() {
 	var x [1]struct{}
 	_ = x[UnknownType-0]
 	_ = x[Mysql-1]
+	_ = x[Sqlite-2]
 }
 
-const _Type_name = "UnknownTypeMysql"
+const _Type_name = "UnknownTypeMysqlSqlite"
 
-var _Type_index = [...]uint8{0, 11, 16}
+var _Type_index = [...]uint8{0, 11, 16, 22}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {

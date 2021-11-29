@@ -1,4 +1,4 @@
-package rdb
+package hash
 
 import "fmt"
 
@@ -9,11 +9,11 @@ import "fmt"
 //go:generate stringer -type=Err  -linecomment
 type Err int
 
-func errWrapper(err Err) error {
+func ErrWrapper(err Err) error {
 	return fmt.Errorf("code:%d,errDesc:%s", err, err.String())
 }
 
 const (
 	UnknownErrCode Err = iota
-	IllegalParams
+	IllegalKeyType     //Illegal KeyType
 )
