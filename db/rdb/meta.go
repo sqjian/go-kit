@@ -1,6 +1,9 @@
 package rdb
 
-import "time"
+import (
+	"github.com/sqjian/go-kit/log"
+	"time"
+)
 
 type Meta struct {
 	IP       string
@@ -11,10 +14,14 @@ type Meta struct {
 
 	MaxIdleConns int
 	MaxLifeTime  time.Duration
+
+	Logger log.API
 }
 
 func newDefaultMeta() *Meta {
-	return &Meta{}
+	return &Meta{
+		Logger: log.DummyLogger,
+	}
 }
 
 func NewMeta(opts ...Option) {
