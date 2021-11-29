@@ -138,12 +138,6 @@ github.com/hashicorp/hcl/json/token
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap
-# github.com/jinzhu/inflection v1.0.0
-## explicit
-github.com/jinzhu/inflection
-# github.com/jinzhu/now v1.1.2
-## explicit; go 1.12
-github.com/jinzhu/now
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14
 github.com/jmespath/go-jmespath
@@ -347,15 +341,3 @@ gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
-# gorm.io/driver/sqlite v1.2.6
-## explicit; go 1.14
-gorm.io/driver/sqlite
-# gorm.io/gorm v1.22.3
-## explicit; go 1.14
-gorm.io/gorm
-gorm.io/gorm/callbacks
-gorm.io/gorm/clause
-gorm.io/gorm/logger
-gorm.io/gorm/migrator
-gorm.io/gorm/schema
-gorm.io/gorm/utils
