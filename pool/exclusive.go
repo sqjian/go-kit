@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -23,7 +22,6 @@ func newExclusivePool(cfg *Cfg) *ExclusivePool {
 		KeepAliveInterval: cfg.KeepAliveInterval,
 		CleanInterval:     cfg.CleanInterval,
 		DialRetryInterval: cfg.DialRetryInterval,
-		CreateNewInterval: cfg.CreateNewInterval,
 		Logger:            cfg.Logger,
 	}
 }
@@ -41,7 +39,6 @@ type ExclusivePool struct {
 	KeepAliveInterval time.Duration
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
-	CreateNewInterval time.Duration
 	Logger            log.API
 
 	workConnCount  int32
@@ -49,7 +46,6 @@ type ExclusivePool struct {
 	alivePool      chan interface{}
 	swapPool       chan interface{}
 	retryPool      chan int
-	sync           sync.Mutex
 	isStopped      bool
 }
 
@@ -117,12 +113,27 @@ func (p *ExclusivePool) start() {
 func (p *ExclusivePool) Get() (connection interface{}, err error) {
 
 	select {
-	case <-time.After(p.CreateNewInterval):
-		p.sync.Lock()
-		defer p.sync.Unlock()
+	case connection = <-p.alivePool:
+		{
+			p.Logger.Infof("addr:%v => Get new connection from alive pool.", p.Address)
+			atomic.AddInt32(&p.workConnCount, 1)
+			return
+		}
+	case connection = <-p.swapPool:
+		{
+			p.Logger.Infof("addr:%v => Get new connection from swap pool.", p.Address)
+			atomic.AddInt32(&p.workConnCount, 1)
+			return
+		}
+	default:
+		{
+			p.Logger.Warnf("addr:%v => Get new connection from new create.", p.Address)
 
-		p.Logger.Warnf("addr:%v => Get new connection from new create.", p.Address)
-		if int(p.workConnCount)+len(p.retryPool)+len(p.alivePool)+len(p.swapPool) < p.MaxPoolSize {
+			if int(p.workConnCount)+len(p.retryPool)+len(p.alivePool)+len(p.swapPool) >= p.MaxPoolSize {
+				p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.",
+					p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
+				return nil, ErrWrapper(ResourceExhausted, fmt.Sprintf("addr:%v", p.Address))
+			}
 
 			retry := 0
 			for retry < p.DialRetryCount {
@@ -144,27 +155,13 @@ func (p *ExclusivePool) Get() (connection interface{}, err error) {
 				p.retryPool <- 0
 				return nil, err
 			}
-		} else {
-			p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.",
-				p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
-			return nil, ErrWrapper(ResourceExhausted, fmt.Sprintf("addr:%v", p.Address))
 		}
-	case connection = <-p.alivePool:
-		p.Logger.Infof("addr:%v => Get new connection from alive pool.", p.Address)
-		atomic.AddInt32(&p.workConnCount, 1)
-		return
-	case connection = <-p.swapPool:
-		p.Logger.Infof("addr:%v => Get new connection from swap pool.", p.Address)
-		atomic.AddInt32(&p.workConnCount, 1)
-		return
 	}
 
 	return nil, ErrWrapper(GetConnTimeout)
 }
 
 func (p *ExclusivePool) Put(connection interface{}) (err error) {
-
-	p.sync.Lock()
 
 	if connection != nil {
 		if p.isStopped {
@@ -181,13 +178,11 @@ func (p *ExclusivePool) Put(connection interface{}) (err error) {
 	}
 
 	atomic.SwapInt32(&p.workConnCount, p.workConnCount-1)
-	p.sync.Unlock()
 
 	return
 }
 
 func (p *ExclusivePool) Release() {
-	p.sync.Lock()
 	p.isStopped = true
 
 	for connection := range p.alivePool {
@@ -196,8 +191,6 @@ func (p *ExclusivePool) Release() {
 		}
 		atomic.SwapInt32(&p.workConnCount, p.workConnCount-1)
 	}
-
-	p.sync.Unlock()
 }
 
 func (p *ExclusivePool) retryLoop() {
