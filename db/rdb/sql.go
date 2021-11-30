@@ -22,27 +22,12 @@ func NewRdb(dbType Type, opts ...Option) (*rdb, error) {
 
 	rdbInst := &rdb{meta: meta}
 
-	switch dbType {
-	case Mysql:
-		{
-			db, dbErr := NewMysqlDb(meta)
-			if dbErr != nil {
-				return nil, dbErr
-			}
-			rdbInst.db = db
+	{
+		db, dbErr := newDb(dbType, meta)
+		if dbErr != nil {
+			return nil, dbErr
 		}
-	case Sqlite:
-		{
-			db, dbErr := NewSqliteDb(meta)
-			if dbErr != nil {
-				return nil, dbErr
-			}
-			rdbInst.db = db
-		}
-	default:
-		{
-			return nil, ErrWrapper(IllegalParams)
-		}
+		rdbInst.db = db
 	}
 
 	{
@@ -149,14 +134,24 @@ func (r *rdb) transaction(ctx context.Context, query string, args ...interface{}
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>txErr:%v", ctx.Value("id"), txErr)
 		return 0, txErr
 	}
-	defer tx.Rollback()
+	defer func(tx *sql.Tx) {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			r.meta.Logger.Errorf("id:%v,fn:transaction=>rollbackErr:%v", ctx.Value("id"), rollbackErr)
+		}
+	}(tx)
 
 	stmt, stmtErr := tx.PrepareContext(ctx, query)
 	if stmtErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>stmtErr:%v", ctx.Value("id"), stmtErr)
 		return 0, stmtErr
 	}
-	defer stmt.Close()
+	defer func(stmt *sql.Stmt) {
+		stmtCloseErr := stmt.Close()
+		if stmtCloseErr != nil {
+			r.meta.Logger.Errorf("id:%v,fn:transaction=>stmtCloseErr:%v", ctx.Value("id"), stmtCloseErr)
+		}
+	}(stmt)
 
 	execRst, execErr := stmt.ExecContext(ctx)
 	if execErr != nil {
@@ -175,7 +170,7 @@ func (r *rdb) transaction(ctx context.Context, query string, args ...interface{}
 func (r *rdb) Delete(ctx context.Context, table string, where map[string]interface{}) (int64, error) {
 	if where == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Delete=>nil where", ctx.Value("id"))
-		return 0, ErrWrapper(IllegalParams)
+		return 0, errWrapper(IllegalParams)
 	}
 
 	rawSql := func() string {
@@ -194,7 +189,7 @@ func (r *rdb) Delete(ctx context.Context, table string, where map[string]interfa
 func (r *rdb) Insert(ctx context.Context, table string, data map[string]interface{}) (int64, error) {
 	if data == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Insert=>nil data", ctx.Value("id"))
-		return 0, ErrWrapper(IllegalParams)
+		return 0, errWrapper(IllegalParams)
 	}
 
 	rawSql := func() string {
@@ -215,11 +210,11 @@ func (r *rdb) Insert(ctx context.Context, table string, data map[string]interfac
 func (r *rdb) Update(ctx context.Context, table string, data map[string]interface{}, where map[string]interface{}) (int64, error) {
 	if data == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Update=>nil data", ctx.Value("id"))
-		return 0, ErrWrapper(IllegalParams)
+		return 0, errWrapper(IllegalParams)
 	}
 	if where == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Update=>nil where", ctx.Value("id"))
-		return 0, ErrWrapper(IllegalParams)
+		return 0, errWrapper(IllegalParams)
 	}
 
 	rawSql := func() string {

@@ -28,7 +28,7 @@ func Test_Query(t *testing.T) {
 
 	t.Log(rdb.Query(ctx, "test", nil))
 	t.Log(rdb.Query(ctx, "test", map[string]interface{}{"column_1": 1}))
-	t.Log(rdb.Query(ctx, "test", map[string]interface{}{"2": 1}))
+	t.Log(rdb.Query(ctx, "test", map[string]interface{}{"tah2": 1}))
 }
 
 func Test_Insert(t *testing.T) {
