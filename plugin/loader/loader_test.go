@@ -3,8 +3,8 @@ package loader
 import (
 	"github.com/spf13/viper"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/plugin/preset/go_native/enter"
-	"github.com/sqjian/go-kit/plugin/preset/go_native/leave"
+	"github.com/sqjian/go-kit/plugin/loader/internal/go_native/enter"
+	"github.com/sqjian/go-kit/plugin/loader/internal/go_native/leave"
 	"testing"
 )
 

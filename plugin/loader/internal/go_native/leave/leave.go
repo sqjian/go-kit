@@ -20,21 +20,21 @@ func (l *leave) FInit() error {
 	l.logger.Infof("%v FInit...\n", l.Name())
 	return nil
 }
-func (l *leave) Interest(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (l *leave) Interest(*proto.Msg, schema.PluginTools) (schema.Action, error) {
 	return schema.CONTINUE, nil
 }
 
-func (l *leave) PreProcess(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (l *leave) PreProcess(msg *proto.Msg, _ schema.PluginTools) (schema.Action, error) {
 	l.logger.Infof("leave PreProcess msg:%v\n", msg.String())
 	return schema.CONTINUE, nil
 }
 
-func (l *leave) Process(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (l *leave) Process(msg *proto.Msg, _ schema.PluginTools) (schema.Action, error) {
 	l.logger.Infof("leave Process msg:%v\n", msg.String())
 	return schema.CONTINUE, nil
 }
 
-func (l *leave) PostProcess(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (l *leave) PostProcess(msg *proto.Msg, _ schema.PluginTools) (schema.Action, error) {
 	l.logger.Infof("leave PostProcess msg:%v\n", msg.String())
 	return schema.CONTINUE, nil
 }

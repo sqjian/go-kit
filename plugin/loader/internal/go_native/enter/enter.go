@@ -20,21 +20,21 @@ func (e *enter) FInit() error {
 	e.logger.Infof("%v FInit...\n", e.Name())
 	return nil
 }
-func (e *enter) Interest(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (e *enter) Interest(*proto.Msg, schema.PluginTools) (schema.Action, error) {
 	return schema.CONTINUE, nil
 }
 
-func (e *enter) PreProcess(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (e *enter) PreProcess(msg *proto.Msg, _ schema.PluginTools) (schema.Action, error) {
 	e.logger.Infof("enter PreProcess msg:%v\n", msg.String())
 	return schema.CONTINUE, nil
 }
 
-func (e *enter) Process(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (e *enter) Process(msg *proto.Msg, _ schema.PluginTools) (schema.Action, error) {
 	e.logger.Infof("enter Process msg:%v\n", msg.String())
 	return schema.CONTINUE, nil
 }
 
-func (e *enter) PostProcess(msg *proto.Msg, tools schema.PluginTools) (schema.Action, error) {
+func (e *enter) PostProcess(msg *proto.Msg, _ schema.PluginTools) (schema.Action, error) {
 	e.logger.Infof("enter PostProcess msg:%v\n", msg.String())
 	return schema.CONTINUE, nil
 }
