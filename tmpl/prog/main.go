@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/sqjian/go-kit/splash"
-	"github.com/sqjian/go-kit/template/prog/cmd"
+	"github.com/sqjian/go-kit/tmpl/prog/cmd"
 )
 
 var (

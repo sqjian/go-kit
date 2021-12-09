@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/template/grpc/idl"
+	"github.com/sqjian/go-kit/tmpl/grpc/idl"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
