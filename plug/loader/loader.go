@@ -3,7 +3,7 @@ package loader
 import (
 	"github.com/spf13/viper"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/plugin/schema"
+	"github.com/sqjian/go-kit/plug/schema"
 	"sync"
 )
 
@@ -18,7 +18,10 @@ type Loader struct {
 	logger log.API
 }
 
-func NewLoader(cfg *Cfg) schema.Loader {
+func NewLoader(fn func(*Cfg)) *Loader {
+	cfg := &Cfg{}
+	fn(cfg)
+
 	return &Loader{viper: cfg.Viper, logger: cfg.Logger}
 }
 
@@ -30,21 +33,23 @@ func (l *Loader) FInit() error {
 	return nil
 }
 
-func (l *Loader) Load(pluginGenerators ...schema.NewPlugin) ([]schema.Plugin, error) {
+func (l *Loader) Load(pluginGenerators ...schema.NewPlug) ([]schema.Plug, error) {
 	l.Lock()
 	defer l.Unlock()
 
-	var plugins []schema.Plugin
+	var plugins []schema.Plug
 
 	{
 		for _, pluginGenerator := range pluginGenerators {
-			plugin, pluginErr := pluginGenerator(&schema.Cfg{Viper: l.viper, Logger: l.logger})
+			plugin, pluginErr := pluginGenerator(func(cfg *schema.Cfg) {
+				cfg.Viper = l.viper
+				cfg.Logger = l.logger
+			})
 			if pluginErr != nil {
 				return plugins, pluginErr
 			}
 			plugins = append(plugins, plugin)
 		}
-
 	}
 
 	{

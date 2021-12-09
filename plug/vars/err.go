@@ -11,6 +11,6 @@ func ErrWrapper(err Err, ps ...string) error {
 
 const (
 	UnknownErrCode       Err = iota
-	PluginMethodNotFound     // NewPlugin not found in plugin
+	PluginMethodNotFound     // NewPlugin not found in plug
 	ServerMethodNotFound     // NewServer not found in acceptor
 )

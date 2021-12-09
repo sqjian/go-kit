@@ -60,7 +60,7 @@ func (l *zapLogger) init() (err error) {
 		}
 	}()
 
-	userPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+	userFilePriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 		if l.meta.Level == Dummy {
 			return false
 		}
@@ -88,6 +88,9 @@ func (l *zapLogger) init() (err error) {
 				}
 			}
 		}()
+	})
+	userConsolePriority := zap.LevelEnablerFunc(func(_ zapcore.Level) bool {
+		return true
 	})
 
 	fileLogRotateUserWriter := zapcore.AddSync(&lumberjack.Logger{
@@ -118,14 +121,14 @@ func (l *zapLogger) init() (err error) {
 	case l.meta.Console:
 		{
 			core = zapcore.NewTee(
-				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userPriority),
-				zapcore.NewCore(presetEncoder, consoleWriter, userPriority),
+				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userFilePriority),
+				zapcore.NewCore(presetEncoder, consoleWriter, userConsolePriority),
 			)
 		}
 	default:
 		{
 			core = zapcore.NewTee(
-				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userPriority),
+				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userFilePriority),
 			)
 		}
 	}

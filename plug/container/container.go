@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/plugin/schema"
+	"github.com/sqjian/go-kit/plug/schema"
 	"sync"
 )
 
@@ -17,11 +17,14 @@ type Container struct {
 	sync.RWMutex
 	viper   *viper.Viper
 	logger  log.API
-	plugins []schema.Plugin
+	plugins []schema.Plug
 }
 
-func NewContainer(cfg *Cfg) Container {
-	return Container{viper: cfg.Viper, logger: cfg.Logger}
+func NewContainer(fn func(*Cfg)) *Container {
+	cfg := &Cfg{}
+	fn(cfg)
+
+	return &Container{viper: cfg.Viper, logger: cfg.Logger}
 }
 func (p *Container) Init() error {
 	return nil
@@ -29,7 +32,7 @@ func (p *Container) Init() error {
 func (p *Container) FInit() error {
 	return nil
 }
-func (p *Container) Add(plugins []schema.Plugin) error {
+func (p *Container) Add(plugins []schema.Plug) error {
 	p.Lock()
 	defer p.Unlock()
 
@@ -66,7 +69,7 @@ func (p *Container) Remove(pluginName string) error {
 	}
 	return nil
 }
-func (p *Container) Get(pluginNames ...string) ([]schema.Plugin, error) {
+func (p *Container) Get(pluginNames ...string) ([]schema.Plug, error) {
 	if len(pluginNames) == 0 {
 		return nil, fmt.Errorf("please specify pluginNames")
 	}
@@ -74,16 +77,16 @@ func (p *Container) Get(pluginNames ...string) ([]schema.Plugin, error) {
 	p.RLock()
 	defer p.RUnlock()
 
-	pluginMap := func() map[string]schema.Plugin {
-		pluginMap := make(map[string]schema.Plugin)
+	pluginMap := func() map[string]schema.Plug {
+		pluginMap := make(map[string]schema.Plug)
 		for _, plugin := range p.plugins {
 			pluginMap[plugin.Name()] = plugin
 		}
 		return pluginMap
 	}()
 
-	plugins, pluginsErr := func() ([]schema.Plugin, error) {
-		var plugins []schema.Plugin
+	plugins, pluginsErr := func() ([]schema.Plug, error) {
+		var plugins []schema.Plug
 		for _, pluginName := range pluginNames {
 			plugin, pluginOk := pluginMap[pluginName]
 			if !pluginOk {

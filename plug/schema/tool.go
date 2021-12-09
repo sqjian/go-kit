@@ -10,7 +10,7 @@ type Buffer interface {
 	Read() []byte
 }
 
-type PluginTools interface {
+type PlugTools interface {
 	Opts
 	Buffer
 }
