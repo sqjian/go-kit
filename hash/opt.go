@@ -1,4 +1,4 @@
-package digest
+package hash
 
 type Option interface {
 	apply(*generator)

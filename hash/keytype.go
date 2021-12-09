@@ -1,4 +1,4 @@
-package digest
+package hash
 
 //go:generate stringer -type=KeyType  -linecomment
 type KeyType int

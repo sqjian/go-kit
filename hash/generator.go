@@ -1,8 +1,8 @@
-package digest
+package hash
 
 import (
-	"github.com/sqjian/go-kit/digest/provider/md5"
-	"github.com/sqjian/go-kit/digest/provider/sha1"
+	"github.com/sqjian/go-kit/hash/provider/md5"
+	"github.com/sqjian/go-kit/hash/provider/sha1"
 )
 
 type Generator interface {

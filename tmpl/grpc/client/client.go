@@ -2,7 +2,7 @@ package main
 
 import (
 	retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	"github.com/sqjian/go-kit/template/grpc/idl"
+	"github.com/sqjian/go-kit/tmpl/grpc/idl"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
