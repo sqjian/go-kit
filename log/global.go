@@ -7,7 +7,7 @@ var (
 			WithMaxSize(3),
 			WithMaxBackups(3),
 			WithMaxAge(3),
-			WithLevel(Debug),
+			WithLevel(Dummy),
 			WithConsole(true),
 		)
 		return logger
@@ -19,7 +19,7 @@ var (
 			WithMaxBackups(3),
 			WithMaxAge(3),
 			WithLevel(Dummy),
-			WithConsole(true),
+			WithConsole(false),
 		)
 		return logger
 	}()

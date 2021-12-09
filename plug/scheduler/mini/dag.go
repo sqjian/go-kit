@@ -1,4 +1,4 @@
-package minimal
+package mini
 
 type Dag struct {
 	Id    string

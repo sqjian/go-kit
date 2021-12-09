@@ -5,17 +5,17 @@ import (
 	"github.com/sqjian/go-kit/log"
 )
 
-var NewPluginObj NewPlugin
+var NewPlugObj NewPlug
 
 type Cfg struct {
 	Viper  *viper.Viper
 	Logger log.API
 }
 
-type NewPlugin = func(*Cfg) (Plugin, error)
+type NewPlug = func(func(*Cfg)) (Plug, error)
 
 type Loader interface {
 	Init() error
 	FInit() error
-	Load(...NewPlugin) ([]Plugin, error)
+	Load(...NewPlug) ([]Plug, error)
 }

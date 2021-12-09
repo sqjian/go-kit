@@ -2,36 +2,36 @@ package loader
 
 import (
 	"fmt"
-	"github.com/sqjian/go-kit/plugin/schema"
-	"github.com/sqjian/go-kit/plugin/vars"
+	"github.com/sqjian/go-kit/plug/schema"
+	"github.com/sqjian/go-kit/plug/vars"
 	"plugin"
 	"strings"
 )
 
-func openGoPlugin(pluginNames ...string) ([]schema.NewPlugin, error) {
+func openGoPlugin(pluginNames ...string) ([]schema.NewPlug, error) {
 	reWritePluginName := func(pluginName string) string {
 		if strings.HasSuffix(pluginName, ".so") {
 			return pluginName
 		}
 		return pluginName + ".so"
 	}
-	verify := func(pluginName string) (schema.NewPlugin, error) {
+	verify := func(pluginName string) (schema.NewPlug, error) {
 		pg, err := plugin.Open(pluginName)
 		if err != nil {
-			return nil, fmt.Errorf("can not open plugin: %v,err:%w", pluginName, err)
+			return nil, fmt.Errorf("can not open plug: %v,err:%w", pluginName, err)
 		}
 
-		f, err := pg.Lookup("NewPlugin")
+		f, err := pg.Lookup("NewPlug")
 		if err != nil {
-			return nil, fmt.Errorf("lookup plugin: %v failed,err:%w", pluginName, err)
+			return nil, fmt.Errorf("lookup plug: %v failed,err:%w", pluginName, err)
 		}
-		NewPlugin, NewPluginOk := f.(schema.NewPlugin)
+		NewPlugin, NewPluginOk := f.(schema.NewPlug)
 		if !NewPluginOk {
-			return nil, fmt.Errorf("%v->convert %T to %T failed,err:%w", pluginName, f, schema.NewPluginObj, vars.ErrWrapper(vars.PluginMethodNotFound))
+			return nil, fmt.Errorf("%v->convert %T to %T failed,err:%w", pluginName, f, schema.NewPlugObj, vars.ErrWrapper(vars.PluginMethodNotFound))
 		}
 		return NewPlugin, nil
 	}
-	load := func(pluginNames ...string) ([]schema.NewPlugin, error) {
+	load := func(pluginNames ...string) ([]schema.NewPlug, error) {
 		if len(pluginNames) == 0 || func() bool {
 			for _, pluginName := range pluginNames {
 				if len(pluginName) == 0 {
@@ -40,10 +40,10 @@ func openGoPlugin(pluginNames ...string) ([]schema.NewPlugin, error) {
 			}
 			return false
 		}() {
-			return nil, fmt.Errorf("can't load plugin, please specify pluginNames")
+			return nil, fmt.Errorf("can't load plug, please specify pluginNames")
 		}
 
-		var NewPlugins []schema.NewPlugin
+		var NewPlugins []schema.NewPlug
 		for _, pluginName := range pluginNames {
 			NewPlugin, NewPluginErr := verify(reWritePluginName(pluginName))
 			if NewPluginErr != nil {
