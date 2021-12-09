@@ -74,6 +74,26 @@ func (p *Container) Get(pluginNames ...string) ([]schema.Plug, error) {
 		return nil, fmt.Errorf("please specify pluginNames")
 	}
 
+	{
+		checkRepeatAdd := func(pluginName string) bool {
+			cnt := 0
+			for _, plugin := range pluginNames {
+				if plugin == pluginName {
+					cnt++
+				}
+			}
+			if cnt > 1 {
+				return true
+			}
+			return false
+		}
+		for _, plugName := range pluginNames {
+			if checkRepeatAdd(plugName) {
+				return nil, fmt.Errorf("plug:%v repeat added, all plugs:%v", plugName, pluginNames)
+			}
+		}
+	}
+
 	p.RLock()
 	defer p.RUnlock()
 

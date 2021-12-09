@@ -45,7 +45,7 @@ func (l *leave) PostProcess(msg *proto.Msg, plugTools schema.PlugTools) (schema.
 func (l *leave) Name() string {
 	return "leave"
 }
-func NewPlugin(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
+func NewPlug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 	cfg := &schema.Cfg{}
 	fn(cfg)
 

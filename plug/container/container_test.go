@@ -35,7 +35,7 @@ func Test_Container(t *testing.T) {
 	}()
 
 	{
-		plugins, pluginsErr := l.Load(enter.NewPlugin, leave.NewPlugin)
+		plugins, pluginsErr := l.Load(enter.NewPlug, leave.NewPlug)
 		if pluginsErr != nil {
 			t.Fatal(pluginsErr)
 		}

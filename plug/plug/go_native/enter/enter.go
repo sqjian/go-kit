@@ -46,7 +46,7 @@ func (e *enter) Name() string {
 	return "enter"
 }
 
-func NewPlugin(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
+func NewPlug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 	cfg := &schema.Cfg{}
 	fn(cfg)
 
