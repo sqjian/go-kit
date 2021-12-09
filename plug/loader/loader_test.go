@@ -16,7 +16,7 @@ func Test_Loader(t *testing.T) {
 	if err := loader.Init(); err != nil {
 		t.Fatal(err)
 	}
-	plugins, pluginsErr := loader.Load(enter.NewPlugin, leave.NewPlugin)
+	plugins, pluginsErr := loader.Load(enter.NewPlug, leave.NewPlug)
 	if pluginsErr != nil {
 		t.Fatal(pluginsErr)
 	}
