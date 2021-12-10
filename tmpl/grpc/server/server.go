@@ -39,13 +39,11 @@ func auth(ctx context.Context) error {
 	return nil
 }
 
-// interceptor 拦截器
 func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	err := auth(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// 继续处理请求
 	return handler(ctx, req)
 }
 
@@ -54,11 +52,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	var opts []grpc.ServerOption
 	opts = append(opts, grpc.UnaryInterceptor(interceptor))
+
 	s := grpc.NewServer(opts...)
 	idl.RegisterGreeterServer(s, &server{})
 	reflection.Register(s)
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
