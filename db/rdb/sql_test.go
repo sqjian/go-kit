@@ -8,109 +8,67 @@ import (
 	"time"
 )
 
-func Test_Query(t *testing.T) {
-	checkErr := func(err error) {
-		if err != nil {
-			panic(err)
-		}
-	}
+var db *rdb.Rdb
 
-	rdb, rdbErr := rdb.NewRdb(
-		rdb.Sqlite,
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func init() {
+	_db, dbErr := rdb.NewRdb(
+		rdb.Mysql,
+		rdb.WithIp("182.92.1.35"),
+		rdb.WithPort("3306"),
+		rdb.WithUserName("root"),
+		rdb.WithPassWord("xylx1.t!@#"),
 		rdb.WithMaxLifeTime(time.Second),
-		rdb.WithMaxIdleConns(10),
-		rdb.WithDbName("sqlite"),
+		rdb.WithMaxIdleConns(3),
+		rdb.WithDbName("test"),
 		rdb.WithLogger(log.DebugLogger),
 	)
-	checkErr(rdbErr)
+	checkErr(dbErr)
 
+	db = _db
+}
+func Test_MysqlQuery(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "id", 1)
 
-	t.Log(rdb.Query(ctx, "test", nil))
-	t.Log(rdb.Query(ctx, "test", map[string]interface{}{"column_1": 1}))
-	t.Log(rdb.Query(ctx, "test", map[string]interface{}{"tah2": 1}))
+	t.Log(db.Query(ctx, "test", nil))
+	t.Log(db.Query(ctx, "test", map[string]interface{}{"t1": 1}))
+	t.Log(db.Query(ctx, "test", map[string]interface{}{"t2": 1}))
 }
 
 func Test_Insert(t *testing.T) {
-	checkErr := func(err error) {
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	rdb, rdbErr := rdb.NewRdb(
-		rdb.Sqlite,
-		rdb.WithMaxLifeTime(time.Second),
-		rdb.WithMaxIdleConns(10),
-		rdb.WithDbName("sqlite"),
-		rdb.WithLogger(log.DebugLogger),
-	)
-	checkErr(rdbErr)
-
 	ctx := context.WithValue(context.Background(), "id", 1)
 
-	t.Log(rdb.Insert(ctx, "test", map[string]interface{}{"column_1": 1}))
-}
-
-func Test_BatchInsert(t *testing.T) {
-	checkErr := func(err error) {
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	rdb, rdbErr := rdb.NewRdb(
-		rdb.Sqlite,
-		rdb.WithMaxLifeTime(time.Second),
-		rdb.WithMaxIdleConns(10),
-		rdb.WithDbName("sqlite"),
-		rdb.WithLogger(log.DebugLogger),
-	)
-	checkErr(rdbErr)
-
-	ctx := context.WithValue(context.Background(), "id", 1)
-
-	t.Log(rdb.Insert(ctx, "test", map[string]interface{}{"column_1": 1}))
+	t.Log(db.Insert(ctx, "test", map[string]interface{}{"t1": 1}))
+	t.Log(db.Insert(ctx, "test", map[string]interface{}{"t2": 1}))
 }
 
 func Test_Update(t *testing.T) {
-	checkErr := func(err error) {
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	rdb, rdbErr := rdb.NewRdb(
-		rdb.Sqlite,
-		rdb.WithMaxLifeTime(time.Second),
-		rdb.WithMaxIdleConns(10),
-		rdb.WithDbName("sqlite"),
-		rdb.WithLogger(log.DebugLogger),
-	)
-	checkErr(rdbErr)
-
 	ctx := context.WithValue(context.Background(), "id", 1)
 
-	t.Log(rdb.Update(ctx, "test", map[string]interface{}{"column_1": 5}, map[string]interface{}{"column_1": 1}))
+	t.Log(db.Update(ctx, "test", map[string]interface{}{"t1": 5}, map[string]interface{}{"t1": 1}))
 }
 
 func Test_Delete(t *testing.T) {
-	checkErr := func(err error) {
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	rdb, rdbErr := rdb.NewRdb(
-		rdb.Sqlite,
-		rdb.WithMaxLifeTime(time.Second),
-		rdb.WithMaxIdleConns(10),
-		rdb.WithDbName("sqlite"),
-		rdb.WithLogger(log.DebugLogger),
-	)
-	checkErr(rdbErr)
-
 	ctx := context.Background()
 
-	t.Log(rdb.Delete(ctx, "test", map[string]interface{}{"column_1": 1}))
+	t.Log(db.Delete(ctx, "test", map[string]interface{}{"t2": 1}))
+}
+
+func Test_RawSql(t *testing.T) {
+	ctx := context.WithValue(context.Background(), "id", 1)
+
+	_, err := db.RawSql(
+		ctx,
+		"INSERT INTO test (`t1`) VALUES (1)",
+		"INSERT INTO test (`t2`) VALUES (1)",
+		"INSERT INTO test (`t3`) VALUES (1)",
+		"INSERT INTO test (`t4`) VALUES (1)",
+		"INSERT INTO test (`t5`) VALUES (1)",
+	)
+	checkErr(err)
 }

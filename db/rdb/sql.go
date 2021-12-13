@@ -8,19 +8,19 @@ import (
 	"strings"
 )
 
-type rdb struct {
+type Rdb struct {
 	meta *Meta
 
 	db *sql.DB
 }
 
-func NewRdb(dbType Type, opts ...Option) (*rdb, error) {
-	meta := newDefaultMeta()
+func NewRdb(dbType Type, opts ...Option) (*Rdb, error) {
+	meta := newMeta()
 	for _, opt := range opts {
 		opt.apply(meta)
 	}
 
-	rdbInst := &rdb{meta: meta}
+	rdbInst := &Rdb{meta: meta}
 
 	{
 		db, dbErr := newDb(dbType, meta)
@@ -45,7 +45,7 @@ func NewRdb(dbType Type, opts ...Option) (*rdb, error) {
 	return rdbInst, nil
 }
 
-func (r *rdb) columns(ctx context.Context, table string) ([]string, error) {
+func (r *Rdb) columns(ctx context.Context, table string) ([]string, error) {
 	rawSql := fmt.Sprintf("SELECT * FROM %v WHERE 1 = 0", table)
 	r.meta.Logger.Debugf("id:%v,fn:columns=>rawSql:%v", ctx.Value("id"), rawSql)
 
@@ -57,7 +57,7 @@ func (r *rdb) columns(ctx context.Context, table string) ([]string, error) {
 	return rows.Columns()
 }
 
-func (r *rdb) Query(ctx context.Context, table string, where map[string]interface{}) ([]map[string]interface{}, error) {
+func (r *Rdb) Query(ctx context.Context, table string, where map[string]interface{}) ([]map[string]interface{}, error) {
 
 	if where == nil {
 		return nil, fmt.Errorf("nil where")
@@ -82,12 +82,12 @@ func (r *rdb) Query(ctx context.Context, table string, where map[string]interfac
 	}
 
 	rawSql := func() string {
-		s := fmt.Sprintf("SELECT * FROM %v ", table)
+		s := fmt.Sprintf("SELECT * FROM %v", table)
 		var w []string
 		for k, v := range where {
 			w = append(w, fmt.Sprintf("%v = %#v", k, v))
 		}
-		s = s + "WHERE " + strings.Join(w, " AND ")
+		s = s + " WHERE " + strings.Join(w, " AND ")
 		return s
 	}()
 	r.meta.Logger.Debugf("id:%v,fn:query=>rawSql:%v", ctx.Value("id"), rawSql)
@@ -126,64 +126,69 @@ func (r *rdb) Query(ctx context.Context, table string, where map[string]interfac
 	return list, nil
 }
 
-func (r *rdb) transaction(ctx context.Context, query string, args ...interface{}) (int64, error) {
-	r.meta.Logger.Debugf("id:%v,fn:transaction=>query:%v,args:%v", ctx.Value("id"), query, args)
+func (r *Rdb) RawSql(ctx context.Context, rawSql ...string) (map[string]int64, error) {
+	return r.transaction(ctx, rawSql...)
+}
 
-	tx, txErr := r.db.Begin()
+func (r *Rdb) transaction(ctx context.Context, instructs ...string) (map[string]int64, error) {
+	r.meta.Logger.Debugf("id:%v,fn:transaction=>instructs:%v", ctx.Value("id"), instructs)
+
+	tx, txErr := r.db.BeginTx(ctx, nil)
 	if txErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>txErr:%v", ctx.Value("id"), txErr)
-		return 0, txErr
+		return nil, txErr
 	}
 
-	stmt, stmtErr := tx.PrepareContext(ctx, query)
-	if stmtErr != nil {
-		r.meta.Logger.Errorf("id:%v,fn:transaction=>stmtErr:%v", ctx.Value("id"), stmtErr)
-		return 0, stmtErr
-	}
-	defer func(stmt *sql.Stmt) {
-		stmtCloseErr := stmt.Close()
-		if stmtCloseErr != nil {
-			r.meta.Logger.Errorf("id:%v,fn:transaction=>stmtCloseErr:%v", ctx.Value("id"), stmtCloseErr)
+	var affectedRows = make(map[string]int64)
+
+	for _, instruct := range instructs {
+		execRst, execErr := tx.ExecContext(ctx, instruct)
+		if execErr == nil {
+			affected, _ := execRst.RowsAffected()
+			affectedRows[instruct] = affected
+			continue
 		}
-	}(stmt)
-
-	execRst, execErr := stmt.ExecContext(ctx)
-	if execErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>execErr:%v", ctx.Value("id"), execErr)
-		return 0, execErr
+
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			r.meta.Logger.Errorf("id:%v,fn:transaction=>rollbackErr:%v", ctx.Value("id"), rollbackErr)
+			return affectedRows, rollbackErr
+		}
 	}
 
 	commitErr := tx.Commit()
 	if commitErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>commitErr:%v", ctx.Value("id"), commitErr)
-		return 0, commitErr
+		return affectedRows, commitErr
 	}
 
-	return execRst.RowsAffected()
+	return affectedRows, nil
 }
-func (r *rdb) Delete(ctx context.Context, table string, where map[string]interface{}) (int64, error) {
+
+func (r *Rdb) Delete(ctx context.Context, table string, where map[string]interface{}) (map[string]int64, error) {
 	if where == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Delete=>nil where", ctx.Value("id"))
-		return 0, errWrapper(IllegalParams)
+		return nil, errWrapper(IllegalParams)
 	}
 
 	rawSql := func() string {
-		s := fmt.Sprintf("DELETE FROM %v WHERE ", table)
+		s := fmt.Sprintf("DELETE FROM %v", table)
 		var w []string
 		for k, v := range where {
 			w = append(w, fmt.Sprintf("%v = %#v", k, v))
 		}
-		s += strings.Join(w, " AND ")
+		s = s + " WHERE " + strings.Join(w, " AND ")
 		return s
 	}()
 
 	return r.transaction(ctx, rawSql)
 }
 
-func (r *rdb) Insert(ctx context.Context, table string, data map[string]interface{}) (int64, error) {
+func (r *Rdb) Insert(ctx context.Context, table string, data map[string]interface{}) (map[string]int64, error) {
 	if data == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Insert=>nil data", ctx.Value("id"))
-		return 0, errWrapper(IllegalParams)
+		return nil, errWrapper(IllegalParams)
 	}
 
 	rawSql := func() string {
@@ -201,14 +206,14 @@ func (r *rdb) Insert(ctx context.Context, table string, data map[string]interfac
 	return r.transaction(ctx, rawSql)
 }
 
-func (r *rdb) Update(ctx context.Context, table string, data map[string]interface{}, where map[string]interface{}) (int64, error) {
+func (r *Rdb) Update(ctx context.Context, table string, data map[string]interface{}, where map[string]interface{}) (map[string]int64, error) {
 	if data == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Update=>nil data", ctx.Value("id"))
-		return 0, errWrapper(IllegalParams)
+		return nil, errWrapper(IllegalParams)
 	}
 	if where == nil {
 		r.meta.Logger.Errorf("id:%v,fn:Update=>nil where", ctx.Value("id"))
-		return 0, errWrapper(IllegalParams)
+		return nil, errWrapper(IllegalParams)
 	}
 
 	rawSql := func() string {

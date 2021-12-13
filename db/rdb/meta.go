@@ -24,13 +24,12 @@ func newDefaultMeta() *Meta {
 	}
 }
 
-func NewMeta(opts ...Option) {
+func newMeta(opts ...Option) *Meta {
 
 	meta := newDefaultMeta()
 
 	for _, opt := range opts {
 		opt.apply(meta)
 	}
-
-	panic("IMPL")
+	return meta
 }
