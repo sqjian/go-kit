@@ -230,7 +230,7 @@ func (r *rdb) Update(ctx context.Context, table string, data map[string]interfac
 		for whereKey, whereVal := range where {
 			whereKvs = append(whereKvs, fmt.Sprintf("%v=%#v", whereKey, whereVal))
 		}
-		s = fmt.Sprintf("%v WHERE %v ", s, strings.Join(whereKvs, ","))
+		s = fmt.Sprintf("%v WHERE %v ", s, strings.Join(whereKvs, " AND "))
 		return s
 	}()
 
