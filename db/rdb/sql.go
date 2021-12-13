@@ -134,12 +134,6 @@ func (r *rdb) transaction(ctx context.Context, query string, args ...interface{}
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>txErr:%v", ctx.Value("id"), txErr)
 		return 0, txErr
 	}
-	defer func(tx *sql.Tx) {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			r.meta.Logger.Errorf("id:%v,fn:transaction=>rollbackErr:%v", ctx.Value("id"), rollbackErr)
-		}
-	}(tx)
 
 	stmt, stmtErr := tx.PrepareContext(ctx, query)
 	if stmtErr != nil {
