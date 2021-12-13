@@ -85,7 +85,7 @@ func (r *rdb) Query(ctx context.Context, table string, where map[string]interfac
 		s := fmt.Sprintf("SELECT * FROM %v ", table)
 		var w []string
 		for k, v := range where {
-			w = append(w, fmt.Sprintf("%v = %v", k, v))
+			w = append(w, fmt.Sprintf("%v = %#v", k, v))
 		}
 		s = s + "WHERE " + strings.Join(w, " AND ")
 		return s
