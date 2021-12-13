@@ -177,7 +177,7 @@ func (r *rdb) Delete(ctx context.Context, table string, where map[string]interfa
 		s := fmt.Sprintf("DELETE FROM %v WHERE ", table)
 		var w []string
 		for k, v := range where {
-			w = append(w, fmt.Sprintf("%v = %v", k, v))
+			w = append(w, fmt.Sprintf("%v = %#v", k, v))
 		}
 		s += strings.Join(w, " AND ")
 		return s
@@ -222,13 +222,13 @@ func (r *rdb) Update(ctx context.Context, table string, data map[string]interfac
 
 		var dataKvs []string
 		for dataKey, dataVal := range data {
-			dataKvs = append(dataKvs, fmt.Sprintf("%v=%v", dataKey, dataVal))
+			dataKvs = append(dataKvs, fmt.Sprintf("%v=%#v", dataKey, dataVal))
 		}
 		s = fmt.Sprintf("%v SET %v ", s, strings.Join(dataKvs, ","))
 
 		var whereKvs []string
 		for whereKey, whereVal := range where {
-			whereKvs = append(whereKvs, fmt.Sprintf("%v=%v", whereKey, whereVal))
+			whereKvs = append(whereKvs, fmt.Sprintf("%v=%#v", whereKey, whereVal))
 		}
 		s = fmt.Sprintf("%v WHERE %v ", s, strings.Join(whereKvs, ","))
 		return s
