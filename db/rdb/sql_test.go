@@ -32,12 +32,10 @@ func init() {
 
 	db = _db
 }
+
 func Test_MysqlQuery(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "id", 1)
-
-	t.Log(db.Query(ctx, "test", nil))
-	t.Log(db.Query(ctx, "test", map[string]interface{}{"t1": 1}))
-	t.Log(db.Query(ctx, "test", map[string]interface{}{"t2": 1}))
+	t.Log(db.Query(ctx, []string{"test"}, nil))
 }
 
 func Test_Insert(t *testing.T) {
@@ -57,18 +55,4 @@ func Test_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	t.Log(db.Delete(ctx, "test", map[string]interface{}{"t2": 1}))
-}
-
-func Test_RawSql(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "id", 1)
-
-	_, err := db.RawSql(
-		ctx,
-		"INSERT INTO test (`t1`) VALUES (1)",
-		"INSERT INTO test (`t2`) VALUES (1)",
-		"INSERT INTO test (`t3`) VALUES (1)",
-		"INSERT INTO test (`t4`) VALUES (1)",
-		"INSERT INTO test (`t5`) VALUES (1)",
-	)
-	checkErr(err)
 }
