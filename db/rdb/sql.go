@@ -97,7 +97,7 @@ func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc
 		}
 	}
 
-	instruct, instructErr := genQuerySql(table, sqlOpt.column, sqlOpt.where, sqlOpt.group, sqlOpt.limit.start, sqlOpt.limit.end)
+	instruct, instructErr := genQuerySql(table, sqlOpt.column, sqlOpt.where, sqlOpt.filter.offset, sqlOpt.filter.limit)
 	r.meta.Logger.Debugf("id:%v,fn:query=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
 	if instructErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:query=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)

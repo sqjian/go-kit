@@ -11,7 +11,7 @@ type Instruct struct {
 	Args []interface{}
 }
 
-func NewInstruct(sql sqrl.Sqlizer) (*Instruct, error) {
+func newInstruct(sql sqrl.Sqlizer) (*Instruct, error) {
 	sqlStr, sqlArgs, sqlErr := sql.ToSql()
 	if sqlErr != nil {
 		return nil, sqlErr
@@ -27,7 +27,7 @@ func instructsToString(instructs []*Instruct) string {
 	return strings.Join(rst, ",")
 }
 
-func genQuerySql(table []string, column []string, where map[string]interface{}, group []string, offset, limit uint64) (instruct *Instruct, err error) {
+func genQuerySql(table []string, column []string, where map[string]interface{}, offset, limit uint64) (instruct *Instruct, err error) {
 
 	var sql *sqrl.SelectBuilder
 
@@ -45,13 +45,9 @@ func genQuerySql(table []string, column []string, where map[string]interface{}, 
 		sql = sql.Where(sqrl.Eq(where))
 	}
 
-	if len(group) != 0 {
-		sql = sql.GroupBy(group...)
-	}
-
 	sql = sql.Offset(offset).Limit(limit)
 
-	return NewInstruct(sql)
+	return newInstruct(sql)
 }
 
 func genInsertSql(table string, data map[string]interface{}) (instruct *Instruct, err error) {
@@ -72,7 +68,7 @@ func genInsertSql(table string, data map[string]interface{}) (instruct *Instruct
 	sql = sql.Columns(columns...)
 	sql = sql.Values(values...)
 
-	return NewInstruct(sql)
+	return newInstruct(sql)
 }
 
 func genDeleteSql(table string, where map[string]interface{}) (instruct *Instruct, err error) {
@@ -86,7 +82,7 @@ func genDeleteSql(table string, where map[string]interface{}) (instruct *Instruc
 	}
 	sql = sql.Where(where)
 
-	return NewInstruct(sql)
+	return newInstruct(sql)
 }
 
 func genUpdateSql(table string, data map[string]interface{}, where map[string]interface{}) (instruct *Instruct, err error) {
@@ -105,5 +101,5 @@ func genUpdateSql(table string, data map[string]interface{}, where map[string]in
 	}
 	sql = sql.SetMap(data)
 
-	return NewInstruct(sql)
+	return newInstruct(sql)
 }
