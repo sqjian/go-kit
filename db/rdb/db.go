@@ -1,30 +1,30 @@
 package rdb
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func newMysqlDb(m *Meta) (*sql.DB, error) {
+func newMysqlDb(m *DbMeta) (*sqlx.DB, error) {
 	path := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8", m.UserName, m.PassWord, m.IP, m.Port, m.DbName)
-	return sql.Open("mysql", path)
+	return sqlx.Open("mysql", path)
 }
 
-func newSqliteDb(m *Meta) (*sql.DB, error) {
-	return sql.Open("sqlite3", m.DbName+".db")
+func newSqliteDb(m *DbMeta) (*sqlx.DB, error) {
+	return sqlx.Open("sqlite3", m.DbName+".db")
 }
 
-func newDb(dbType Type, meta *Meta) (*sql.DB, error) {
+func newDb(dbType Type, dbMeta *DbMeta) (*sqlx.DB, error) {
 	switch dbType {
 	case Mysql:
 		{
-			return newMysqlDb(meta)
+			return newMysqlDb(dbMeta)
 		}
 	case Sqlite:
 		{
-			return newSqliteDb(meta)
+			return newSqliteDb(dbMeta)
 		}
 	default:
 		{
