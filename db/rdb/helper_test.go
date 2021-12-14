@@ -9,7 +9,6 @@ func Test_genQuerySql(t *testing.T) {
 		table  []string
 		column []string
 		where  map[string]interface{}
-		group  []string
 	}
 	tests := []struct {
 		name string
@@ -23,7 +22,6 @@ func Test_genQuerySql(t *testing.T) {
 				where: map[string]interface{}{
 					"whereKey1": "whereVal1",
 				},
-				group: []string{"group1"},
 			},
 		},
 		{
@@ -32,13 +30,12 @@ func Test_genQuerySql(t *testing.T) {
 				table:  []string{"table1"},
 				column: []string{"*"},
 				where:  nil,
-				group:  []string{"group1"},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotRst, gotErr := genQuerySql(tt.args.table, tt.args.column, tt.args.where, tt.args.group, 0, 1)
+			gotRst, gotErr := genQuerySql(tt.args.table, tt.args.column, tt.args.where, 0, 1)
 			t.Logf("gotRst:%v, gotArgs:%v", gotRst, gotErr)
 		})
 	}
