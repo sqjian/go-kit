@@ -11,8 +11,8 @@ type MetaOption interface {
 
 type metaOptionFunc func(*DbMeta)
 
-func (f metaOptionFunc) apply(log *DbMeta) {
-	f(log)
+func (f metaOptionFunc) apply(d *DbMeta) {
+	f(d)
 }
 
 func WithLogger(logger log.API) MetaOption {

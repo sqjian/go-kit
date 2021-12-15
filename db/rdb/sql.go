@@ -10,7 +10,8 @@ import (
 type Rdb struct {
 	meta *DbMeta
 
-	db *sqlx.DB
+	db          *sqlx.DB
+	placeHolder string
 }
 
 func NewRdb(dbType Type, opts ...MetaOption) (*Rdb, error) {
@@ -27,6 +28,14 @@ func NewRdb(dbType Type, opts ...MetaOption) (*Rdb, error) {
 			return nil, dbErr
 		}
 		rdbInst.db = db
+	}
+
+	{
+		placeHolder, placeHolderErr := newPlaceHolder(dbType)
+		if placeHolderErr != nil {
+			return nil, placeHolderErr
+		}
+		rdbInst.placeHolder = placeHolder
 	}
 
 	{
@@ -97,7 +106,7 @@ func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc
 		}
 	}
 
-	instruct, instructErr := genQuerySql(table, sqlOpt.column, sqlOpt.where, sqlOpt.filter.offset, sqlOpt.filter.limit)
+	instruct, instructErr := genQuerySql(table, sqlOpt.column, sqlOpt.where, sqlOpt.filter.offset, sqlOpt.filter.limit, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:query=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
 	if instructErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:query=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
@@ -187,7 +196,7 @@ func (r *Rdb) Delete(ctx context.Context, table string, where map[string]interfa
 		}
 	}
 
-	instruct, instructErr := genDeleteSql(table, where)
+	instruct, instructErr := genDeleteSql(table, where, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:delete=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
 	if instructErr != nil {
 		r.meta.Logger.Debugf("id:%v,fn:delete=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
@@ -221,7 +230,7 @@ func (r *Rdb) Insert(ctx context.Context, table string, data map[string]interfac
 		}
 	}
 
-	instruct, instructErr := genInsertSql(table, data)
+	instruct, instructErr := genInsertSql(table, data, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:insert=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
 	if instructErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:insert=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
@@ -258,7 +267,7 @@ func (r *Rdb) Update(ctx context.Context, table string, data map[string]interfac
 		}
 	}
 
-	instruct, instructErr := genUpdateSql(table, data, where)
+	instruct, instructErr := genUpdateSql(table, data, where, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:update=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
 	if instructErr != nil {
 		r.meta.Logger.Debugf("id:%v,fn:update=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)

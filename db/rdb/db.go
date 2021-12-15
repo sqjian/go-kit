@@ -32,3 +32,20 @@ func newDb(dbType Type, dbMeta *DbMeta) (*sqlx.DB, error) {
 		}
 	}
 }
+
+func newPlaceHolder(dbType Type) (string, error) {
+	switch dbType {
+	case Mysql:
+		{
+			return "?", nil
+		}
+	case Sqlite:
+		{
+			return "?", nil
+		}
+	default:
+		{
+			return "", errWrapper(IllegalParams)
+		}
+	}
+}
