@@ -75,10 +75,18 @@ func TestLoggerDummy(t *testing.T) {
 func TestDebugLogger(t *testing.T) {
 
 	{
+		fmt.Println("--------------------------------")
 		log.DebugLogger.Debugf("testing infof...")
 		log.DebugLogger.Infof("testing Infof...")
 		log.DebugLogger.Warnf("testing Warnf...")
 		log.DebugLogger.Errorf("testing Errorf...")
+	}
+	{
+		fmt.Println("--------------------------------")
+		log.Debugf("testing infof...")
+		log.Infof("testing Infof...")
+		log.Warnf("testing Warnf...")
+		log.Errorf("testing Errorf...")
 	}
 }
 
