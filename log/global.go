@@ -24,3 +24,19 @@ var (
 		return logger
 	}()
 )
+
+func Debugf(template string, args ...interface{}) {
+	DebugLogger.Debugf(template, args...)
+}
+
+func Infof(template string, args ...interface{}) {
+	DebugLogger.Infof(template, args...)
+}
+
+func Warnf(template string, args ...interface{}) {
+	DebugLogger.Warnf(template, args...)
+}
+
+func Errorf(template string, args ...interface{}) {
+	DebugLogger.Errorf(template, args...)
+}
