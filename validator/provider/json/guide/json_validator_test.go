@@ -1,4 +1,4 @@
-package json_test
+package guide_test
 
 import (
 	"github.com/sqjian/go-kit/validator"
