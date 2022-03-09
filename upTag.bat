@@ -1,4 +1,4 @@
-set tag=v0.0.42
+set tag=v0.0.43
 
 git tag -d %tag%
 git push origin :refs/tags/%tag%
