@@ -16,13 +16,13 @@ func newDefaultValidatorConfig() *validator {
 
 func NewValidator(opts ...Option) (Validator, error) {
 
-	validatorInst := newDefaultValidatorConfig()
+	configInst := newDefaultValidatorConfig()
 
 	for _, opt := range opts {
-		opt.apply(validatorInst)
+		opt.apply(configInst)
 	}
 
-	switch validatorInst.validatorType {
+	switch configInst.validatorType {
 	case Json:
 		{
 			return json.NewValidator()
