@@ -1,6 +1,7 @@
-package aes
+package aes_test
 
 import (
+	"github.com/sqjian/go-kit/enc/aes"
 	"testing"
 )
 
@@ -16,7 +17,7 @@ func TestAes(t *testing.T) {
 		{name: "test1", args: args{plainText: []byte("hello world"), key: []byte("1443flfsaWfdasds")}},
 	}
 
-	aes, _ := NewAes()
+	aes, _ := aes.NewAes()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
