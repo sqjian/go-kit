@@ -10,19 +10,20 @@ import (
 )
 
 func AesEncrypt(plainText []byte, key []byte) ([]byte, error) {
-	plainText = PKCS7Padding(plainText, aes.BlockSize)
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
+	blockSize := block.BlockSize()
+	plainText = PKCS7Padding(plainText, blockSize)
+	cipherText := make([]byte, blockSize+len(plainText))
+	iv := cipherText[:blockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
 	}
 
 	stream := cipher.NewOFB(block, iv)
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+	stream.XORKeyStream(cipherText[blockSize:], plainText)
 	return cipherText, nil
 }
 
@@ -31,9 +32,10 @@ func AesDecrypt(cipherText []byte, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	iv := cipherText[:aes.BlockSize]
-	cipherText = cipherText[aes.BlockSize:]
-	if len(cipherText)%aes.BlockSize != 0 {
+	blockSize := block.BlockSize()
+	iv := cipherText[:blockSize]
+	cipherText = cipherText[blockSize:]
+	if len(cipherText)%blockSize != 0 {
 		return nil, fmt.Errorf("cipherText is not a multiple of the block size")
 	}
 
@@ -45,17 +47,14 @@ func AesDecrypt(cipherText []byte, key []byte) ([]byte, error) {
 	return plainText, nil
 }
 
-//补码
-//AES加密数据块分组长度必须为128bit(byte[16])，密钥长度可以是128bit(byte[16])、192bit(byte[24])、256bit(byte[32])中的任意一个。
-func PKCS7Padding(ciphertext []byte, blocksize int) []byte {
-	padding := blocksize - len(ciphertext)%blocksize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
+func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padText := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padText...)
 }
 
-//去码
 func PKCS7UnPadding(origData []byte) []byte {
 	length := len(origData)
-	unpadding := int(origData[length-1])
-	return origData[:(length - unpadding)]
+	upPadding := int(origData[length-1])
+	return origData[:(length - upPadding)]
 }

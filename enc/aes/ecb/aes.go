@@ -1,55 +1,45 @@
 package ecb
 
 import (
+	"bytes"
 	"crypto/aes"
 )
 
 func AesEncrypt(plainText []byte, key []byte) ([]byte, error) {
-	cipher, err := aes.NewCipher(generateKey(key))
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	length := (len(plainText) + aes.BlockSize) / aes.BlockSize
-	plain := make([]byte, length*aes.BlockSize)
-	copy(plain, plainText)
-	pad := byte(len(plain) - len(plainText))
-	for i := len(plainText); i < len(plain); i++ {
-		plain[i] = pad
+	blockSize := block.BlockSize()
+	plainText = PKCS7Padding(plainText, blockSize)
+	cipherText := make([]byte, len(plainText))
+	for bs, be := 0, blockSize; bs < len(plainText); bs, be = bs+blockSize, be+blockSize {
+		block.Encrypt(cipherText[bs:be], plainText[bs:be])
 	}
-	cipherText := make([]byte, len(plain))
-	// 分组分块加密
-	for bs, be := 0, cipher.BlockSize(); bs <= len(plainText); bs, be = bs+cipher.BlockSize(), be+cipher.BlockSize() {
-		cipher.Encrypt(cipherText[bs:be], plain[bs:be])
-	}
-
 	return cipherText, nil
 }
 
 func AesDecrypt(cipherText []byte, key []byte) ([]byte, error) {
-	cipher, err := aes.NewCipher(generateKey(key))
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
+	blockSize := block.BlockSize()
 	plainText := make([]byte, len(cipherText))
-	for bs, be := 0, cipher.BlockSize(); bs < len(cipherText); bs, be = bs+cipher.BlockSize(), be+cipher.BlockSize() {
-		cipher.Decrypt(plainText[bs:be], cipherText[bs:be])
+	for bs, be := 0, blockSize; bs < len(cipherText); bs, be = bs+blockSize, be+blockSize {
+		block.Decrypt(plainText[bs:be], cipherText[bs:be])
 	}
-
-	trim := 0
-	if len(plainText) > 0 {
-		trim = len(plainText) - int(plainText[len(plainText)-1])
-	}
-
-	return plainText[:trim], nil
+	plainText = PKCS7UnPadding(plainText)
+	return plainText, nil
+}
+func PKCS7Padding(plainText []byte, blockSize int) []byte {
+	padding := blockSize - len(plainText)%blockSize
+	padText := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(plainText, padText...)
 }
 
-func generateKey(key []byte) (genKey []byte) {
-	genKey = make([]byte, 16)
-	copy(genKey, key)
-	for i := 16; i < len(key); {
-		for j := 0; j < 16 && i < len(key); j, i = j+1, i+1 {
-			genKey[j] ^= key[i]
-		}
-	}
-	return genKey
+func PKCS7UnPadding(data []byte) []byte {
+	length := len(data)
+	unPadding := int(data[length-1])
+	return data[:(length - unPadding)]
 }
