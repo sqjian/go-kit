@@ -25,13 +25,11 @@ func NewLogger(opts ...Option) (API, error) {
 
 	switch {
 	case len(meta.FileName) == 0:
-		fallthrough
+		return nil, ErrWrapper(IllegalParams)
 	case meta.MaxSize == 0:
-		fallthrough
-	case meta.MaxBackups == 0:
-		fallthrough
+		return nil, ErrWrapper(IllegalParams)
 	case meta.MaxAge == 0:
-		fallthrough
+		return nil, ErrWrapper(IllegalParams)
 	case meta.Level == UnknownLevel:
 		return nil, ErrWrapper(IllegalParams)
 	}

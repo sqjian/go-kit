@@ -13,13 +13,14 @@ func AesEncrypt(plainText, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
+	blockSize := block.BlockSize()
+	cipherText := make([]byte, blockSize+len(plainText))
+	iv := cipherText[:blockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
 	}
 	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+	stream.XORKeyStream(cipherText[blockSize:], plainText)
 	return cipherText, nil
 }
 
@@ -28,13 +29,16 @@ func AesDecrypt(cipherText []byte, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(cipherText) < aes.BlockSize {
+	blockSize := block.BlockSize()
+	if len(cipherText) < blockSize {
 		return nil, fmt.Errorf("ciphertext too short")
 	}
-	iv := cipherText[:aes.BlockSize]
-	cipherText = cipherText[aes.BlockSize:]
+	iv := cipherText[:blockSize]
+	cipherText = cipherText[blockSize:]
+
+	plainText := make([]byte, len(cipherText))
 
 	stream := cipher.NewCFBDecrypter(block, iv)
-	stream.XORKeyStream(cipherText, cipherText)
-	return cipherText, nil
+	stream.XORKeyStream(plainText, cipherText)
+	return plainText, nil
 }

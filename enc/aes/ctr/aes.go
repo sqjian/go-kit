@@ -1,39 +1,44 @@
 package ctr
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/rand"
+	"fmt"
+	"io"
 )
 
 func AesEncrypt(plainText []byte, key []byte) ([]byte, error) {
-	//指定使用AES加密算法
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	//给到一个iv值，长度等于block的块尺寸，即16byte
-	iv := bytes.Repeat([]byte("1"), block.BlockSize())
-	//CTR模式是不需要填充的，返回一个计数器模式的，底层采用block生成key流的srtream接口
+	blockSize := block.BlockSize()
+	cipherText := make([]byte, blockSize+len(plainText))
+	iv := cipherText[:blockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, err
+	}
 	stream := cipher.NewCTR(block, iv)
-	cipherText := make([]byte, len(plainText))
-	//加密操作
-	stream.XORKeyStream(cipherText, plainText)
+	stream.XORKeyStream(cipherText[blockSize:], plainText)
 	return cipherText, nil
 }
 
 func AesDecrypt(cipherText []byte, key []byte) ([]byte, error) {
-	//1.指定算法:aes
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	//2.返回一个计数器模式的、底层采用block生成key流的Stream接口，初始向量iv的长度必须等于block的块尺寸。
-	iv := bytes.Repeat([]byte("1"), block.BlockSize())
-	stream := cipher.NewCTR(block, iv)
+	blockSize := block.BlockSize()
+	if len(cipherText) < blockSize {
+		return nil, fmt.Errorf("ciphertext too short")
+	}
+	iv := cipherText[:blockSize]
+	cipherText = cipherText[blockSize:]
 
-	//3.解密操作
 	plainText := make([]byte, len(cipherText))
+
+	stream := cipher.NewCTR(block, iv)
 	stream.XORKeyStream(plainText, cipherText)
 
 	return plainText, nil
