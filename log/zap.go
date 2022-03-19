@@ -135,7 +135,7 @@ func (l *zapLogger) init() (err error) {
 
 	l.Logger = zap.New(
 		core,
-		/*zap.AddCaller(),*/
+		zap.WithCaller(l.meta.Caller),
 		zap.AddCallerSkip(1),
 		zap.Fields(
 			zapcore.Field{

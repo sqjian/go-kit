@@ -53,58 +53,16 @@ func NewRdb(dbType Type, opts ...MetaOption) (*Rdb, error) {
 	return rdbInst, nil
 }
 
-func (r *Rdb) columns(opts *SqlOption) ([]string, error) {
-	rawSql := fmt.Sprintf("SELECT * FROM %v WHERE 1 = 0", opts.table)
-	r.meta.Logger.Debugf("id:%v,fn:columns=>rawSql:%v", opts.ctx.Value("id"), rawSql)
-
-	rows, err := r.db.QueryContext(opts.ctx, rawSql)
-	if err != nil {
-		r.meta.Logger.Errorf("id:%v,fn:columns=>err:%v", opts.ctx.Value("id"), err)
-		return nil, err
-	}
-	return rows.Columns()
-}
-
-func (r *Rdb) checkWhere(opts *SqlOption) error {
-	columns, columnsErr := r.columns(opts)
-	if columnsErr != nil {
-		r.meta.Logger.Errorf("id:%v,fn:query=>columnsErr:%v", opts.ctx.Value("id"), columnsErr)
-		return columnsErr
-	}
-	for expectColumn, _ := range opts.where {
-		matched := false
-		for _, realColumn := range columns {
-			if expectColumn == realColumn {
-				matched = true
-				break
-			}
-		}
-		if !matched {
-			return fmt.Errorf("can't find column:%v in table columns:%v", expectColumn, columns)
-		}
-	}
-	return nil
-}
-
 func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc) ([]map[string]interface{}, error) {
 
 	sqlOpt := newDefaultSqlOption()
-	{
-		for _, opt := range opts {
-			if opt != nil {
-				opt(sqlOpt)
-			}
-		}
-		sqlOpt.ctx = ctx
-		sqlOpt.table = table
-
-		if len(sqlOpt.where) != 0 {
-			err := r.checkWhere(sqlOpt)
-			if err != nil {
-				return nil, err
-			}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(sqlOpt)
 		}
 	}
+	sqlOpt.ctx = ctx
+	sqlOpt.table = table
 
 	instruct, instructErr := genQuerySql(table, sqlOpt.column, sqlOpt.where, sqlOpt.filter.offset, sqlOpt.filter.limit, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:query=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
@@ -148,26 +106,31 @@ func (r *Rdb) transaction(ctx context.Context, instructs ...*Instruct) (map[stri
 
 	var affectedRows = make(map[string]int64)
 
+	execErrs := make([]error, len(instructs))
 	for _, instruct := range instructs {
+		r.meta.Logger.Debugf("about to do ExecContext for instruct:%v", instruct)
 		execRst, execErr := r.db.ExecContext(ctx, instruct.Sql, instruct.Args...)
 		if execErr == nil {
+			r.meta.Logger.Debugf("ExecContext successfully,about to get RowsAffected")
 			affected, _ := execRst.RowsAffected()
 			affectedRows[fmt.Sprintf("%v", instruct)] = affected
+			r.meta.Logger.Debugf("instruct exec successfully,affected:%v", affected)
 			continue
 		}
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>execErr:%v", ctx.Value("id"), execErr)
+		execErrs = append(execErrs, execErr)
 
 		rollbackErr := tx.Rollback()
 		if rollbackErr != nil {
 			r.meta.Logger.Errorf("id:%v,fn:transaction=>rollbackErr:%v", ctx.Value("id"), rollbackErr)
-			return affectedRows, rollbackErr
+			return affectedRows, fmt.Errorf("execErr:%v,rollbackErr:%v", execErr, rollbackErr)
 		}
 	}
 
 	commitErr := tx.Commit()
 	if commitErr != nil {
 		r.meta.Logger.Errorf("id:%v,fn:transaction=>commitErr:%v", ctx.Value("id"), commitErr)
-		return affectedRows, commitErr
+		return affectedRows, fmt.Errorf("execErrs:%v,commitErr:%v", execErrs, commitErr)
 	}
 
 	return affectedRows, nil
@@ -179,22 +142,13 @@ func (r *Rdb) Delete(ctx context.Context, table string, where map[string]interfa
 		return nil, errWrapper(IllegalParams)
 	}
 	sqlOpt := newDefaultSqlOption()
-	{
-		for _, opt := range opts {
-			if opt != nil {
-				opt(sqlOpt)
-			}
-		}
-		sqlOpt.ctx = ctx
-		sqlOpt.table = []string{table}
-
-		if len(sqlOpt.where) != 0 {
-			err := r.checkWhere(sqlOpt)
-			if err != nil {
-				return nil, err
-			}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(sqlOpt)
 		}
 	}
+	sqlOpt.ctx = ctx
+	sqlOpt.table = []string{table}
 
 	instruct, instructErr := genDeleteSql(table, where, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:delete=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
@@ -213,22 +167,13 @@ func (r *Rdb) Insert(ctx context.Context, table string, data map[string]interfac
 	}
 
 	sqlOpt := newDefaultSqlOption()
-	{
-		for _, opt := range opts {
-			if opt != nil {
-				opt(sqlOpt)
-			}
-		}
-		sqlOpt.ctx = ctx
-		sqlOpt.table = []string{table}
-
-		if len(sqlOpt.where) != 0 {
-			err := r.checkWhere(sqlOpt)
-			if err != nil {
-				return nil, err
-			}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(sqlOpt)
 		}
 	}
+	sqlOpt.ctx = ctx
+	sqlOpt.table = []string{table}
 
 	instruct, instructErr := genInsertSql(table, data, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:insert=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
@@ -250,22 +195,13 @@ func (r *Rdb) Update(ctx context.Context, table string, data map[string]interfac
 		return nil, errWrapper(IllegalParams)
 	}
 	sqlOpt := newDefaultSqlOption()
-	{
-		for _, opt := range opts {
-			if opt != nil {
-				opt(sqlOpt)
-			}
-		}
-		sqlOpt.ctx = ctx
-		sqlOpt.table = []string{table}
-
-		if len(sqlOpt.where) != 0 {
-			err := r.checkWhere(sqlOpt)
-			if err != nil {
-				return nil, err
-			}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(sqlOpt)
 		}
 	}
+	sqlOpt.ctx = ctx
+	sqlOpt.table = []string{table}
 
 	instruct, instructErr := genUpdateSql(table, data, where, WithPlaceholder(r.placeHolder))
 	r.meta.Logger.Debugf("id:%v,fn:update=>instruct:%v,instructErr:%v", ctx.Value("id"), instruct, instructErr)
