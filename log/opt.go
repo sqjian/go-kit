@@ -16,6 +16,12 @@ func WithFileName(FileName string) Option {
 	})
 }
 
+func WithCaller(Caller bool) Option {
+	return optionFunc(func(m *Meta) {
+		m.Caller = Caller
+	})
+}
+
 func WithMaxSize(MaxSize int) Option {
 	return optionFunc(func(m *Meta) {
 		m.MaxSize = MaxSize

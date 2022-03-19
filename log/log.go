@@ -7,6 +7,7 @@ type Meta struct {
 	MaxAge     int    /*日志备份时间，单位Day*/
 	Level      Level  /*日志级别，可选：none、debug、info、warn、error*/
 	Console    bool   /*是否向控制台输出*/
+	Caller     bool
 
 	builder func(*Meta) (API, error)
 }

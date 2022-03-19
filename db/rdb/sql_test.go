@@ -19,7 +19,7 @@ func checkErr(err error) {
 func init() {
 	_db, dbErr := rdb.NewRdb(
 		rdb.Mysql,
-		rdb.WithIp("182.92.1.35"),
+		rdb.WithIp("192.168.6.6"),
 		rdb.WithPort("3306"),
 		rdb.WithUserName("root"),
 		rdb.WithPassWord("xylx1.t!@#"),
@@ -33,26 +33,32 @@ func init() {
 	db = _db
 }
 
-func Test_MysqlQuery(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "id", 1)
-	t.Log(db.Query(ctx, []string{"test"}, nil))
-}
-
 func Test_Insert(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "id", 1)
+	log.Debugf("begin to insert data.")
+	t.Log(db.Insert(ctx, "test", map[string]interface{}{"age": 1}))
+}
 
-	t.Log(db.Insert(ctx, "test", map[string]interface{}{"t1": 1}))
-	t.Log(db.Insert(ctx, "test", map[string]interface{}{"t2": 1}))
+func Test_MysqlQuery(t *testing.T) {
+	ctx := context.WithValue(context.Background(), "id", 1)
+	rst, err := db.Query(ctx, []string{"test"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for k, v := range rst {
+		t.Logf("k:%v,v:%v", k, v)
+	}
+	t.Log(string((rst[0]["create_time"]).([]byte)))
 }
 
 func Test_Update(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "id", 1)
 
-	t.Log(db.Update(ctx, "test", map[string]interface{}{"t1": 5}, map[string]interface{}{"t1": 1}))
+	t.Log(db.Update(ctx, "test", map[string]interface{}{"age": 5}, map[string]interface{}{"age": 1}))
 }
 
 func Test_Delete(t *testing.T) {
 	ctx := context.Background()
 
-	t.Log(db.Delete(ctx, "test", map[string]interface{}{"t2": 1}))
+	t.Log(db.Delete(ctx, "test", map[string]interface{}{"age": 5}))
 }
