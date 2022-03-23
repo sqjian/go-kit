@@ -1,8 +1,8 @@
 package hash
 
 import (
-	"github.com/sqjian/go-kit/hash/provider/md5"
-	"github.com/sqjian/go-kit/hash/provider/sha1"
+	"github.com/sqjian/go-kit/hash/md5"
+	"github.com/sqjian/go-kit/hash/sha1"
 )
 
 type Generator interface {
