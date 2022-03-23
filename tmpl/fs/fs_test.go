@@ -10,6 +10,6 @@ import (
 var f embed.FS
 
 func TestFs(t *testing.T) {
-	data, _ := f.ReadFile("testdata/hello.txt")
+	data, _ := f.ReadFile("test/hello.txt")
 	t.Log(string(data))
 }

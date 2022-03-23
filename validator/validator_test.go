@@ -7,13 +7,13 @@ import (
 	"testing"
 )
 
-//go:embed testdata/test-schema.json
+//go:embed test/test-schema.json
 var testSchema []byte
 
-//go:embed testdata/test-example.json
+//go:embed test/test-example.json
 var testExample []byte
 
-//go:embed testdata/test-example-fake.json
+//go:embed test/test-example-fake.json
 var testExampleFake []byte
 
 func TestValidateJson(t *testing.T) {

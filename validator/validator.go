@@ -1,6 +1,8 @@
 package validator
 
-import "github.com/sqjian/go-kit/validator/provider/json"
+import (
+	"github.com/sqjian/go-kit/validator/json"
+)
 
 type Validator interface {
 	Validate([]byte /*schema*/, []byte /*data*/) error

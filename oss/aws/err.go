@@ -1,4 +1,4 @@
-package s3
+package aws
 
 import "fmt"
 
@@ -7,13 +7,13 @@ import "fmt"
 */
 
 //go:generate stringer -type=Err  -linecomment
-type Err int
+type err int
 
-func ErrWrapper(err Err) error {
+func errWrapper(err err) error {
 	return fmt.Errorf("code:%d,errDesc:%s", err, err.String())
 }
 
 const (
-	UnknownErrCode Err = iota
+	UnknownErrCode err = iota
 	IllegalParams      // wrong params
 )

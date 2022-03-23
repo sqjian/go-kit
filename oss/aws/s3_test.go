@@ -1,7 +1,8 @@
-package s3
+package aws_test
 
 import (
 	"context"
+	"github.com/sqjian/go-kit/oss/aws"
 	"testing"
 )
 
@@ -12,12 +13,11 @@ func Test_S3(t *testing.T) {
 		}
 	}
 
-	cli, err := newS3Cli(
-		WithKey("12345678"),
-		WithSecret("12345678"),
-		WithAddr("http://172.31.243.215:9091"),
-		WithConcurrency(3),
-		WithDebugInfo(false),
+	cli, err := aws.NewS3Cli(
+		aws.WithKey("12345678"),
+		aws.WithSecret("12345678"),
+		aws.WithAddr("http://172.31.243.215:9091"),
+		aws.WithConcurrency(3),
 	)
 	checkErr(err)
 
@@ -26,9 +26,8 @@ func Test_S3(t *testing.T) {
 		objectKey = "sqjian"
 		data      = []byte("sqjian")
 	)
-
 	{
-		err := cli.upload(
+		err := cli.Upload(
 			context.Background(),
 			bucket,
 			objectKey,
@@ -37,7 +36,7 @@ func Test_S3(t *testing.T) {
 		checkErr(err)
 	}
 	{
-		rst, err := cli.download(
+		rst, err := cli.Download(
 			context.Background(),
 			bucket,
 			objectKey,

@@ -2,7 +2,7 @@ package unique
 
 import (
 	"github.com/google/uuid"
-	"github.com/sqjian/go-kit/unique/provider/snowflake"
+	"github.com/sqjian/go-kit/unique/snowflake"
 )
 
 //go:generate stringer -type=KeyType  -linecomment
