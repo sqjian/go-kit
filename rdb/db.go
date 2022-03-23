@@ -8,7 +8,7 @@ import (
 )
 
 func newMysqlDb(m *DbMeta) (*sqlx.DB, error) {
-	path := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?charset=utf8", m.UserName, m.PassWord, m.IP, m.Port, m.DbName)
+	path := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?collation=utf8mb4_general_ci", m.UserName, m.PassWord, m.IP, m.Port, m.DbName)
 	return sqlx.Open("mysql", path)
 }
 

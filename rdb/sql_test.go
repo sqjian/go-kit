@@ -3,12 +3,12 @@ package rdb_test
 import (
 	"context"
 	"github.com/sqjian/go-kit/log"
-	rdb2 "github.com/sqjian/go-kit/rdb"
+	"github.com/sqjian/go-kit/rdb"
 	"testing"
 	"time"
 )
 
-var db *rdb2.Rdb
+var db *rdb.Rdb
 
 func checkErr(err error) {
 	if err != nil {
@@ -17,16 +17,16 @@ func checkErr(err error) {
 }
 
 func init() {
-	_db, dbErr := rdb2.NewRdb(
-		rdb2.Mysql,
-		rdb2.WithIp("192.168.6.6"),
-		rdb2.WithPort("3306"),
-		rdb2.WithUserName("root"),
-		rdb2.WithPassWord("xylx1.t!@#"),
-		rdb2.WithMaxLifeTime(time.Second),
-		rdb2.WithMaxIdleConns(3),
-		rdb2.WithDbName("test"),
-		rdb2.WithLogger(log.DebugLogger),
+	_db, dbErr := rdb.NewRdb(
+		rdb.Mysql,
+		rdb.WithIp("192.168.6.6"),
+		rdb.WithPort("3306"),
+		rdb.WithUserName("root"),
+		rdb.WithPassWord("xylx1.t!@#"),
+		rdb.WithMaxLifeTime(time.Second),
+		rdb.WithMaxIdleConns(3),
+		rdb.WithDbName("test"),
+		rdb.WithLogger(log.DebugLogger),
 	)
 	checkErr(dbErr)
 
