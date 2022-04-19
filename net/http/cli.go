@@ -162,7 +162,7 @@ func genReq(method Method, target string, cfg *cliCfg) (*http.Request, error) {
 	}
 
 	{
-		cfg.logger.Infof("log req => id:%v,method:%v,urlEncode:%v", cfg.logId, req.Method, req.RequestURI)
+		cfg.logger.Infof("log req => id:%v,method:%v,urlEncode:%v", cfg.logId, req.Method, req.RemoteAddr)
 		cfg.logger.Infof("log req => id:%v,header:%v", cfg.logId, req.Header)
 		cfg.logger.Infof("log req => id:%v,body:%v", cfg.logId, func() string {
 			if len(cfg.body) > defaultBodyVerbose {
