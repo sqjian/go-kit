@@ -202,6 +202,9 @@ func Do(ctx context.Context, method Method, target string, opts ...CliOption) ([
 			return nil, err
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("statusCode:%v not equal 200", resp.StatusCode)
+		}
 		return ioutil.ReadAll(resp.Body)
 	}
 
