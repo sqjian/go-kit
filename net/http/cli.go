@@ -202,10 +202,14 @@ func Do(ctx context.Context, method Method, target string, opts ...CliOption) ([
 			return nil, err
 		}
 		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("statusCode:%v not equal 200", resp.StatusCode)
+		respData, respDataErr := ioutil.ReadAll(resp.Body)
+		if respDataErr != nil {
+			return nil, respDataErr
 		}
-		return ioutil.ReadAll(resp.Body)
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("statusCode:%v not equal 200,raw:%v", resp.StatusCode, string(respData))
+		}
+		return respData, respDataErr
 	}
 
 	var rst []byte
