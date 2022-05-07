@@ -5,6 +5,8 @@ import (
 	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/plug/container"
 	"github.com/sqjian/go-kit/plug/loader"
+	"github.com/sqjian/go-kit/plug/plug/go_native/enter"
+	"github.com/sqjian/go-kit/plug/plug/go_native/leave"
 	"github.com/sqjian/go-kit/plug/proto"
 	"github.com/sqjian/go-kit/plug/schema"
 	"github.com/sqjian/go-kit/plug/tool"
@@ -24,7 +26,7 @@ func NewMinimal(fn func(cfg *Cfg)) (*Mini, error) {
 	mini := &Mini{
 		viper:  cfg.Viper,
 		logger: cfg.Logger,
-		Plugs:  cfg.Plugs,
+		Plugs:  append(cfg.Plugs, enter.NewPlug, leave.NewPlug),
 	}
 	if err := mini.Init(); err != nil {
 		return nil, err

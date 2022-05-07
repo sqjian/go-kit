@@ -3,8 +3,6 @@ package mini_test
 import (
 	"github.com/spf13/viper"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/plug/plug/go_native/enter"
-	"github.com/sqjian/go-kit/plug/plug/go_native/leave"
 	"github.com/sqjian/go-kit/plug/proto"
 	"github.com/sqjian/go-kit/plug/scheduler/mini"
 	"github.com/sqjian/go-kit/plug/schema"
@@ -99,7 +97,7 @@ func Test_minimal(t *testing.T) {
 	minimalInst, minimalInstErr := mini.NewMinimal(func(cfg *mini.Cfg) {
 		cfg.Viper = viper.New()
 		cfg.Logger = log.DebugLogger
-		cfg.Plugs = []schema.NewPlug{enter.NewPlug, leave.NewPlug, NewTest1Plug, NewTest2Plug}
+		cfg.Plugs = []schema.NewPlug{NewTest1Plug, NewTest2Plug}
 	})
 	if minimalInstErr != nil {
 		t.Fatal(minimalInstErr)
@@ -109,7 +107,7 @@ func Test_minimal(t *testing.T) {
 		Id:   "uuid",
 		Desc: map[string][]byte{"key": []byte("val")},
 	}
-	_, processErr := minimalInst.Process(mini.Dag{Id: "xxx", Steps: []string{"leave", "Test1"}}, msg)
+	_, processErr := minimalInst.Process(mini.Dag{Id: "xxx", Steps: []string{"Test2", "Test1"}}, msg)
 	if processErr != nil {
 		t.Fatal(processErr)
 	}

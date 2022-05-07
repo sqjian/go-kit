@@ -89,7 +89,7 @@ func (p *Container) Get(pluginNames ...string) ([]schema.Plug, error) {
 		}
 		for _, plugName := range pluginNames {
 			if checkRepeatAdd(plugName) {
-				return nil, fmt.Errorf("plug:%v repeat added, all plugs:%v", plugName, pluginNames)
+				return nil, fmt.Errorf("plug->%v repeat, all plugs:%v", plugName, pluginNames)
 			}
 		}
 	}
