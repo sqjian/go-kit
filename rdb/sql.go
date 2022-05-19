@@ -53,6 +53,10 @@ func NewRdb(dbType Type, opts ...MetaOption) (*Rdb, error) {
 	return rdbInst, nil
 }
 
+func (r *Rdb) Engine() *sqlx.DB {
+	return r.db
+}
+
 func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc) ([]map[string]interface{}, error) {
 
 	sqlOpt := newDefaultSqlOption()
