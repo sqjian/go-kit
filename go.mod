@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.7.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.21.0
+	github.com/davecgh/go-spew v1.1.1
 	github.com/elgris/sqrl v0.0.0-20210727210741-7e0198b30236
 	github.com/envoyproxy/protoc-gen-validate v0.6.2
 	github.com/go-sql-driver/mysql v1.6.0

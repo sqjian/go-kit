@@ -25,7 +25,7 @@ func TestNew(t *testing.T) {
 	if x == nil {
 		t.Errorf("expected obj")
 	}
-	checkNum(x.NumberOfReplicas, 20, t)
+	checkNum(x.numberOfReplicas, 20, t)
 }
 
 func TestAdd(t *testing.T) {
@@ -685,7 +685,7 @@ func TestCollisionsCRC(t *testing.T) {
 	count := 0
 	for scanner.Scan() {
 		word := scanner.Text()
-		for i := 0; i < c.NumberOfReplicas; i++ {
+		for i := 0; i < c.numberOfReplicas; i++ {
 			ekey := c.eltKey(word, i)
 			// ekey := word + "|" + strconv.Itoa(i)
 			k := c.hashKey(ekey)
@@ -740,7 +740,7 @@ func TestConcurrentGetSet(t *testing.T) {
 
 func TestDistributionFnv(t *testing.T) {
 	x := New()
-	x.UseFnv = true
+	x.useFnv = true
 	x.Add("abcdefg")
 	x.Add("hijklmn")
 	x.Add("opqrstu")

@@ -28,11 +28,11 @@ type Consistent struct {
 	circle           map[uint32]string
 	members          map[string]bool
 	sortedHashes     uints
-	NumberOfReplicas int
+	numberOfReplicas int
 	count            int64
 	scratch          [64]byte
-	UseFnv           bool
-	sync.RWMutex
+	useFnv           bool
+	rwMu             sync.RWMutex
 }
 
 func newDefaultConfig() *Config {
@@ -43,7 +43,7 @@ func newDefaultConfig() *Config {
 
 // New creates a new Consistent object with a default setting of 20 replicas for each entry.
 //
-// To change the number of replicas, set NumberOfReplicas before adding entries.
+// To change the number of replicas, set numberOfReplicas before adding entries.
 func New(opts ...Option) *Consistent {
 	config := newDefaultConfig()
 	for _, opt := range opts {
@@ -51,7 +51,7 @@ func New(opts ...Option) *Consistent {
 	}
 
 	c := new(Consistent)
-	c.NumberOfReplicas = config.NumberOfReplicas
+	c.numberOfReplicas = config.NumberOfReplicas
 	c.circle = make(map[uint32]string)
 	c.members = make(map[string]bool)
 	return c
@@ -65,14 +65,14 @@ func (c *Consistent) eltKey(elt string, idx int) string {
 
 // Add inserts a string element in the consistent hash.
 func (c *Consistent) Add(elt string) {
-	c.Lock()
-	defer c.Unlock()
+	c.rwMu.Lock()
+	defer c.rwMu.Unlock()
 	c.add(elt)
 }
 
 // need c.Lock() before calling
 func (c *Consistent) add(elt string) {
-	for i := 0; i < c.NumberOfReplicas; i++ {
+	for i := 0; i < c.numberOfReplicas; i++ {
 		c.circle[c.hashKey(c.eltKey(elt, i))] = elt
 	}
 	c.members[elt] = true
@@ -82,14 +82,14 @@ func (c *Consistent) add(elt string) {
 
 // Remove removes an element from the hash.
 func (c *Consistent) Remove(elt string) {
-	c.Lock()
-	defer c.Unlock()
+	c.rwMu.Lock()
+	defer c.rwMu.Unlock()
 	c.remove(elt)
 }
 
 // need c.Lock() before calling
 func (c *Consistent) remove(elt string) {
-	for i := 0; i < c.NumberOfReplicas; i++ {
+	for i := 0; i < c.numberOfReplicas; i++ {
 		delete(c.circle, c.hashKey(c.eltKey(elt, i)))
 	}
 	delete(c.members, elt)
@@ -100,8 +100,8 @@ func (c *Consistent) remove(elt string) {
 // Set sets all the elements in the hash.  If there are existing elements not
 // present in elts, they will be removed.
 func (c *Consistent) Set(elts []string) {
-	c.Lock()
-	defer c.Unlock()
+	c.rwMu.Lock()
+	defer c.rwMu.Unlock()
 	for k := range c.members {
 		found := false
 		for _, v := range elts {
@@ -124,8 +124,8 @@ func (c *Consistent) Set(elts []string) {
 }
 
 func (c *Consistent) Members() []string {
-	c.RLock()
-	defer c.RUnlock()
+	c.rwMu.RLock()
+	defer c.rwMu.RUnlock()
 	var m []string
 	for k := range c.members {
 		m = append(m, k)
@@ -135,8 +135,8 @@ func (c *Consistent) Members() []string {
 
 // Get returns an element close to where name hashes to in the circle.
 func (c *Consistent) Get(name string) (string, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.rwMu.RLock()
+	defer c.rwMu.RUnlock()
 	if len(c.circle) == 0 {
 		return "", ErrEmptyCircle
 	}
@@ -158,8 +158,8 @@ func (c *Consistent) search(key uint32) (i int) {
 
 // GetTwo returns the two closest distinct elements to the name input in the circle.
 func (c *Consistent) GetTwo(name string) (string, string, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.rwMu.RLock()
+	defer c.rwMu.RUnlock()
 	if len(c.circle) == 0 {
 		return "", "", ErrEmptyCircle
 	}
@@ -187,8 +187,8 @@ func (c *Consistent) GetTwo(name string) (string, string, error) {
 
 // GetN returns the N closest distinct elements to the name input in the circle.
 func (c *Consistent) GetN(name string, n int) ([]string, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.rwMu.RLock()
+	defer c.rwMu.RUnlock()
 
 	if len(c.circle) == 0 {
 		return nil, ErrEmptyCircle
@@ -229,7 +229,7 @@ func (c *Consistent) GetN(name string, n int) ([]string, error) {
 }
 
 func (c *Consistent) hashKey(key string) uint32 {
-	if c.UseFnv {
+	if c.useFnv {
 		return c.hashKeyFnv(key)
 	}
 	return c.hashKeyCRC32(key)
@@ -253,7 +253,7 @@ func (c *Consistent) hashKeyFnv(key string) uint32 {
 func (c *Consistent) updateSortedHashes() {
 	hashes := c.sortedHashes[:0]
 	//reallocate if we're holding on to too much (1/4th)
-	if cap(c.sortedHashes)/(c.NumberOfReplicas*4) > len(c.circle) {
+	if cap(c.sortedHashes)/(c.numberOfReplicas*4) > len(c.circle) {
 		hashes = nil
 	}
 	for k := range c.circle {
