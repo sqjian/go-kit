@@ -2,6 +2,7 @@ package consistent_test
 
 import (
 	"github.com/davecgh/go-spew/spew"
+	"github.com/schollz/progressbar/v3"
 	"github.com/sqjian/go-kit/consistent"
 	"strconv"
 	"testing"
@@ -28,7 +29,9 @@ func TestBalance(t *testing.T) {
 		x.Add(node)
 	}
 
+	bar := progressbar.Default(int64(len(reqs)))
 	for _, req := range reqs {
+		bar.Add(1)
 		node, nodeErr := x.Get(req)
 		if nodeErr != nil {
 			t.Fatal(nodeErr)
