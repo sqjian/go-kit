@@ -1,10 +1,10 @@
-package http_test
+package easyhttp_test
 
 import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
-	httpUtil "github.com/sqjian/go-kit/net/http"
+	"github.com/sqjian/go-kit/net/easyhttp"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -34,17 +34,17 @@ func TestDo(t *testing.T) {
 		fmt.Fprintln(w, "hello")
 	}))
 
-	rst, err := httpUtil.Do(
+	rst, err := easyhttp.Do(
 		context.Background(),
-		httpUtil.GET,
+		easyhttp.GET,
 		ts.URL,
-		httpUtil.WithCliQuery(map[string]string{
+		easyhttp.WithCliQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
 		}),
-		httpUtil.WithCliRetry(3),
-		httpUtil.WithCliLogger(logger),
+		easyhttp.WithCliRetry(3),
+		easyhttp.WithCliLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
@@ -73,18 +73,18 @@ func TestDoWithId(t *testing.T) {
 		fmt.Fprintln(w, "hello")
 	}))
 
-	rst, err := httpUtil.Do(
+	rst, err := easyhttp.Do(
 		context.Background(),
-		httpUtil.GET,
+		easyhttp.GET,
 		ts.URL,
-		httpUtil.WithCliQuery(map[string]string{
+		easyhttp.WithCliQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
 		}),
-		httpUtil.WithCliRetry(3),
-		httpUtil.WithCliUniqueId("xxx"),
-		httpUtil.WithCliLogger(logger),
+		easyhttp.WithCliRetry(3),
+		easyhttp.WithCliUniqueId("xxx"),
+		easyhttp.WithCliLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
@@ -115,17 +115,17 @@ func BenchmarkDo(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			_, err := httpUtil.Do(
+			_, err := easyhttp.Do(
 				context.Background(),
-				httpUtil.GET,
+				easyhttp.GET,
 				ts.URL,
-				httpUtil.WithCliQuery(map[string]string{
+				easyhttp.WithCliQuery(map[string]string{
 					"from":    "cn",
 					"to":      "en",
 					"content": "你好",
 				}),
-				httpUtil.WithCliRetry(3),
-				httpUtil.WithCliLogger(logger),
+				easyhttp.WithCliRetry(3),
+				easyhttp.WithCliLogger(logger),
 			)
 			if err != nil {
 				b.Fatal(err)

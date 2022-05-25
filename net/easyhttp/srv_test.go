@@ -1,11 +1,11 @@
-package http_test
+package easyhttp_test
 
 import (
 	"context"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/sqjian/go-kit/log"
-	httpUtil "github.com/sqjian/go-kit/net/http"
+	httpUtil "github.com/sqjian/go-kit/net/easyhttp"
 	"net/http"
 	"testing"
 	"time"

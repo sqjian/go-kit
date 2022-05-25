@@ -1,4 +1,4 @@
-package http
+package easyhttp
 
 //go:generate stringer -type=Method  -linecomment
 type Method int64
