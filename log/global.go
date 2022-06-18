@@ -9,7 +9,7 @@ var (
 			WithMaxAge(3),
 			WithLevel(Dummy),
 			WithConsole(true),
-			WithCaller(false),
+			WithCaller(false, 1),
 		)
 		return logger
 	}()

@@ -16,9 +16,10 @@ func WithFileName(FileName string) Option {
 	})
 }
 
-func WithCaller(Caller bool) Option {
+func WithCaller(Caller bool, CallerSkip int) Option {
 	return optionFunc(func(m *Meta) {
 		m.Caller = Caller
+		m.CallerSkip = CallerSkip
 	})
 }
 

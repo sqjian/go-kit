@@ -14,6 +14,7 @@ func TestLoggerZap(t *testing.T) {
 		log.WithMaxAge(3),
 		log.WithLevel(log.Info),
 		log.WithConsole(false),
+		log.WithCaller(true, 1),
 	)
 
 	if loggerErr != nil {

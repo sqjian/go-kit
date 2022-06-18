@@ -136,7 +136,7 @@ func (l *zapLogger) init() (err error) {
 	l.Logger = zap.New(
 		core,
 		zap.WithCaller(l.meta.Caller),
-		zap.AddCallerSkip(1),
+		zap.AddCallerSkip(l.meta.CallerSkip),
 		zap.Fields(
 			zapcore.Field{
 				Key:     "pid",

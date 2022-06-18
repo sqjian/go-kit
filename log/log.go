@@ -8,12 +8,15 @@ type Meta struct {
 	Level      Level  /*日志级别，可选：none、debug、info、warn、error*/
 	Console    bool   /*是否向控制台输出*/
 	Caller     bool
+	CallerSkip int
 
 	builder func(*Meta) (API, error)
 }
 
 func newDefaultMeta() *Meta {
-	return &Meta{}
+	return &Meta{
+		CallerSkip: 1,
+	}
 }
 
 func NewLogger(opts ...Option) (API, error) {
