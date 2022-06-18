@@ -1,6 +1,6 @@
 module github.com/sqjian/go-kit
 
-go 1.17
+go 1.18
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.1+incompatible
@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.7.4
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.21.0
+	github.com/cheggaaa/pb v1.0.29
 	github.com/davecgh/go-spew v1.1.1
 	github.com/elgris/sqrl v0.0.0-20210727210741-7e0198b30236
 	github.com/envoyproxy/protoc-gen-validate v0.6.2
@@ -71,7 +72,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838 // indirect
-	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect

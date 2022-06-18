@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 )
 
-type S3Manager struct {
+type OssManager struct {
 	meta struct {
 		addr   string
 		key    string
@@ -17,44 +17,44 @@ type S3Manager struct {
 	cli *oss.Client
 }
 
-func newDefaultS3Manager() *S3Manager {
-	s3m := &S3Manager{}
-	return s3m
+func newDefaultOssManager() *OssManager {
+	return &OssManager{}
 }
 
-func NewS3Cli(opts ...Option) (*S3Manager, error) {
-	s3m := newDefaultS3Manager()
+func NewOssCli(opts ...Option) (*OssManager, error) {
+	ossM := newDefaultOssManager()
 
-	for _, opt := range opts {
-		opt.apply(s3m)
-	}
-	if len(s3m.meta.key) == 0 {
-		return nil, errWrapper(IllegalParams)
-	}
-	if len(s3m.meta.secret) == 0 {
-		return nil, errWrapper(IllegalParams)
-	}
-	if len(s3m.meta.addr) == 0 {
-		return nil, errWrapper(IllegalParams)
+	{
+		for _, opt := range opts {
+			opt.apply(ossM)
+		}
+		switch {
+		case len(ossM.meta.key) == 0:
+			return nil, errWrapper(IllegalParams)
+		case len(ossM.meta.secret) == 0:
+			return nil, errWrapper(IllegalParams)
+		case len(ossM.meta.addr) == 0:
+			return nil, errWrapper(IllegalParams)
+		}
 	}
 
-	cli, err := oss.New(s3m.meta.addr, s3m.meta.key, s3m.meta.secret)
+	cli, err := oss.New(ossM.meta.addr, ossM.meta.key, ossM.meta.secret)
 	if err != nil {
 		return nil, err
 	}
-	s3m.cli = cli
+	ossM.cli = cli
 
-	return s3m, nil
+	return ossM, nil
 }
 
-func (s *S3Manager) CreateBucket(_ context.Context, bucket string) error {
+func (s *OssManager) CreateBucket(_ context.Context, bucket string) error {
 	err := s.cli.CreateBucket(
 		bucket,
 	)
 	return err
 }
 
-func (s *S3Manager) Upload(_ context.Context, bucket, objectKey string, data []byte) error {
+func (s *OssManager) Upload(_ context.Context, bucket, objectKey string, data []byte) error {
 	bk, err := s.cli.Bucket(bucket)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (s *S3Manager) Upload(_ context.Context, bucket, objectKey string, data []b
 	return bk.PutObject(objectKey, bytes.NewReader(data))
 }
 
-func (s *S3Manager) Download(_ context.Context, bucket, objectKey string) ([]byte, error) {
+func (s *OssManager) Download(_ context.Context, bucket, objectKey string) ([]byte, error) {
 	bk, err := s.cli.Bucket(bucket)
 	if err != nil {
 		return nil, err

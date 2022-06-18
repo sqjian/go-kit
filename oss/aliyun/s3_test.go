@@ -13,7 +13,7 @@ func Test_S3(t *testing.T) {
 		}
 	}
 
-	cli, err := aliyun.NewS3Cli(
+	cli, err := aliyun.NewOssCli(
 		aliyun.WithKey("xxx"),
 		aliyun.WithSecret("xxx"),
 		aliyun.WithAddr("http://oss-cn-shanghai.aliyuncs.com"),

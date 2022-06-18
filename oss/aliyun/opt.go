@@ -1,29 +1,29 @@
 package aliyun
 
 type Option interface {
-	apply(*S3Manager)
+	apply(*OssManager)
 }
 
-type optionFunc func(*S3Manager)
+type optionFunc func(*OssManager)
 
-func (f optionFunc) apply(s3 *S3Manager) {
+func (f optionFunc) apply(s3 *OssManager) {
 	f(s3)
 }
 
 func WithAddr(addr string) Option {
-	return optionFunc(func(cli *S3Manager) {
+	return optionFunc(func(cli *OssManager) {
 		cli.meta.addr = addr
 	})
 }
 
 func WithKey(key string) Option {
-	return optionFunc(func(cli *S3Manager) {
+	return optionFunc(func(cli *OssManager) {
 		cli.meta.key = key
 	})
 }
 
 func WithSecret(secret string) Option {
-	return optionFunc(func(cli *S3Manager) {
+	return optionFunc(func(cli *OssManager) {
 		cli.meta.secret = secret
 	})
 }
