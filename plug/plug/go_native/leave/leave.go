@@ -2,13 +2,13 @@ package leave
 
 import (
 	"github.com/spf13/viper"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/plug/proto"
 	"github.com/sqjian/go-kit/plug/schema"
 )
 
 type leave struct {
-	logger log.API
+	logger easylog.API
 	viper  *viper.Viper
 }
 

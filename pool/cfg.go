@@ -2,7 +2,7 @@ package pool
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"time"
 )
 
@@ -17,7 +17,7 @@ var (
 func newDefaultCfg() *Cfg {
 	return &Cfg{
 		PoolType:          Exclusive,
-		Logger:            log.DummyLogger,
+		Logger:            easylog.DummyLogger,
 		KeepAliveInterval: DefaultKeepAliveInterval,
 		CreateNewInterval: DefaultCreateNewInterval,
 		DialRetryCount:    DefaultDialRetryCount,
@@ -41,7 +41,7 @@ type Cfg struct {
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
 	CreateNewInterval time.Duration
-	Logger            log.API
+	Logger            easylog.API
 }
 
 type Option interface {
@@ -138,7 +138,7 @@ func WithCreateNewInterval(CreateNewInterval time.Duration) Option {
 	})
 }
 
-func WithLogger(Logger log.API) Option {
+func WithLogger(Logger easylog.API) Option {
 	return OptionFunc(func(options *Cfg) {
 		options.Logger = Logger
 	})

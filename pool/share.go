@@ -3,7 +3,7 @@ package pool
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -38,7 +38,7 @@ type SharePool struct {
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
 	CreateNewInterval time.Duration
-	Logger            log.API
+	Logger            easylog.API
 
 	alivePool       []interface{}
 	alivePoolOffset uint64

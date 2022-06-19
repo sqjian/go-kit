@@ -5,7 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/retry"
 	"github.com/sqjian/go-kit/unique"
 	"io/ioutil"
@@ -67,7 +67,7 @@ func newDefaultCliCfg() *cliCfg {
 	return &cliCfg{
 		retry:   3,
 		trace:   true,
-		logger:  log.DummyLogger,
+		logger:  easylog.DummyLogger,
 		client:  defaultHttpClient,
 		context: context.Background(),
 		logId: func() string {
@@ -162,9 +162,9 @@ func genReq(method Method, target string, cfg *cliCfg) (*http.Request, error) {
 	}
 
 	{
-		cfg.logger.Infof("log req => id:%v,method:%v,urlEncode:%v", cfg.logId, req.Method, req.RemoteAddr)
-		cfg.logger.Infof("log req => id:%v,header:%v", cfg.logId, req.Header)
-		cfg.logger.Infof("log req => id:%v,body:%v", cfg.logId, func() string {
+		cfg.logger.Infof("easylog req => id:%v,method:%v,urlEncode:%v", cfg.logId, req.Method, req.RemoteAddr)
+		cfg.logger.Infof("easylog req => id:%v,header:%v", cfg.logId, req.Header)
+		cfg.logger.Infof("easylog req => id:%v,body:%v", cfg.logId, func() string {
 			if len(cfg.body) > defaultBodyVerbose {
 				return fmt.Sprintf("%v...", string(cfg.body[:defaultBodyVerbose]))
 			}

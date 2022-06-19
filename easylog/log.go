@@ -1,4 +1,4 @@
-package log
+package easylog
 
 type Meta struct {
 	FileName   string /*日志的名字*/

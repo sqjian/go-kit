@@ -2,7 +2,7 @@ package mini
 
 import (
 	"github.com/spf13/viper"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/plug/container"
 	"github.com/sqjian/go-kit/plug/loader"
 	"github.com/sqjian/go-kit/plug/plug/go_native/enter"
@@ -15,7 +15,7 @@ import (
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.API
+	Logger easylog.API
 	Plugs  []schema.NewPlug
 }
 
@@ -35,7 +35,7 @@ func NewMinimal(fn func(cfg *Cfg)) (*Mini, error) {
 }
 
 type Mini struct {
-	logger    log.API
+	logger    easylog.API
 	viper     *viper.Viper
 	Plugs     []schema.NewPlug
 	container *container.Container

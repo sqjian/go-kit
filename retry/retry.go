@@ -3,7 +3,7 @@ package retry
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"strings"
 	"time"
 )
@@ -64,7 +64,7 @@ func Do(userFn UserFunc, opts ...Option) error {
 func newDefaultRetryConfig() *Config {
 	return &Config{
 		attempts: uint(10),
-		logger:   log.DummyLogger,
+		logger:   easylog.DummyLogger,
 		context:  context.Background(),
 		onRetry:  func(n uint, err error) {},
 		retryIf:  func(err error) bool { return true },

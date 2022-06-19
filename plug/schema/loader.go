@@ -2,14 +2,14 @@ package schema
 
 import (
 	"github.com/spf13/viper"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 )
 
 var NewPlugObj NewPlug
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.API
+	Logger easylog.API
 }
 
 type NewPlug = func(func(*Cfg)) (Plug, error)

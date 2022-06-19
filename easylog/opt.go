@@ -1,4 +1,4 @@
-package log
+package easylog
 
 type Option interface {
 	apply(*Meta)

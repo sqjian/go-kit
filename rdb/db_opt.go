@@ -1,7 +1,7 @@
 package rdb
 
 import (
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"time"
 )
 
@@ -15,7 +15,7 @@ func (f metaOptionFunc) apply(d *DbMeta) {
 	f(d)
 }
 
-func WithLogger(logger log.API) MetaOption {
+func WithLogger(logger easylog.API) MetaOption {
 	return metaOptionFunc(func(m *DbMeta) {
 		m.Logger = logger
 	})

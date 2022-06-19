@@ -2,7 +2,7 @@ package easyhttp
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"net/http"
 )
 
@@ -11,7 +11,7 @@ type cliCfg struct {
 
 	retry   int
 	trace   bool
-	logger  log.API
+	logger  easylog.API
 	client  *http.Client
 	context context.Context
 
@@ -66,7 +66,7 @@ func WithCliRetry(retry int) CliOption {
 	})
 }
 
-func WithCliLogger(logger log.API) CliOption {
+func WithCliLogger(logger easylog.API) CliOption {
 	return cliOptionFunc(func(options *cliCfg) {
 		options.logger = logger
 	})

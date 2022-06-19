@@ -1,4 +1,4 @@
-package log
+package easylog
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestLogger(t *testing.T) {
 	logger, loggerErr := newZapLogger(&Meta{
-		FileName:   "go-kit.log",
+		FileName:   "go-kit.easylog",
 		MaxSize:    3,
 		MaxBackups: 3,
 		MaxAge:     3,

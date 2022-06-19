@@ -3,7 +3,7 @@ package easyhttp
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/unique"
 	"golang.org/x/net/netutil"
 	"net"
@@ -29,7 +29,7 @@ func newDefaultSrvCfg() *srvCfg {
 		WriteTimeout: 10 * time.Second,
 
 		gracefully: time.Minute,
-		logger:     log.DummyLogger,
+		logger:     easylog.DummyLogger,
 		context:    context.Background(),
 	}
 }

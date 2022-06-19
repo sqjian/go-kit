@@ -1,4 +1,4 @@
-package log
+package easylog
 
 type API interface {
 	Debugf(template string, args ...interface{})

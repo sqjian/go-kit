@@ -3,7 +3,7 @@ package easyhttp_test
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/net/easyhttp"
 	"net/http"
 	"net/http/httptest"
@@ -18,13 +18,13 @@ func TestDo(t *testing.T) {
 		}
 	}
 
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("go-kit.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
-		log.WithConsole(false),
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("go-kit.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Debug),
+		easylog.WithConsole(false),
 	)
 
 	checkErr(loggerErr)
@@ -57,13 +57,13 @@ func TestDoWithId(t *testing.T) {
 		}
 	}
 
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("go-kit.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
-		log.WithConsole(false),
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("go-kit.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Debug),
+		easylog.WithConsole(false),
 	)
 
 	checkErr(loggerErr)
@@ -97,13 +97,13 @@ func BenchmarkDo(b *testing.B) {
 		}
 	}
 
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("go-kit.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
-		log.WithConsole(false),
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("go-kit.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Debug),
+		easylog.WithConsole(false),
 	)
 
 	checkErr(loggerErr)

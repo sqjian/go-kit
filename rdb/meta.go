@@ -1,7 +1,7 @@
 package rdb
 
 import (
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"time"
 )
 
@@ -15,12 +15,12 @@ type DbMeta struct {
 	MaxIdleConns int
 	MaxLifeTime  time.Duration
 
-	Logger log.API
+	Logger easylog.API
 }
 
 func newDefaultMeta() *DbMeta {
 	return &DbMeta{
-		Logger: log.DummyLogger,
+		Logger: easylog.DummyLogger,
 	}
 }
 

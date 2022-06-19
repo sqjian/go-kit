@@ -1,4 +1,4 @@
-package log
+package easylog
 
 //go:generate stringer -type=Level  -linecomment
 type Level int64

@@ -1,9 +1,9 @@
-package log
+package easylog
 
 var (
 	DebugLogger = func() API {
 		logger, _ := NewLogger(
-			WithFileName("go-kit.log"),
+			WithFileName("go-kit.easylog"),
 			WithMaxSize(3),
 			WithMaxBackups(3),
 			WithMaxAge(3),
@@ -15,7 +15,7 @@ var (
 	}()
 	DummyLogger = func() API {
 		logger, _ := NewLogger(
-			WithFileName("go-kit.log"),
+			WithFileName("go-kit.easylog"),
 			WithMaxSize(3),
 			WithMaxBackups(3),
 			WithMaxAge(3),

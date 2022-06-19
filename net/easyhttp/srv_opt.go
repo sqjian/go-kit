@@ -2,7 +2,7 @@ package easyhttp
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"time"
 )
 
@@ -15,7 +15,7 @@ type srvCfg struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
-	logger     log.API
+	logger     easylog.API
 	gracefully time.Duration
 	context    context.Context
 }
@@ -30,7 +30,7 @@ func (f srvOptionFunc) apply(options *srvCfg) {
 	f(options)
 }
 
-func WithSrvLogger(logger log.API) SrvOption {
+func WithSrvLogger(logger easylog.API) SrvOption {
 	return srvOptionFunc(func(options *srvCfg) {
 		options.logger = logger
 	})

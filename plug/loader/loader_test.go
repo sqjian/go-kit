@@ -2,7 +2,7 @@ package loader
 
 import (
 	"github.com/spf13/viper"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/plug/plug/go_native/enter"
 	"github.com/sqjian/go-kit/plug/plug/go_native/leave"
 	"testing"
@@ -11,7 +11,7 @@ import (
 func Test_Loader(t *testing.T) {
 	loader := NewLoader(func(cfg *Cfg) {
 		cfg.Viper = viper.New()
-		cfg.Logger = log.DebugLogger
+		cfg.Logger = easylog.DebugLogger
 	})
 	if err := loader.Init(); err != nil {
 		t.Fatal(err)

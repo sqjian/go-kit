@@ -1,20 +1,20 @@
-package log_test
+package easylog_test
 
 import (
 	"fmt"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"testing"
 )
 
 func TestLoggerZap(t *testing.T) {
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("go-kit.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Info),
-		log.WithConsole(false),
-		log.WithCaller(true, 1),
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("go-kit.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Info),
+		easylog.WithConsole(false),
+		easylog.WithCaller(true, 1),
 	)
 
 	if loggerErr != nil {
@@ -30,13 +30,13 @@ func TestLoggerZap(t *testing.T) {
 }
 
 func TestLoggerDef(t *testing.T) {
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("go-kit.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Info),
-		log.WithConsole(false),
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("go-kit.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Info),
+		easylog.WithConsole(false),
 	)
 
 	if loggerErr != nil {
@@ -52,13 +52,13 @@ func TestLoggerDef(t *testing.T) {
 }
 
 func TestLoggerDummy(t *testing.T) {
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("test.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Info),
-		log.WithConsole(false),
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("test.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Info),
+		easylog.WithConsole(false),
 	)
 
 	if loggerErr != nil {
@@ -77,17 +77,17 @@ func TestDebugLogger(t *testing.T) {
 
 	{
 		fmt.Println("--------------------------------")
-		log.DebugLogger.Debugf("testing infof...")
-		log.DebugLogger.Infof("testing Infof...")
-		log.DebugLogger.Warnf("testing Warnf...")
-		log.DebugLogger.Errorf("testing Errorf...")
+		easylog.DebugLogger.Debugf("testing infof...")
+		easylog.DebugLogger.Infof("testing Infof...")
+		easylog.DebugLogger.Warnf("testing Warnf...")
+		easylog.DebugLogger.Errorf("testing Errorf...")
 	}
 	{
 		fmt.Println("--------------------------------")
-		log.Debugf("testing infof...")
-		log.Infof("testing Infof...")
-		log.Warnf("testing Warnf...")
-		log.Errorf("testing Errorf...")
+		easylog.Debugf("testing infof...")
+		easylog.Infof("testing Infof...")
+		easylog.Warnf("testing Warnf...")
+		easylog.Errorf("testing Errorf...")
 	}
 }
 
@@ -110,14 +110,14 @@ func (b Builder) Errorf(template string, args ...interface{}) {
 }
 
 func TestBuilder(t *testing.T) {
-	logger, loggerErr := log.NewLogger(
-		log.WithFileName("test.log"),
-		log.WithMaxSize(3),
-		log.WithMaxBackups(3),
-		log.WithMaxAge(3),
-		log.WithLevel(log.Info),
-		log.WithConsole(false),
-		log.WithBuilder(func(_ *log.Meta) (log.API, error) {
+	logger, loggerErr := easylog.NewLogger(
+		easylog.WithFileName("test.easylog"),
+		easylog.WithMaxSize(3),
+		easylog.WithMaxBackups(3),
+		easylog.WithMaxAge(3),
+		easylog.WithLevel(easylog.Info),
+		easylog.WithConsole(false),
+		easylog.WithBuilder(func(_ *easylog.Meta) (easylog.API, error) {
 			return &Builder{}, nil
 		}),
 	)

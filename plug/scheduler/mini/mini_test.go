@@ -2,7 +2,7 @@ package mini_test
 
 import (
 	"github.com/spf13/viper"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/plug/proto"
 	"github.com/sqjian/go-kit/plug/scheduler/mini"
 	"github.com/sqjian/go-kit/plug/schema"
@@ -10,7 +10,7 @@ import (
 )
 
 type Test1 struct {
-	logger log.API
+	logger easylog.API
 	viper  *viper.Viper
 }
 
@@ -52,7 +52,7 @@ func NewTest1Plug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 }
 
 type Test2 struct {
-	logger log.API
+	logger easylog.API
 	viper  *viper.Viper
 }
 
@@ -96,7 +96,7 @@ func NewTest2Plug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 func Test_minimal(t *testing.T) {
 	minimalInst, minimalInstErr := mini.NewMinimal(func(cfg *mini.Cfg) {
 		cfg.Viper = viper.New()
-		cfg.Logger = log.DebugLogger
+		cfg.Logger = easylog.DebugLogger
 		cfg.Plugs = []schema.NewPlug{NewTest1Plug, NewTest2Plug}
 	})
 	if minimalInstErr != nil {

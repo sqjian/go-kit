@@ -2,20 +2,20 @@ package loader
 
 import (
 	"github.com/spf13/viper"
-	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/plug/schema"
 	"sync"
 )
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.API
+	Logger easylog.API
 }
 
 type Loader struct {
 	sync.RWMutex
 	viper  *viper.Viper
-	logger log.API
+	logger easylog.API
 }
 
 func NewLoader(fn func(*Cfg)) *Loader {
