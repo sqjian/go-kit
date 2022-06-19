@@ -14,9 +14,9 @@ var awsConfig *aws.Config
 
 func init() {
 	cfg, err := s3.NewAwsConfig(
-		"root",
-		"xylx1.t!@#",
-		"http://192.168.56.7:9091",
+		s3.WithAccessKey("root"),
+		s3.WithSecretKey("xylx1.t!@#"),
+		s3.WithEndpoint("http://192.168.56.7:9091"),
 	)
 	if err != nil {
 		panic(err)
@@ -61,7 +61,7 @@ func Test_S3_UploadFile(t *testing.T) {
 
 	cli, err := s3.NewS3Cli(
 		s3.WithAwsConfig(awsConfig),
-		s3.WithProgressOutput(os.Stdin),
+		s3.WithProgressOutput(os.Stderr),
 	)
 	checkErr(err)
 
@@ -89,7 +89,7 @@ func Test_S3_DownloadFile(t *testing.T) {
 
 	cli, err := s3.NewS3Cli(
 		s3.WithAwsConfig(awsConfig),
-		s3.WithProgressOutput(os.Stdin),
+		s3.WithProgressOutput(os.Stderr),
 	)
 	checkErr(err)
 

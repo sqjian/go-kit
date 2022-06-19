@@ -19,6 +19,28 @@ type Client interface {
 	DeleteFile(ctx context.Context, bucketName string, remotePath string) error
 }
 
+type S3clientOpt interface {
+	apply(*s3client)
+}
+
+type s3clientOptFn func(*s3client)
+
+func (f s3clientOptFn) apply(cli *s3client) {
+	f(cli)
+}
+
+func WithAwsConfig(awsConfig *aws.Config) S3clientOpt {
+	return s3clientOptFn(func(cli *s3client) {
+		cli.meta.awsConfig = awsConfig
+	})
+}
+
+func WithProgressOutput(progressOutput io.Writer) S3clientOpt {
+	return s3clientOptFn(func(cli *s3client) {
+		cli.meta.progressOutput = progressOutput
+	})
+}
+
 type s3client struct {
 	meta struct {
 		awsConfig      *aws.Config
@@ -27,14 +49,13 @@ type s3client struct {
 	cli *s3.Client
 }
 
-func initS3Client() *s3client {
+func initS3client() *s3client {
 	s3m := &s3client{}
 	return s3m
 }
 
-func NewS3Cli(opts ...Option) (*s3client, error) {
-	s3c := initS3Client()
-
+func NewS3Cli(opts ...S3clientOpt) (*s3client, error) {
+	s3c := initS3client()
 	{
 		for _, opt := range opts {
 			opt.apply(s3c)
@@ -57,7 +78,7 @@ func NewS3Cli(opts ...Option) (*s3client, error) {
 	return s3c, nil
 }
 
-func (s3c *s3client) BucketFiles(ctx context.Context, bucketName string, directoryPrefix string) ([]string, error) {
+func (c *s3client) BucketFiles(ctx context.Context, bucketName string, directoryPrefix string) ([]string, error) {
 	if !strings.HasSuffix(directoryPrefix, "/") {
 		directoryPrefix = directoryPrefix + "/"
 	}
@@ -67,7 +88,7 @@ func (s3c *s3client) BucketFiles(ctx context.Context, bucketName string, directo
 		paths             []string
 	)
 	for continuationToken, truncated = nil, true; truncated; {
-		s3ListChunk, err := s3c.chunkedBucketList(ctx, bucketName, directoryPrefix, continuationToken)
+		s3ListChunk, err := c.chunkedBucketList(ctx, bucketName, directoryPrefix, continuationToken)
 		if err != nil {
 			return []string{}, err
 		}
@@ -85,8 +106,8 @@ type BucketListChunk struct {
 	Paths             []string
 }
 
-func (s3c *s3client) chunkedBucketList(ctx context.Context, bucketName string, prefix string, continuationToken *string) (BucketListChunk, error) {
-	response, err := s3c.cli.ListObjectsV2(
+func (c *s3client) chunkedBucketList(ctx context.Context, bucketName string, prefix string, continuationToken *string) (BucketListChunk, error) {
+	response, err := c.cli.ListObjectsV2(
 		ctx,
 		&s3.ListObjectsV2Input{
 			Bucket:            aws.String(bucketName),
@@ -113,10 +134,10 @@ func (s3c *s3client) chunkedBucketList(ctx context.Context, bucketName string, p
 		Paths:             paths,
 	}, nil
 }
-func (s3c *s3client) newProgressBar(total int64) *pb.ProgressBar {
+func (c *s3client) newProgressBar(total int64) *pb.ProgressBar {
 	progress := pb.New64(total)
 
-	progress.Output = s3c.meta.progressOutput
+	progress.Output = c.meta.progressOutput
 	progress.ShowSpeed = true
 	progress.Units = pb.U_BYTES
 	progress.NotPrint = true
@@ -124,14 +145,14 @@ func (s3c *s3client) newProgressBar(total int64) *pb.ProgressBar {
 	return progress.SetWidth(80)
 }
 
-func (s3c *s3client) UploadFile(ctx context.Context, bucketName string, remotePath string, localFile fs.File) error {
-	uploader := manager.NewUploader(s3c.cli)
+func (c *s3client) UploadFile(ctx context.Context, bucketName string, remotePath string, localFile fs.File) error {
+	uploader := manager.NewUploader(c.cli)
 
 	stat, err := localFile.Stat()
 	if err != nil {
 		return err
 	}
-	progress := s3c.newProgressBar(stat.Size())
+	progress := c.newProgressBar(stat.Size())
 
 	progress.Start()
 	defer progress.Finish()
@@ -144,8 +165,8 @@ func (s3c *s3client) UploadFile(ctx context.Context, bucketName string, remotePa
 	return err
 }
 
-func (s3c *s3client) DownloadFile(ctx context.Context, bucketName string, remotePath string, localFile io.WriterAt) error {
-	object, err := s3c.cli.HeadObject(
+func (c *s3client) DownloadFile(ctx context.Context, bucketName string, remotePath string, localFile io.WriterAt) error {
+	object, err := c.cli.HeadObject(
 		ctx,
 		&s3.HeadObjectInput{
 			Bucket: aws.String(bucketName),
@@ -156,13 +177,13 @@ func (s3c *s3client) DownloadFile(ctx context.Context, bucketName string, remote
 		return err
 	}
 
-	progress := s3c.newProgressBar(object.ContentLength)
+	progress := c.newProgressBar(object.ContentLength)
 
 	progress.Start()
 	defer progress.Finish()
 
 	safeDown := func() error {
-		_, err = manager.NewDownloader(s3c.cli).Download(
+		_, err = manager.NewDownloader(c.cli).Download(
 			ctx,
 			progressWriterAt{localFile, progress},
 			&s3.GetObjectInput{
@@ -173,7 +194,7 @@ func (s3c *s3client) DownloadFile(ctx context.Context, bucketName string, remote
 		return err
 	}
 	unsafeDown := func() error {
-		output, err := s3c.cli.GetObject(
+		output, err := c.cli.GetObject(
 			ctx,
 			&s3.GetObjectInput{
 				Bucket: aws.String(bucketName),
@@ -197,8 +218,8 @@ func (s3c *s3client) DownloadFile(ctx context.Context, bucketName string, remote
 	}
 	return safeDown()
 }
-func (s3c *s3client) DeleteFile(ctx context.Context, bucketName string, remotePath string) error {
-	_, err := s3c.cli.DeleteObject(ctx, &s3.DeleteObjectInput{
+func (c *s3client) DeleteFile(ctx context.Context, bucketName string, remotePath string) error {
+	_, err := c.cli.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(remotePath),
 	})
