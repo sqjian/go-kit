@@ -5,9 +5,10 @@ import (
 )
 
 var binCmd1 = &cobra.Command{
-	Use:   "cmd1",
-	Short: "cmd1 message",
-	Run:   func(cmd *cobra.Command, args []string) {},
+	Use:     "cmd1",
+	Short:   "cmd1 message",
+	GroupID: "1",
+	Run:     func(cmd *cobra.Command, args []string) {},
 }
 
 func init() {

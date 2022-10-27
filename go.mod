@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/olivere/elastic/v7 v7.0.29
 	github.com/schollz/progressbar/v3 v3.8.6
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.10.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/zap v1.19.1
@@ -48,7 +48,7 @@ require (
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect

@@ -19,6 +19,8 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
+	RootCmd.AddGroup(&cobra.Group{ID: "1", Title: "group1"})
+	RootCmd.AddGroup(&cobra.Group{ID: "2", Title: "group2"})
 }
 
 func Execute() {
