@@ -8,7 +8,7 @@ import (
 	"github.com/sqjian/go-kit/easylog"
 	"github.com/sqjian/go-kit/retry"
 	"github.com/sqjian/go-kit/unique"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptrace"
@@ -202,7 +202,7 @@ func Do(ctx context.Context, method Method, target string, opts ...CliOption) ([
 			return nil, err
 		}
 		defer resp.Body.Close()
-		respData, respDataErr := ioutil.ReadAll(resp.Body)
+		respData, respDataErr := io.ReadAll(resp.Body)
 		if respDataErr != nil {
 			return nil, respDataErr
 		}

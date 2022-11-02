@@ -50,6 +50,7 @@ type ExclusivePool struct {
 }
 
 func NewExclusivePool(ctx context.Context, cfg *Cfg) (*ExclusivePool, error) {
+	id := genUniqueId(ctx)
 
 	pool := newExclusivePool(cfg)
 
@@ -60,28 +61,28 @@ func NewExclusivePool(ctx context.Context, cfg *Cfg) (*ExclusivePool, error) {
 	if pool.Dial == nil ||
 		pool.Close == nil ||
 		pool.KeepAlive == nil {
-		pool.Logger.Errorf("illegal params => pool.Dial | pool.Close | pool.KeepAlive")
+		pool.Logger.Errorf("id:%v,illegal params => pool.Dial | pool.Close | pool.KeepAlive", id)
 		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.InitialPoolSize < 0 {
-		pool.Logger.Errorf("illegal params => pool.InitialPoolSize < 0")
+		pool.Logger.Errorf("id:%v,illegal params => pool.InitialPoolSize < 0", id)
 		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.MaxPoolSize < 1 {
-		pool.Logger.Errorf("illegal params => pool.MaxPoolSize < 1")
+		pool.Logger.Errorf("id:%v,illegal params => pool.MaxPoolSize < 1", id)
 		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.InitialPoolSize > pool.MaxPoolSize {
-		pool.Logger.Errorf("illegal params => pool.InitialPoolSize > pool.MaxPoolSize")
+		pool.Logger.Errorf("id:%v,illegal params => pool.InitialPoolSize > pool.MaxPoolSize", id)
 		return nil, ErrWrapper(IllegalParams)
 	}
 
 	if pool.BestPoolSize == 0 {
-		pool.Logger.Errorf("initialize pool => BestPoolSize is not set,use MaxPoolSize(%v) instead",
-			pool.MaxPoolSize)
+		pool.Logger.Errorf("id:%v,initialize pool => BestPoolSize is not set,use MaxPoolSize(%v) instead",
+			id, pool.MaxPoolSize)
 		pool.BestPoolSize = pool.MaxPoolSize
 	}
 
@@ -93,8 +94,8 @@ func NewExclusivePool(ctx context.Context, cfg *Cfg) (*ExclusivePool, error) {
 		if c, err := pool.Dial(ctx, pool.Address, pool.Port); err == nil {
 			pool.alivePool <- c
 		} else {
-			pool.Logger.Errorf("initialize pool => Dial %v:%v failed,err:%v",
-				pool.Address, pool.Port, err.Error())
+			pool.Logger.Errorf("id:%v,initialize pool => Dial %v:%v failed,err:%v",
+				id, pool.Address, pool.Port, err.Error())
 			pool.retryPool <- 0
 		}
 	}
@@ -112,41 +113,43 @@ func (p *ExclusivePool) start() {
 
 func (p *ExclusivePool) Get() (connection interface{}, err error) {
 
+	id := genUniqueId(context.Background())
+
 	select {
 	case connection = <-p.alivePool:
 		{
-			p.Logger.Infof("addr:%v => Get new connection from alive pool.", p.Address)
+			p.Logger.Infof("id:%v,addr:%v => Get new connection from alive pool.", id, p.Address)
 			atomic.AddInt32(&p.workConnCount, 1)
 			return
 		}
 	case connection = <-p.swapPool:
 		{
-			p.Logger.Infof("addr:%v => Get new connection from swap pool.", p.Address)
+			p.Logger.Infof("id:%v,addr:%v => Get new connection from swap pool.", id, p.Address)
 			atomic.AddInt32(&p.workConnCount, 1)
 			return
 		}
 	default:
 		{
-			p.Logger.Warnf("addr:%v => Get new connection from new create.", p.Address)
+			p.Logger.Warnf("id:%v,addr:%v => Get new connection from new create.", id, p.Address)
 
 			if int(p.workConnCount)+len(p.retryPool)+len(p.alivePool)+len(p.swapPool) >= p.MaxPoolSize {
-				p.Logger.Errorf("addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.",
-					p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
+				p.Logger.Errorf("id:%v,addr:%v => Pool Was Exhausted, detail: working: %v, alive: %v, retry: %v.",
+					id, p.Address, p.workConnCount, len(p.alivePool), len(p.retryPool))
 				return nil, ErrWrapper(ResourceExhausted, fmt.Sprintf("addr:%v", p.Address))
 			}
 
 			retry := 0
 			for retry < p.DialRetryCount {
 				if connection, err = p.Dial(context.TODO(), p.Address, p.Port); err != nil {
-					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v failed,err:%v",
-						p.Address, p.Address, p.Port, err.Error())
+					p.Logger.Errorf("id:%v,addr:%v => get conn => Dial %v:%v failed,err:%v",
+						id, p.Address, p.Address, p.Port, err.Error())
 					retry++
 					continue
 				} else {
 					atomic.AddInt32(&p.workConnCount, 1)
 					atomic.AddInt32(&p.newlyConnCount, 1)
-					p.Logger.Errorf("addr:%v => get conn => Dial %v:%v successfully",
-						p.Address, p.Address, p.Port)
+					p.Logger.Errorf("id:%v,addr:%v => get conn => Dial %v:%v successfully",
+						id, p.Address, p.Address, p.Port)
 					return
 				}
 			}
@@ -163,11 +166,13 @@ func (p *ExclusivePool) Get() (connection interface{}, err error) {
 
 func (p *ExclusivePool) Put(connection interface{}) (err error) {
 
+	id := genUniqueId(context.Background())
+
 	if connection != nil {
 		if p.isStopped {
 			err := p.Close(context.TODO(), connection)
 			if err != nil {
-				p.Logger.Errorf("addr:%v => Put conn => Close conn failed,err:%v", p.Address, err.Error())
+				p.Logger.Errorf("id:%v,addr:%v => Put conn => Close conn failed,err:%v", id, p.Address, err.Error())
 				return err
 			}
 		} else {
@@ -183,19 +188,25 @@ func (p *ExclusivePool) Put(connection interface{}) (err error) {
 }
 
 func (p *ExclusivePool) Release() {
+
+	id := genUniqueId(context.Background())
+
 	p.isStopped = true
 
 	for connection := range p.alivePool {
 		if err := p.Close(context.TODO(), connection); err != nil {
-			p.Logger.Infof("addr:%v => Release connection error:%v", p.Address, err)
+			p.Logger.Infof("id:%v,addr:%v => Release connection error:%v", id, p.Address, err)
 		}
 		atomic.SwapInt32(&p.workConnCount, p.workConnCount-1)
 	}
 }
 
 func (p *ExclusivePool) retryLoop() {
-	p.Logger.Infof("addr:%v => retry loop start.", p.Address)
-	defer p.Logger.Infof("addr:%v => retry loop end.", p.Address)
+
+	id := genUniqueId(context.Background())
+
+	p.Logger.Infof("id:%v,addr:%v => retry loop start.", id, p.Address)
+	defer p.Logger.Infof("id:%v,addr:%v => retry loop end.", id, p.Address)
 
 	for {
 		select {
@@ -206,9 +217,9 @@ func (p *ExclusivePool) retryLoop() {
 					if connection, err := p.Dial(context.TODO(), p.Address, p.Port); err == nil {
 						<-p.retryPool
 						p.alivePool <- connection
-						p.Logger.Infof("addr:%v => Retry Pool Success.", p.Address)
+						p.Logger.Infof("id:%v,addr:%v => Retry Pool Success.", id, p.Address)
 					} else {
-						p.Logger.Errorf("addr:%v => Retry Pool Failed.", p.Address)
+						p.Logger.Errorf("id:%v,addr:%v => Retry Pool Failed.", id, p.Address)
 					}
 				}
 
@@ -222,8 +233,10 @@ func (p *ExclusivePool) retryLoop() {
 
 func (p *ExclusivePool) keepAliveLoop() {
 
-	p.Logger.Infof("addr:%v => keepAlive loop start.", p.Address)
-	defer p.Logger.Infof("addr:%v => keepAlive loop end.", p.Address)
+	id := genUniqueId(context.Background())
+
+	p.Logger.Infof("id:%v,addr:%v => keepAlive loop start.", id, p.Address)
+	defer p.Logger.Infof("id:%v,addr:%v => keepAlive loop end.", id, p.Address)
 
 	for {
 		select {
@@ -234,8 +247,8 @@ func (p *ExclusivePool) keepAliveLoop() {
 						if err := p.KeepAlive(context.TODO(), connection); err == nil {
 							p.swapPool <- connection
 						} else {
-							p.Logger.Errorf("addr:%v => Keepalive Pool Failed on %v\n",
-								p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
+							p.Logger.Errorf("id:%v,addr:%v => Keepalive Pool Failed on %v\n",
+								id, p.Address, fmt.Sprintf("%v:%v", p.Address, p.Port))
 							p.retryPool <- 0
 						}
 
@@ -271,20 +284,22 @@ func (p *ExclusivePool) keepAliveLoop() {
 
 func (p *ExclusivePool) clean() {
 
-	p.Logger.Infof("addr:%v => clean loop start.", p.Address)
-	defer p.Logger.Infof("addr:%v => clean loop end.", p.Address)
+	id := genUniqueId(context.Background())
+
+	p.Logger.Infof("id:%v,addr:%v => clean loop start.", id, p.Address)
+	defer p.Logger.Infof("id:%v,addr:%v => clean loop end.", id, p.Address)
 
 	for {
 		select {
 		case <-time.After(p.CleanInterval):
 			{
 				if len(p.retryPool) > 0 {
-					p.Logger.Infof("addr:%v the pool is retrying, skip.", p.Address)
+					p.Logger.Infof("id:%v,addr:%v the pool is retrying, skip.", id, p.Address)
 					break
 				}
 
 				if atomic.LoadInt32(&p.newlyConnCount) > 0 {
-					p.Logger.Infof("addr:%v the pool is at high load, skip.", p.Address)
+					p.Logger.Infof("id:%v,addr:%v the pool is at high load, skip.", id, p.Address)
 					atomic.StoreInt32(&p.newlyConnCount, 0)
 					break
 				}
@@ -293,16 +308,16 @@ func (p *ExclusivePool) clean() {
 					select {
 					case connection := <-p.alivePool:
 						{
-							p.Logger.Infof("addr:%v cleaning conn from alivePool.", p.Address)
+							p.Logger.Infof("id:%v,addr:%v cleaning conn from alivePool.", id, p.Address)
 							if err := p.Close(context.TODO(), connection); err != nil {
-								p.Logger.Infof("addr:%v => cleaning connection error:%v", p.Address, err)
+								p.Logger.Infof("id:%v,addr:%v => cleaning connection error:%v", id, p.Address, err)
 							}
 						}
 					case connection := <-p.swapPool:
 						{
-							p.Logger.Infof("addr:%v cleaning conn from swapPool.", p.Address)
+							p.Logger.Infof("id:%v,addr:%v cleaning conn from swapPool.", id, p.Address)
 							if err := p.Close(context.TODO(), connection); err != nil {
-								p.Logger.Infof("addr:%v => cleaning connection error:%v", p.Address, err)
+								p.Logger.Infof("id:%v,addr:%v => cleaning connection error:%v", id, p.Address, err)
 							}
 						}
 					}

@@ -49,7 +49,7 @@ func Do(userFn UserFunc, opts ...Option) error {
 			select {
 			case <-time.After(delayTime):
 			case <-config.context.Done():
-				return config.context.Err()
+				return append(errorLog, config.context.Err())
 			}
 
 		} else {
