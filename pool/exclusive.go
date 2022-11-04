@@ -139,7 +139,7 @@ func (p *ExclusivePool) Get() (connection interface{}, err error) {
 			}
 
 			retry := 0
-			for retry < p.DialRetryCount {
+			for retry < p.DialRetryCount+1 {
 				if connection, err = p.Dial(context.TODO(), p.Address, p.Port); err != nil {
 					p.Logger.Errorf("id:%v,addr:%v => get conn => Dial %v:%v failed,err:%v",
 						id, p.Address, p.Address, p.Port, err.Error())
