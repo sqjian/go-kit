@@ -4,10 +4,10 @@ import (
 	"context"
 )
 
-func NewPool(ctx context.Context, opts ...Option) (Pool, error) {
+func NewPool(ctx context.Context, opts ...OptionFunc) (Pool, error) {
 	cfg := newDefaultCfg()
 	for _, opt := range opts {
-		opt.apply(cfg)
+		opt(cfg)
 	}
 
 	switch cfg.PoolType {

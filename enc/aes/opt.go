@@ -6,8 +6,8 @@ type Option interface {
 
 type optionFunc func(*aes)
 
-func (f optionFunc) apply(aes *aes) {
-	f(aes)
+func (f optionFunc) apply(a *aes) {
+	f(a)
 }
 
 func WithAesMode(mode Mode) Option {

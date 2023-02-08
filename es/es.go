@@ -20,11 +20,11 @@ type Cli struct {
 	debugLogger elastic.Logger
 }
 
-func newEsCli(opts ...Option) (*Cli, error) {
+func newEsCli(opts ...OptionFunc) (*Cli, error) {
 	cli := &Cli{}
 
 	for _, opt := range opts {
-		opt.apply(cli)
+		opt(cli)
 	}
 
 	if len(cli.meta.hosts) == 0 {

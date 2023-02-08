@@ -7,10 +7,5 @@ import (
 )
 
 func TestStringifyMultiLine(t *testing.T) {
-	fmt.Println(splash.Stringify(
-		"xxx",
-		"xxx",
-		"xxx",
-		"xxx",
-	))
+	fmt.Println(splash.Stringify("xxx", "xxx", "xxx", "xxx"))
 }

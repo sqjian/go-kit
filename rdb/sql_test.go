@@ -2,7 +2,7 @@ package rdb_test
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/rdb"
 	"testing"
 	"time"
@@ -26,7 +26,7 @@ func init() {
 		rdb.WithMaxLifeTime(time.Second),
 		rdb.WithMaxIdleConns(3),
 		rdb.WithDbName("test"),
-		rdb.WithLogger(easylog.DebugLogger),
+		rdb.WithLogger(log.TerminalLogger{}),
 	)
 	checkErr(dbErr)
 
@@ -35,7 +35,7 @@ func init() {
 
 func Test_Insert(t *testing.T) {
 	ctx := context.WithValue(context.Background(), "id", 1)
-	easylog.Debugf("begin to insert data.")
+	log.TerminalLogger{}.Debugf("begin to insert data.")
 	t.Log(db.Insert(ctx, "test", map[string]interface{}{"age": 1}))
 }
 

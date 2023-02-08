@@ -2,7 +2,7 @@ package retry
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"time"
 )
 
@@ -18,7 +18,7 @@ type Config struct {
 	onRetry   OnRetryFunc
 	delayType DelayTypeFunc
 	context   context.Context
-	logger    easylog.API
+	logger    log.API
 }
 
 type Option func(*Config)

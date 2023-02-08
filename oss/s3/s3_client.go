@@ -20,28 +20,28 @@ type Client interface {
 }
 
 type S3clientOpt interface {
-	apply(*s3client)
+	apply(*S3client)
 }
 
-type s3clientOptFn func(*s3client)
+type s3clientOptFn func(*S3client)
 
-func (f s3clientOptFn) apply(cli *s3client) {
+func (f s3clientOptFn) apply(cli *S3client) {
 	f(cli)
 }
 
 func WithAwsConfig(awsConfig *aws.Config) S3clientOpt {
-	return s3clientOptFn(func(cli *s3client) {
+	return s3clientOptFn(func(cli *S3client) {
 		cli.meta.awsConfig = awsConfig
 	})
 }
 
 func WithProgressOutput(progressOutput io.Writer) S3clientOpt {
-	return s3clientOptFn(func(cli *s3client) {
+	return s3clientOptFn(func(cli *S3client) {
 		cli.meta.progressOutput = progressOutput
 	})
 }
 
-type s3client struct {
+type S3client struct {
 	meta struct {
 		awsConfig      *aws.Config
 		progressOutput io.Writer
@@ -49,12 +49,12 @@ type s3client struct {
 	cli *s3.Client
 }
 
-func initS3client() *s3client {
-	s3m := &s3client{}
+func initS3client() *S3client {
+	s3m := &S3client{}
 	return s3m
 }
 
-func NewS3Cli(opts ...S3clientOpt) (*s3client, error) {
+func NewS3Cli(opts ...S3clientOpt) (*S3client, error) {
 	s3c := initS3client()
 	{
 		for _, opt := range opts {
@@ -78,7 +78,7 @@ func NewS3Cli(opts ...S3clientOpt) (*s3client, error) {
 	return s3c, nil
 }
 
-func (c *s3client) BucketFiles(ctx context.Context, bucketName string, directoryPrefix string) ([]string, error) {
+func (c *S3client) BucketFiles(ctx context.Context, bucketName string, directoryPrefix string) ([]string, error) {
 	if !strings.HasSuffix(directoryPrefix, "/") {
 		directoryPrefix = directoryPrefix + "/"
 	}
@@ -106,7 +106,7 @@ type BucketListChunk struct {
 	Paths             []string
 }
 
-func (c *s3client) chunkedBucketList(ctx context.Context, bucketName string, prefix string, continuationToken *string) (BucketListChunk, error) {
+func (c *S3client) chunkedBucketList(ctx context.Context, bucketName string, prefix string, continuationToken *string) (BucketListChunk, error) {
 	response, err := c.cli.ListObjectsV2(
 		ctx,
 		&s3.ListObjectsV2Input{
@@ -134,7 +134,7 @@ func (c *s3client) chunkedBucketList(ctx context.Context, bucketName string, pre
 		Paths:             paths,
 	}, nil
 }
-func (c *s3client) newProgressBar(total int64) *pb.ProgressBar {
+func (c *S3client) newProgressBar(total int64) *pb.ProgressBar {
 	progress := pb.New64(total)
 
 	progress.Output = c.meta.progressOutput
@@ -145,7 +145,7 @@ func (c *s3client) newProgressBar(total int64) *pb.ProgressBar {
 	return progress.SetWidth(80)
 }
 
-func (c *s3client) UploadFile(ctx context.Context, bucketName string, remotePath string, localFile fs.File) error {
+func (c *S3client) UploadFile(ctx context.Context, bucketName string, remotePath string, localFile fs.File) error {
 	uploader := manager.NewUploader(c.cli)
 
 	stat, err := localFile.Stat()
@@ -165,7 +165,7 @@ func (c *s3client) UploadFile(ctx context.Context, bucketName string, remotePath
 	return err
 }
 
-func (c *s3client) DownloadFile(ctx context.Context, bucketName string, remotePath string, localFile io.WriterAt) error {
+func (c *S3client) DownloadFile(ctx context.Context, bucketName string, remotePath string, localFile io.WriterAt) error {
 	object, err := c.cli.HeadObject(
 		ctx,
 		&s3.HeadObjectInput{
@@ -218,7 +218,7 @@ func (c *s3client) DownloadFile(ctx context.Context, bucketName string, remotePa
 	}
 	return safeDown()
 }
-func (c *s3client) DeleteFile(ctx context.Context, bucketName string, remotePath string) error {
+func (c *S3client) DeleteFile(ctx context.Context, bucketName string, remotePath string) error {
 	_, err := c.cli.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(remotePath),

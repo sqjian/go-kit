@@ -3,7 +3,7 @@ package pool_test
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/pool"
 	"net"
 	"testing"
@@ -16,13 +16,13 @@ func TestExclusivePool(t *testing.T) {
 		}
 	}
 
-	logger, loggerErr := easylog.NewLogger(
-		easylog.WithFileName("go-kit.easylog"),
-		easylog.WithMaxSize(3),
-		easylog.WithMaxBackups(3),
-		easylog.WithMaxAge(3),
-		easylog.WithLevel(easylog.Warn),
-		easylog.WithConsole(false),
+	logger, loggerErr := log.NewLogger(
+		log.WithFileName("go-kit.easylog"),
+		log.WithMaxSize(3),
+		log.WithMaxBackups(3),
+		log.WithMaxAge(3),
+		log.WithLevel(log.Warn),
+		log.WithConsole(false),
 	)
 
 	checkErr(loggerErr)
@@ -31,7 +31,7 @@ func TestExclusivePool(t *testing.T) {
 		address = "www.baidu.com"
 		port    = "80"
 	)
-	pool, poolErr := pool.NewPool(
+	p, e := pool.NewPool(
 		context.TODO(),
 		pool.WithType(pool.Exclusive),
 		pool.WithAddress(address),
@@ -54,9 +54,9 @@ func TestExclusivePool(t *testing.T) {
 		pool.WithLogger(logger),
 	)
 
-	checkErr(poolErr)
+	checkErr(e)
 
-	conn, connErr := pool.Get()
+	conn, connErr := p.Get()
 	checkErr(connErr)
 	t.Log(conn.(net.Conn).RemoteAddr().String())
 }

@@ -2,7 +2,7 @@ package pool
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"time"
 )
 
@@ -17,7 +17,7 @@ var (
 func newDefaultCfg() *Cfg {
 	return &Cfg{
 		PoolType:          Exclusive,
-		Logger:            easylog.DummyLogger,
+		Logger:            log.DummyLogger{},
 		KeepAliveInterval: DefaultKeepAliveInterval,
 		CreateNewInterval: DefaultCreateNewInterval,
 		DialRetryCount:    DefaultDialRetryCount,
@@ -41,105 +41,97 @@ type Cfg struct {
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
 	CreateNewInterval time.Duration
-	Logger            easylog.API
-}
-
-type Option interface {
-	apply(*Cfg)
+	Logger            log.API
 }
 
 type OptionFunc func(*Cfg)
 
-func (f OptionFunc) apply(options *Cfg) {
-	f(options)
-}
-
-func WithType(poolType Type) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithType(poolType Type) OptionFunc {
+	return func(options *Cfg) {
 		options.PoolType = poolType
-	})
+	}
 }
 
-func WithAddress(Address string) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithAddress(Address string) OptionFunc {
+	return func(options *Cfg) {
 		options.Address = Address
-	})
+	}
 }
 
-func WithPort(Port string) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithPort(Port string) OptionFunc {
+	return func(options *Cfg) {
 		options.Port = Port
-	})
+	}
 }
 
-func WithDial(Dial func(ctx context.Context, address, port string) (connection interface{}, err error)) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithDial(Dial func(ctx context.Context, address, port string) (connection interface{}, err error)) OptionFunc {
+	return func(options *Cfg) {
 		options.Dial = Dial
-	})
+	}
 }
 
-func WithClose(Close func(ctx context.Context, connection interface{}) (err error)) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithClose(Close func(ctx context.Context, connection interface{}) (err error)) OptionFunc {
+	return func(options *Cfg) {
 		options.Close = Close
-	})
+	}
 }
 
-func WithKeepAlive(KeepAlive func(ctx context.Context, connection interface{}) (err error)) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithKeepAlive(KeepAlive func(ctx context.Context, connection interface{}) (err error)) OptionFunc {
+	return func(options *Cfg) {
 		options.KeepAlive = KeepAlive
-	})
+	}
 }
 
-func WithInitialPoolSize(InitialPoolSize int) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithInitialPoolSize(InitialPoolSize int) OptionFunc {
+	return func(options *Cfg) {
 		options.InitialPoolSize = InitialPoolSize
-	})
+	}
 }
 
-func WithBestPoolSize(BestPoolSize int) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithBestPoolSize(BestPoolSize int) OptionFunc {
+	return func(options *Cfg) {
 		options.BestPoolSize = BestPoolSize
-	})
+	}
 }
 
-func WithMaxPoolSize(MaxPoolSize int) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithMaxPoolSize(MaxPoolSize int) OptionFunc {
+	return func(options *Cfg) {
 		options.MaxPoolSize = MaxPoolSize
-	})
+	}
 }
 
-func WithDialRetryCount(DialRetryCount int) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithDialRetryCount(DialRetryCount int) OptionFunc {
+	return func(options *Cfg) {
 		options.DialRetryCount = DialRetryCount
-	})
+	}
 }
 
-func WithKeepAliveInterval(KeepAliveInterval time.Duration) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithKeepAliveInterval(KeepAliveInterval time.Duration) OptionFunc {
+	return func(options *Cfg) {
 		options.KeepAliveInterval = KeepAliveInterval
-	})
+	}
 }
 
-func WithCleanInterval(CleanInterval time.Duration) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithCleanInterval(CleanInterval time.Duration) OptionFunc {
+	return func(options *Cfg) {
 		options.CleanInterval = CleanInterval
-	})
+	}
 }
 
-func WithDialRetryInterval(DialRetryInterval time.Duration) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithDialRetryInterval(DialRetryInterval time.Duration) OptionFunc {
+	return func(options *Cfg) {
 		options.DialRetryInterval = DialRetryInterval
-	})
+	}
 }
 
-func WithCreateNewInterval(CreateNewInterval time.Duration) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithCreateNewInterval(CreateNewInterval time.Duration) OptionFunc {
+	return func(options *Cfg) {
 		options.CreateNewInterval = CreateNewInterval
-	})
+	}
 }
 
-func WithLogger(Logger easylog.API) Option {
-	return OptionFunc(func(options *Cfg) {
+func WithLogger(Logger log.API) OptionFunc {
+	return func(options *Cfg) {
 		options.Logger = Logger
-	})
+	}
 }

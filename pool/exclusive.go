@@ -3,7 +3,7 @@ package pool
 import (
 	"context"
 	"fmt"
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"sync/atomic"
 	"time"
 )
@@ -39,7 +39,7 @@ type ExclusivePool struct {
 	KeepAliveInterval time.Duration
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
-	Logger            easylog.API
+	Logger            log.API
 
 	workConnCount  int32
 	newlyConnCount int32

@@ -21,12 +21,12 @@ func newDefaultOssManager() *OssManager {
 	return &OssManager{}
 }
 
-func NewOssCli(opts ...Option) (*OssManager, error) {
+func NewOssCli(opts ...OptionFunc) (*OssManager, error) {
 	ossM := newDefaultOssManager()
 
 	{
 		for _, opt := range opts {
-			opt.apply(ossM)
+			opt(ossM)
 		}
 		switch {
 		case len(ossM.meta.key) == 0:

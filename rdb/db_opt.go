@@ -1,64 +1,56 @@
 package rdb
 
 import (
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"time"
 )
 
-type MetaOption interface {
-	apply(*DbMeta)
-}
+type MetaOptionFunc func(*Meta)
 
-type metaOptionFunc func(*DbMeta)
-
-func (f metaOptionFunc) apply(d *DbMeta) {
-	f(d)
-}
-
-func WithLogger(logger easylog.API) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithLogger(logger log.API) MetaOptionFunc {
+	return func(m *Meta) {
 		m.Logger = logger
-	})
+	}
 }
 
-func WithUserName(UserName string) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithUserName(UserName string) MetaOptionFunc {
+	return func(m *Meta) {
 		m.UserName = UserName
-	})
+	}
 }
 
-func WithPassWord(PassWord string) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithPassWord(PassWord string) MetaOptionFunc {
+	return func(m *Meta) {
 		m.PassWord = PassWord
-	})
+	}
 }
 
-func WithIp(ip string) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithIp(ip string) MetaOptionFunc {
+	return func(m *Meta) {
 		m.IP = ip
-	})
+	}
 }
 
-func WithPort(port string) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithPort(port string) MetaOptionFunc {
+	return func(m *Meta) {
 		m.Port = port
-	})
+	}
 }
 
-func WithDbName(dbName string) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithDbName(dbName string) MetaOptionFunc {
+	return func(m *Meta) {
 		m.DbName = dbName
-	})
+	}
 }
 
-func WithMaxIdleConns(MaxIdleConns int) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithMaxIdleConns(MaxIdleConns int) MetaOptionFunc {
+	return func(m *Meta) {
 		m.MaxIdleConns = MaxIdleConns
-	})
+	}
 }
 
-func WithMaxLifeTime(MaxLifeTime time.Duration) MetaOption {
-	return metaOptionFunc(func(m *DbMeta) {
+func WithMaxLifeTime(MaxLifeTime time.Duration) MetaOptionFunc {
+	return func(m *Meta) {
 		m.MaxLifeTime = MaxLifeTime
-	})
+	}
 }

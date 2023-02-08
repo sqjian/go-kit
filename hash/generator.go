@@ -26,12 +26,12 @@ func (g *generator) Calc(keyType KeyType, data []byte) (string, error) {
 	return "", ErrWrapper(IllegalKeyType)
 }
 
-func NewGenerator(opts ...Option) (Generator, error) {
+func NewGenerator(opts ...OptionFunc) (Generator, error) {
 
 	generatorInst := new(generator)
 
 	for _, opt := range opts {
-		opt.apply(generatorInst)
+		opt(generatorInst)
 	}
 	return generatorInst, nil
 }

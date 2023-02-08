@@ -8,16 +8,16 @@ import (
 )
 
 type Rdb struct {
-	meta *DbMeta
+	meta *Meta
 
 	db          *sqlx.DB
 	placeHolder string
 }
 
-func NewRdb(dbType Type, opts ...MetaOption) (*Rdb, error) {
+func NewRdb(dbType Type, opts ...MetaOptionFunc) (*Rdb, error) {
 	meta := newMeta()
 	for _, opt := range opts {
-		opt.apply(meta)
+		opt(meta)
 	}
 
 	rdbInst := &Rdb{meta: meta}

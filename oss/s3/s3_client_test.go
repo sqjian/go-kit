@@ -80,6 +80,7 @@ func Test_S3_UploadFile(t *testing.T) {
 		checkErr(err)
 	}
 }
+
 func Test_S3_DownloadFile(t *testing.T) {
 	checkErr := func(err error) {
 		if err != nil {

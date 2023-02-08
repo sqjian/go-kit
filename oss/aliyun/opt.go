@@ -1,29 +1,21 @@
 package aliyun
 
-type Option interface {
-	apply(*OssManager)
+type OptionFunc func(*OssManager)
+
+func WithAddr(addr string) OptionFunc {
+	return func(o *OssManager) {
+		o.meta.addr = addr
+	}
 }
 
-type optionFunc func(*OssManager)
-
-func (f optionFunc) apply(s3 *OssManager) {
-	f(s3)
+func WithKey(key string) OptionFunc {
+	return func(o *OssManager) {
+		o.meta.key = key
+	}
 }
 
-func WithAddr(addr string) Option {
-	return optionFunc(func(cli *OssManager) {
-		cli.meta.addr = addr
-	})
-}
-
-func WithKey(key string) Option {
-	return optionFunc(func(cli *OssManager) {
-		cli.meta.key = key
-	})
-}
-
-func WithSecret(secret string) Option {
-	return optionFunc(func(cli *OssManager) {
-		cli.meta.secret = secret
-	})
+func WithSecret(secret string) OptionFunc {
+	return func(o *OssManager) {
+		o.meta.secret = secret
+	}
 }

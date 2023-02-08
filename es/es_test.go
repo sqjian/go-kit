@@ -2,7 +2,7 @@ package es
 
 import (
 	"context"
-	"github.com/sqjian/go-kit/net/easyhttp"
+	"github.com/sqjian/go-kit/net/http"
 	"strings"
 	"testing"
 )
@@ -26,7 +26,7 @@ func Test_Es(t *testing.T) {
 	cli, esCLiErr := newEsCli(
 		WithHosts(esAddr),
 		WithDebugInfo(true),
-		WithHttpClient(easyhttp.GetDefaultHttpClient()),
+		WithHttpClient(http.GetDefaultHttpClient()),
 	)
 	checkErr(esCLiErr)
 

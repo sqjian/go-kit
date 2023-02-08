@@ -16,12 +16,12 @@ func newDefaultValidatorConfig() *validator {
 	return &validator{}
 }
 
-func NewValidator(opts ...Option) (Validator, error) {
+func NewValidator(opts ...OptionFunc) (Validator, error) {
 
 	configInst := newDefaultValidatorConfig()
 
 	for _, opt := range opts {
-		opt.apply(configInst)
+		opt(configInst)
 	}
 
 	switch configInst.validatorType {

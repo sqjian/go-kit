@@ -1,11 +1,11 @@
 package rdb
 
 import (
-	"github.com/sqjian/go-kit/easylog"
+	"github.com/sqjian/go-kit/log"
 	"time"
 )
 
-type DbMeta struct {
+type Meta struct {
 	IP       string
 	Port     string
 	DbName   string
@@ -15,21 +15,21 @@ type DbMeta struct {
 	MaxIdleConns int
 	MaxLifeTime  time.Duration
 
-	Logger easylog.API
+	Logger log.API
 }
 
-func newDefaultMeta() *DbMeta {
-	return &DbMeta{
-		Logger: easylog.DummyLogger,
+func newDefaultMeta() *Meta {
+	return &Meta{
+		Logger: log.DummyLogger{},
 	}
 }
 
-func newMeta(opts ...MetaOption) *DbMeta {
+func newMeta(opts ...MetaOptionFunc) *Meta {
 
 	meta := newDefaultMeta()
 
 	for _, opt := range opts {
-		opt.apply(meta)
+		opt(meta)
 	}
 	return meta
 }
