@@ -6,18 +6,10 @@ import (
 )
 
 const splash = `
---------------------------------
-   / \__
-  (    @\___
-  /         O
- /   (_____/
-/_____/   U
-
-GitTag: {{if .GitTag}}{{.GitTag}}{{else}}Unknown{{end}}
-GitCommitLog: {{if .GitCommitLog}}{{.GitCommitLog}}{{else}}Unknown{{end}}
-BuildTime: {{if .BuildTime}}{{.BuildTime}}{{else}}Unknown{{end}}
-BuildGoVersion: {{if .BuildGoVersion}}{{.BuildGoVersion}}{{else}}Unknown{{end}}
---------------------------------
+-> GitTag: {{if .GitTag}}{{.GitTag}}{{else}}Unknown{{end}}
+-> GitCommitLog: {{if .GitCommitLog}}{{.GitCommitLog}}{{else}}Unknown{{end}}
+-> BuildTime: {{if .BuildTime}}{{.BuildTime}}{{else}}Unknown{{end}}
+-> BuildGoVersion: {{if .BuildGoVersion}}{{.BuildGoVersion}}{{else}}Unknown{{end}}
 `
 
 var (
