@@ -31,18 +31,18 @@ func (f s3clientOptFn) apply(cli *S3client) {
 
 func WithAwsConfig(awsConfig *aws.Config) S3clientOpt {
 	return s3clientOptFn(func(cli *S3client) {
-		cli.meta.awsConfig = awsConfig
+		cli.config.awsConfig = awsConfig
 	})
 }
 
 func WithProgressOutput(progressOutput io.Writer) S3clientOpt {
 	return s3clientOptFn(func(cli *S3client) {
-		cli.meta.progressOutput = progressOutput
+		cli.config.progressOutput = progressOutput
 	})
 }
 
 type S3client struct {
-	meta struct {
+	config struct {
 		awsConfig      *aws.Config
 		progressOutput io.Writer
 	}
@@ -61,15 +61,15 @@ func NewS3Cli(opts ...S3clientOpt) (*S3client, error) {
 			opt.apply(s3c)
 		}
 		switch {
-		case s3c.meta.awsConfig == nil:
+		case s3c.config.awsConfig == nil:
 			return nil, errWrapper(IllegalParams)
-		case s3c.meta.progressOutput == nil:
+		case s3c.config.progressOutput == nil:
 			return nil, errWrapper(IllegalParams)
 		}
 	}
 
 	s3c.cli = s3.NewFromConfig(
-		*s3c.meta.awsConfig,
+		*s3c.config.awsConfig,
 		func(options *s3.Options) {
 			options.UsePathStyle = true
 		},
@@ -137,7 +137,7 @@ func (c *S3client) chunkedBucketList(ctx context.Context, bucketName string, pre
 func (c *S3client) newProgressBar(total int64) *pb.ProgressBar {
 	progress := pb.New64(total)
 
-	progress.Output = c.meta.progressOutput
+	progress.Output = c.config.progressOutput
 	progress.ShowSpeed = true
 	progress.Units = pb.U_BYTES
 	progress.NotPrint = true

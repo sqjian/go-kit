@@ -55,7 +55,7 @@ func TestBuilder(t *testing.T) {
 		log.WithMaxAge(3),
 		log.WithLevel(log.Info),
 		log.WithConsole(false),
-		log.WithBuilder(func(_ *log.Meta) (log.API, error) {
+		log.WithBuilder(func(_ *log.Config) (log.API, error) {
 			return &Builder{}, nil
 		}),
 	)

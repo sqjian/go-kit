@@ -5,52 +5,52 @@ import (
 	"time"
 )
 
-type MetaOptionFunc func(*Meta)
+type ConfigOptionFunc func(*Config)
 
-func WithLogger(logger log.API) MetaOptionFunc {
-	return func(m *Meta) {
+func WithLogger(logger log.API) ConfigOptionFunc {
+	return func(m *Config) {
 		m.Logger = logger
 	}
 }
 
-func WithUserName(UserName string) MetaOptionFunc {
-	return func(m *Meta) {
+func WithUserName(UserName string) ConfigOptionFunc {
+	return func(m *Config) {
 		m.UserName = UserName
 	}
 }
 
-func WithPassWord(PassWord string) MetaOptionFunc {
-	return func(m *Meta) {
+func WithPassWord(PassWord string) ConfigOptionFunc {
+	return func(m *Config) {
 		m.PassWord = PassWord
 	}
 }
 
-func WithIp(ip string) MetaOptionFunc {
-	return func(m *Meta) {
+func WithIp(ip string) ConfigOptionFunc {
+	return func(m *Config) {
 		m.IP = ip
 	}
 }
 
-func WithPort(port string) MetaOptionFunc {
-	return func(m *Meta) {
+func WithPort(port string) ConfigOptionFunc {
+	return func(m *Config) {
 		m.Port = port
 	}
 }
 
-func WithDbName(dbName string) MetaOptionFunc {
-	return func(m *Meta) {
+func WithDbName(dbName string) ConfigOptionFunc {
+	return func(m *Config) {
 		m.DbName = dbName
 	}
 }
 
-func WithMaxIdleConns(MaxIdleConns int) MetaOptionFunc {
-	return func(m *Meta) {
+func WithMaxIdleConns(MaxIdleConns int) ConfigOptionFunc {
+	return func(m *Config) {
 		m.MaxIdleConns = MaxIdleConns
 	}
 }
 
-func WithMaxLifeTime(MaxLifeTime time.Duration) MetaOptionFunc {
-	return func(m *Meta) {
+func WithMaxLifeTime(MaxLifeTime time.Duration) ConfigOptionFunc {
+	return func(m *Config) {
 		m.MaxLifeTime = MaxLifeTime
 	}
 }

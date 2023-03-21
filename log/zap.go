@@ -10,10 +10,10 @@ import (
 	"sync/atomic"
 )
 
-func newZapLogger(meta *Meta) (*zapLogger, error) {
+func newZapLogger(config *Config) (*zapLogger, error) {
 
 	zapInst := &zapLogger{
-		meta: meta,
+		config: config,
 	}
 
 	err := zapInst.init()
@@ -25,7 +25,7 @@ func newZapLogger(meta *Meta) (*zapLogger, error) {
 }
 
 type zapLogger struct {
-	meta   *Meta
+	config *Config
 	ready  bool
 	Logger *zap.SugaredLogger
 }
@@ -33,7 +33,7 @@ type zapLogger struct {
 func (l *zapLogger) String() string {
 
 	m := make(map[string]interface{})
-	m["meta"] = l.meta
+	m["config"] = l.config
 	res, _ := json.Marshal(m)
 
 	return string(res)
@@ -45,7 +45,7 @@ func (l *zapLogger) SetLevelOTF(Level Level) error {
 		return fmt.Errorf("zapLogger not ready,please init first")
 	}
 
-	atomic.StoreInt64((*int64)(&l.meta.Level), int64(Level))
+	atomic.StoreInt64((*int64)(&l.config.Level), int64(Level))
 
 	l.Errorf("reset the level,params:%v", l)
 
@@ -61,11 +61,11 @@ func (l *zapLogger) init() (err error) {
 	}()
 
 	userFilePriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		if l.meta.Level == Dummy {
+		if l.config.Level == Dummy {
 			return false
 		}
 		return lvl >= func() zapcore.Level {
-			switch l.meta.Level {
+			switch l.config.Level {
 			case Debug:
 				{
 					return zapcore.DebugLevel
@@ -94,10 +94,10 @@ func (l *zapLogger) init() (err error) {
 	})
 
 	fileLogRotateUserWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   l.meta.FileName,
-		MaxSize:    l.meta.MaxSize,
-		MaxBackups: l.meta.MaxBackups,
-		MaxAge:     l.meta.MaxAge,
+		Filename:   l.config.FileName,
+		MaxSize:    l.config.MaxSize,
+		MaxBackups: l.config.MaxBackups,
+		MaxAge:     l.config.MaxAge,
 	})
 
 	consoleWriter := zapcore.Lock(os.Stdout)
@@ -118,7 +118,7 @@ func (l *zapLogger) init() (err error) {
 
 	var core zapcore.Core
 	switch {
-	case l.meta.Console:
+	case l.config.Console:
 		{
 			core = zapcore.NewTee(
 				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userFilePriority),
@@ -135,8 +135,8 @@ func (l *zapLogger) init() (err error) {
 
 	l.Logger = zap.New(
 		core,
-		zap.WithCaller(l.meta.Caller),
-		zap.AddCallerSkip(l.meta.CallerSkip),
+		zap.WithCaller(l.config.Caller),
+		zap.AddCallerSkip(l.config.CallerSkip),
 		zap.Fields(
 			zapcore.Field{
 				Key:     "pid",

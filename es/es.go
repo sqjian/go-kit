@@ -9,7 +9,7 @@ import (
 )
 
 type Cli struct {
-	meta struct {
+	config struct {
 		cli   *http.Client
 		debug bool
 		hosts []string
@@ -27,17 +27,17 @@ func newEsCli(opts ...OptionFunc) (*Cli, error) {
 		opt(cli)
 	}
 
-	if len(cli.meta.hosts) == 0 {
+	if len(cli.config.hosts) == 0 {
 		return nil, ErrWrapper(IllegalParams)
 	}
-	if cli.meta.debug {
+	if cli.config.debug {
 		cli.debugLogger = log.New(os.Stderr, "", log.LstdFlags)
 	}
 	esCli, err := elastic.NewClient(
-		elastic.SetURL(cli.meta.hosts...),
+		elastic.SetURL(cli.config.hosts...),
 		elastic.SetSniff(false),
 		elastic.SetTraceLog(cli.debugLogger),
-		elastic.SetHttpClient(cli.meta.cli),
+		elastic.SetHttpClient(cli.config.cli),
 	)
 	if err != nil {
 		return nil, err

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Meta struct {
+type Config struct {
 	IP       string
 	Port     string
 	DbName   string
@@ -18,18 +18,18 @@ type Meta struct {
 	Logger log.API
 }
 
-func newDefaultMeta() *Meta {
-	return &Meta{
+func newDefaultConfig() *Config {
+	return &Config{
 		Logger: log.DummyLogger{},
 	}
 }
 
-func newMeta(opts ...MetaOptionFunc) *Meta {
+func newConfig(opts ...ConfigOptionFunc) *Config {
 
-	meta := newDefaultMeta()
+	config := newDefaultConfig()
 
 	for _, opt := range opts {
-		opt(meta)
+		opt(config)
 	}
-	return meta
+	return config
 }

@@ -1,6 +1,6 @@
 package log
 
-type Meta struct {
+type Config struct {
 	FileName   string /*日志的名字*/
 	MaxSize    int    /*日志大小，单位MB*/
 	MaxBackups int    /*日志备份个数*/
@@ -10,36 +10,36 @@ type Meta struct {
 	Caller     bool
 	CallerSkip int
 
-	builder func(*Meta) (API, error)
+	builder func(*Config) (API, error)
 }
 
-func newDefaultMeta() *Meta {
-	return &Meta{
+func newDefaultConfig() *Config {
+	return &Config{
 		CallerSkip: 1,
 	}
 }
 
 func NewLogger(opts ...OptionFunc) (API, error) {
 
-	meta := newDefaultMeta()
+	config := newDefaultConfig()
 
 	for _, opt := range opts {
-		opt(meta)
+		opt(config)
 	}
 
 	switch {
-	case len(meta.FileName) == 0:
+	case len(config.FileName) == 0:
 		return nil, ErrWrapper(IllegalParams)
-	case meta.MaxSize == 0:
+	case config.MaxSize == 0:
 		return nil, ErrWrapper(IllegalParams)
-	case meta.MaxAge == 0:
+	case config.MaxAge == 0:
 		return nil, ErrWrapper(IllegalParams)
-	case meta.Level == UnknownLevel:
+	case config.Level == UnknownLevel:
 		return nil, ErrWrapper(IllegalParams)
 	}
 
-	if meta.builder != nil {
-		return meta.builder(meta)
+	if config.builder != nil {
+		return config.builder(config)
 	}
-	return newZapLogger(meta)
+	return newZapLogger(config)
 }

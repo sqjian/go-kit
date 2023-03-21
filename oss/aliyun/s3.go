@@ -8,7 +8,7 @@ import (
 )
 
 type OssManager struct {
-	meta struct {
+	config struct {
 		addr   string
 		key    string
 		secret string
@@ -29,16 +29,16 @@ func NewOssCli(opts ...OptionFunc) (*OssManager, error) {
 			opt(ossM)
 		}
 		switch {
-		case len(ossM.meta.key) == 0:
+		case len(ossM.config.key) == 0:
 			return nil, errWrapper(IllegalParams)
-		case len(ossM.meta.secret) == 0:
+		case len(ossM.config.secret) == 0:
 			return nil, errWrapper(IllegalParams)
-		case len(ossM.meta.addr) == 0:
+		case len(ossM.config.addr) == 0:
 			return nil, errWrapper(IllegalParams)
 		}
 	}
 
-	cli, err := oss.New(ossM.meta.addr, ossM.meta.key, ossM.meta.secret)
+	cli, err := oss.New(ossM.config.addr, ossM.config.key, ossM.config.secret)
 	if err != nil {
 		return nil, err
 	}
