@@ -3,7 +3,7 @@ package err
 import "fmt"
 
 /*
-	go get golang.org/x/tools/cmd/stringer
+	go install golang.org/x/tools/cmd/stringer
 */
 
 //go:generate stringer -type=Err  -linecomment
