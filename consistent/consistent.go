@@ -35,12 +35,6 @@ type Consistent struct {
 	rwMu             sync.RWMutex
 }
 
-func newDefaultConfig() *Config {
-	return &Config{
-		NumberOfReplicas: 20,
-	}
-}
-
 // New creates a new Consistent object with a default setting of 20 replicas for each entry.
 //
 // To change the number of replicas, set numberOfReplicas before adding entries.
