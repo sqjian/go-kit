@@ -20,17 +20,17 @@ func TestCmd(t *testing.T) {
 	}{
 		{
 			name:    "test1",
-			args:    args{execName: "ping", opts: []exec.OptionFunc{exec.WithArgs("www.baidu.com")}},
+			args:    args{execName: "echo", opts: []exec.OptionFunc{exec.WithArgs("www.baidu.com")}},
 			wantErr: false,
 		},
 		{
 			name:    "test2",
-			args:    args{execName: "ping", opts: []exec.OptionFunc{exec.WithArgs("www.baidu.com"), exec.WithWriters(func() io.WriteCloser { f, _ := os.Create("testing.log"); return f }())}},
+			args:    args{execName: "echo", opts: []exec.OptionFunc{exec.WithArgs("www.baidu.com"), exec.WithWriters(func() io.WriteCloser { f, _ := os.Create("testing.log"); return f }())}},
 			wantErr: false,
 		},
 		{
 			name:    "test3",
-			args:    args{execName: "ping", opts: []exec.OptionFunc{exec.WithArgs("www.baidu.com"), exec.WithWriters(os.Stderr)}},
+			args:    args{execName: "echo", opts: []exec.OptionFunc{exec.WithArgs("www.baidu.com"), exec.WithWriters(os.Stderr)}},
 			wantErr: false,
 		},
 	}

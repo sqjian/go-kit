@@ -1,0 +1,1 @@
+{"level":"error","ts":"2023-07-07T00:49:35.219+0800","msg":"id:->3,initialize pool => BestPoolSize is not set,use MaxPoolSize(1) instead","pid":4096}

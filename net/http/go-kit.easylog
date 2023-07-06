@@ -1,0 +1,13 @@
+{"level":"info","ts":"2023-07-07T00:49:33.980+0800","msg":"req => id:xxx,method:GET,urlEncode:","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.981+0800","msg":"req => id:xxx,header:map[]","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.981+0800","msg":"req => id:xxx,body:","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.981+0800","msg":"logId:xxx,Prepare to get a connection for 127.0.0.1:14670.","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.981+0800","msg":"logId:xxx,Dialing... (tcp:127.0.0.1:14670).","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.982+0800","msg":"logId:xxx,Dial is done. (tcp:127.0.0.1:14670)","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.982+0800","msg":"logId:xxx,Got a connection: reused: false, from the idle pool: false.","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.982+0800","msg":"logId:xxx,Wrote headers: ok.","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:33.982+0800","msg":"logId:xxx,Wrote a request: ok.","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:34.488+0800","msg":"logId:xxx,Got the first response byte.","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:34.488+0800","msg":"logId:xxx,Put a connection to the idle pool: ok.","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:34.489+0800","msg":"About to listen on 0.0.0.0:8888,id:1676996823559966720","pid":4096}
+{"level":"info","ts":"2023-07-07T00:49:37.499+0800","msg":"server gracefully shutdown => id:1676996823559966720","pid":4096}
