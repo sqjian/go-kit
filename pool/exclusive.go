@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -47,6 +48,7 @@ type ExclusivePool struct {
 	swapPool       chan interface{}
 	retryPool      chan int
 	isStopped      bool
+	isStoppedRwMu  sync.RWMutex
 }
 
 func NewExclusivePool(ctx context.Context, cfg *Cfg) (*ExclusivePool, error) {
@@ -148,8 +150,7 @@ func (p *ExclusivePool) Get() (connection interface{}, err error) {
 				} else {
 					atomic.AddInt32(&p.workConnCount, 1)
 					atomic.AddInt32(&p.newlyConnCount, 1)
-					p.Logger.Errorf("id:%v,addr:%v => get conn => Dial %v:%v successfully",
-						id, p.Address, p.Address, p.Port)
+					p.Logger.Infof("id:%v,addr:%v => get conn => Dial %v:%v successfully", id, p.Address, p.Address, p.Port)
 					return
 				}
 			}
@@ -168,6 +169,9 @@ func (p *ExclusivePool) Put(connection interface{}) (err error) {
 
 	id := genUniqueId(context.Background())
 
+	p.isStoppedRwMu.RLock()
+	defer p.isStoppedRwMu.RUnlock()
+
 	if connection != nil {
 		if p.isStopped {
 			err := p.Close(context.TODO(), connection)
@@ -177,21 +181,34 @@ func (p *ExclusivePool) Put(connection interface{}) (err error) {
 			}
 		} else {
 			if len(p.alivePool) < p.MaxPoolSize {
-				p.alivePool <- connection
+				select {
+				case p.alivePool <- connection:
+					p.Logger.Infof("id:%v,addr:%v => Put conn successfully => alivePool is blocked", id, p.Address)
+					atomic.SwapInt32(&p.workConnCount, p.workConnCount-1)
+				default:
+					p.Logger.Errorf("id:%v,addr:%v => Put conn failed => alivePool is blocked", id, p.Address)
+				}
 			}
 		}
 	}
-
-	atomic.SwapInt32(&p.workConnCount, p.workConnCount-1)
 
 	return
 }
 
 func (p *ExclusivePool) Release() {
 
+	p.isStoppedRwMu.Lock()
+	defer p.isStoppedRwMu.Unlock()
+
 	id := genUniqueId(context.Background())
 
 	p.isStopped = true
+
+	{
+		close(p.alivePool)
+		close(p.swapPool)
+		close(p.retryPool)
+	}
 
 	for connection := range p.alivePool {
 		if err := p.Close(context.TODO(), connection); err != nil {
@@ -204,6 +221,14 @@ func (p *ExclusivePool) Release() {
 func (p *ExclusivePool) retryLoop() {
 
 	id := genUniqueId(context.Background())
+
+	p.isStoppedRwMu.RLock()
+	defer p.isStoppedRwMu.RUnlock()
+
+	if p.isStopped {
+		p.Logger.Warnf("id:%v,addr:%v => retry loop exited => pool is stopped.", id, p.Address)
+		return
+	}
 
 	p.Logger.Infof("id:%v,addr:%v => retry loop start.", id, p.Address)
 	defer p.Logger.Infof("id:%v,addr:%v => retry loop end.", id, p.Address)
@@ -234,6 +259,19 @@ func (p *ExclusivePool) retryLoop() {
 func (p *ExclusivePool) keepAliveLoop() {
 
 	id := genUniqueId(context.Background())
+
+	p.isStoppedRwMu.RLock()
+	defer p.isStoppedRwMu.RUnlock()
+
+	if p.isStopped {
+		for connection := range p.alivePool {
+			err := p.Close(context.TODO(), connection)
+			if err != nil {
+				return
+			}
+		}
+		return
+	}
 
 	p.Logger.Infof("id:%v,addr:%v => keepAlive loop start.", id, p.Address)
 	defer p.Logger.Infof("id:%v,addr:%v => keepAlive loop end.", id, p.Address)
