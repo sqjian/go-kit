@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-type Cli struct {
+type cli struct {
 	config struct {
 		cli   *http.Client
 		debug bool
@@ -20,8 +20,8 @@ type Cli struct {
 	debugLogger elastic.Logger
 }
 
-func newEsCli(opts ...OptionFunc) (*Cli, error) {
-	cli := &Cli{}
+func NewEsCli(opts ...OptionFunc) (*cli, error) {
+	cli := &cli{}
 
 	for _, opt := range opts {
 		opt(cli)
@@ -48,14 +48,14 @@ func newEsCli(opts ...OptionFunc) (*Cli, error) {
 	return cli, nil
 }
 
-func (es *Cli) indexExists(ctx context.Context, index string) (bool, error) {
+func (es *cli) IndexExists(ctx context.Context, index string) (bool, error) {
 	return es.
 		cli.
 		IndexExists(index).
 		Do(ctx)
 }
 
-func (es *Cli) createIndex(ctx context.Context, index string) error {
+func (es *cli) CreateIndex(ctx context.Context, index string) error {
 	_, rstErr := es.
 		cli.
 		CreateIndex(index).
@@ -64,7 +64,7 @@ func (es *Cli) createIndex(ctx context.Context, index string) error {
 	return rstErr
 }
 
-func (es *Cli) writeDocs(ctx context.Context, index string, docs ...map[string]interface{}) error {
+func (es *cli) WriteDocs(ctx context.Context, index string, docs ...map[string]interface{}) error {
 	switch {
 	case len(docs) == 1:
 		{
@@ -98,7 +98,7 @@ func (es *Cli) writeDocs(ctx context.Context, index string, docs ...map[string]i
 
 }
 
-func (es *Cli) updateDocs(ctx context.Context, index string, docs ...struct {
+func (es *cli) UpdateDocs(ctx context.Context, index string, docs ...struct {
 	id  string
 	doc map[string]interface{}
 }) error {
@@ -137,7 +137,7 @@ func (es *Cli) updateDocs(ctx context.Context, index string, docs ...struct {
 	}
 }
 
-func (es *Cli) queryDocs(ctx context.Context, index string, condition map[string]interface{}) ([]string, error) {
+func (es *cli) QueryDocs(ctx context.Context, index string, condition map[string]interface{}) ([]string, error) {
 
 	boolQuery := elastic.NewBoolQuery()
 	for k, v := range condition {

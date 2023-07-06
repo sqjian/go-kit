@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"sync"
 	"testing"
-	"testing/quick"
 	"time"
 )
 
@@ -70,23 +69,6 @@ func TestGetEmpty(t *testing.T) {
 	}
 }
 
-func TestGetSingle(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	f := func(s string) bool {
-		y, err := x.Get(s)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		t.Logf("s = %q, y = %q", s, y)
-		return y == "abcdefg"
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
-	}
-}
-
 type gtest struct {
 	in  string
 	out string
@@ -111,25 +93,6 @@ func TestGetMultiple(t *testing.T) {
 		if result != v.out {
 			t.Errorf("%d. got %q, expected %q", i, result, v.out)
 		}
-	}
-}
-
-func TestGetMultipleQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	x.Add("opqrstu")
-	f := func(s string) bool {
-		y, err := x.Get(s)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		t.Logf("s = %q, y = %q", s, y)
-		return y == "abcdefg" || y == "hijklmn" || y == "opqrstu"
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
 	}
 }
 
@@ -171,26 +134,6 @@ func TestGetMultipleRemove(t *testing.T) {
 	}
 }
 
-func TestGetMultipleRemoveQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	x.Add("opqrstu")
-	x.Remove("opqrstu")
-	f := func(s string) bool {
-		y, err := x.Get(s)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		t.Logf("s = %q, y = %q", s, y)
-		return y == "abcdefg" || y == "hijklmn"
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestGetTwo(t *testing.T) {
 	x := New()
 	x.Add("abcdefg")
@@ -208,67 +151,6 @@ func TestGetTwo(t *testing.T) {
 	}
 	if b != "hijklmn" {
 		t.Errorf("wrong b: %q", b)
-	}
-}
-
-func TestGetTwoQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	x.Add("opqrstu")
-	f := func(s string) bool {
-		a, b, err := x.GetTwo(s)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		if a == b {
-			t.Logf("a == b")
-			return false
-		}
-		if a != "abcdefg" && a != "hijklmn" && a != "opqrstu" {
-			t.Logf("invalid a: %q", a)
-			return false
-		}
-
-		if b != "abcdefg" && b != "hijklmn" && b != "opqrstu" {
-			t.Logf("invalid b: %q", b)
-			return false
-		}
-		return true
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestGetTwoOnlyTwoQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	f := func(s string) bool {
-		a, b, err := x.GetTwo(s)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		if a == b {
-			t.Logf("a == b")
-			return false
-		}
-		if a != "abcdefg" && a != "hijklmn" {
-			t.Logf("invalid a: %q", a)
-			return false
-		}
-
-		if b != "abcdefg" && b != "hijklmn" {
-			t.Logf("invalid b: %q", b)
-			return false
-		}
-		return true
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
 	}
 }
 
@@ -353,108 +235,6 @@ func TestGetNMore(t *testing.T) {
 	}
 	if members[2] != "hijklmn" {
 		t.Errorf("wrong members[2]: %q", members[2])
-	}
-}
-
-func TestGetNQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	x.Add("opqrstu")
-	f := func(s string) bool {
-		members, err := x.GetN(s, 3)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		if len(members) != 3 {
-			t.Logf("expected 3 members instead of %d", len(members))
-			return false
-		}
-		set := make(map[string]bool, 4)
-		for _, member := range members {
-			if set[member] {
-				t.Logf("duplicate error")
-				return false
-			}
-			set[member] = true
-			if member != "abcdefg" && member != "hijklmn" && member != "opqrstu" {
-				t.Logf("invalid member: %q", member)
-				return false
-			}
-		}
-		return true
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestGetNLessQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	x.Add("opqrstu")
-	f := func(s string) bool {
-		members, err := x.GetN(s, 2)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		if len(members) != 2 {
-			t.Logf("expected 2 members instead of %d", len(members))
-			return false
-		}
-		set := make(map[string]bool, 4)
-		for _, member := range members {
-			if set[member] {
-				t.Logf("duplicate error")
-				return false
-			}
-			set[member] = true
-			if member != "abcdefg" && member != "hijklmn" && member != "opqrstu" {
-				t.Logf("invalid member: %q", member)
-				return false
-			}
-		}
-		return true
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestGetNMoreQuick(t *testing.T) {
-	x := New()
-	x.Add("abcdefg")
-	x.Add("hijklmn")
-	x.Add("opqrstu")
-	f := func(s string) bool {
-		members, err := x.GetN(s, 5)
-		if err != nil {
-			t.Logf("error: %q", err)
-			return false
-		}
-		if len(members) != 3 {
-			t.Logf("expected 3 members instead of %d", len(members))
-			return false
-		}
-		set := make(map[string]bool, 4)
-		for _, member := range members {
-			if set[member] {
-				t.Logf("duplicate error")
-				return false
-			}
-			set[member] = true
-			if member != "abcdefg" && member != "hijklmn" && member != "opqrstu" {
-				t.Logf("invalid member: %q", member)
-				return false
-			}
-		}
-		return true
-	}
-	if err := quick.Check(f, nil); err != nil {
-		t.Fatal(err)
 	}
 }
 

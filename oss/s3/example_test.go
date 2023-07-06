@@ -3,11 +3,11 @@ package s3_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/sqjian/go-kit/oss/s3"
 	"os"
-	"testing"
 )
 
 var awsConfig *aws.Config
@@ -24,7 +24,7 @@ func init() {
 	awsConfig = cfg
 }
 
-func Test_S3_BucketFiles(t *testing.T) {
+func Example_bucketFiles() {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)
@@ -48,11 +48,11 @@ func Test_S3_BucketFiles(t *testing.T) {
 			prefixHint,
 		)
 		checkErr(err)
-		t.Log(files)
+		fmt.Println(files)
 	}
 }
 
-func Test_S3_UploadFile(t *testing.T) {
+func Example_uploadFile() {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)
@@ -81,7 +81,7 @@ func Test_S3_UploadFile(t *testing.T) {
 	}
 }
 
-func Test_S3_DownloadFile(t *testing.T) {
+func Example_downloadFile() {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)
@@ -108,11 +108,11 @@ func Test_S3_DownloadFile(t *testing.T) {
 			buf,
 		)
 		checkErr(err)
-		t.Log(len(buf.Bytes()))
+		fmt.Println(len(buf.Bytes()))
 	}
 }
 
-func Test_S3_DeleteFile(t *testing.T) {
+func Example_deleteFile() {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)

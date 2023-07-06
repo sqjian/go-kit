@@ -2,9 +2,9 @@ package rdb_test
 
 import (
 	"context"
+	"fmt"
 	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/rdb"
-	"testing"
 	"time"
 )
 
@@ -16,7 +16,7 @@ func checkErr(err error) {
 	}
 }
 
-func init() {
+func Example_init() {
 	_db, dbErr := rdb.NewRdb(
 		rdb.Mysql,
 		rdb.WithIp("192.168.6.6"),
@@ -33,32 +33,32 @@ func init() {
 	db = _db
 }
 
-func Test_Insert(t *testing.T) {
+func Example_insert() {
 	ctx := context.WithValue(context.Background(), "id", 1)
 	log.TerminalLogger{}.Debugf("begin to insert data.")
-	t.Log(db.Insert(ctx, "test", map[string]interface{}{"age": 1}))
+	fmt.Println(db.Insert(ctx, "test", map[string]interface{}{"age": 1}))
 }
 
-func Test_MysqlQuery(t *testing.T) {
+func Example_mysqlQuery() {
 	ctx := context.WithValue(context.Background(), "id", 1)
 	rst, err := db.Query(ctx, []string{"test"}, nil)
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	for k, v := range rst {
-		t.Logf("k:%v,v:%v", k, v)
+		fmt.Printf("k:%v,v:%v", k, v)
 	}
-	t.Log(string((rst[0]["create_time"]).([]byte)))
+	fmt.Println(string((rst[0]["create_time"]).([]byte)))
 }
 
-func Test_Update(t *testing.T) {
+func Example_update() {
 	ctx := context.WithValue(context.Background(), "id", 1)
 
-	t.Log(db.Update(ctx, "test", map[string]interface{}{"age": 5}, map[string]interface{}{"age": 1}))
+	fmt.Println(db.Update(ctx, "test", map[string]interface{}{"age": 5}, map[string]interface{}{"age": 1}))
 }
 
-func Test_Delete(t *testing.T) {
+func Example_delete() {
 	ctx := context.Background()
 
-	t.Log(db.Delete(ctx, "test", map[string]interface{}{"age": 5}))
+	fmt.Println(db.Delete(ctx, "test", map[string]interface{}{"age": 5}))
 }

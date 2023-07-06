@@ -1,13 +1,14 @@
-package es
+package es_test
 
 import (
 	"context"
+	"github.com/sqjian/go-kit/es"
 	"github.com/sqjian/go-kit/net/http"
+	"log"
 	"strings"
-	"testing"
 )
 
-func Test_Es(t *testing.T) {
+func Example() {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)
@@ -15,7 +16,7 @@ func Test_Es(t *testing.T) {
 	}
 
 	const (
-		esAddr  = `http://xrpc.xfyun.cn:9200`
+		esAddr  = `https://x.x.x.x:xxxx`
 		esIndex = `go-kit`
 	)
 
@@ -23,23 +24,23 @@ func Test_Es(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	cli, esCLiErr := newEsCli(
-		WithHosts(esAddr),
-		WithDebugInfo(true),
-		WithHttpClient(http.GetDefaultHttpClient()),
+	cli, esCLiErr := es.NewEsCli(
+		es.WithHosts(esAddr),
+		es.WithDebugInfo(true),
+		es.WithHttpClient(http.GetDefaultHttpClient()),
 	)
 	checkErr(esCLiErr)
 
 	{
-		exists, err := cli.indexExists(ctx, esIndex)
+		exists, err := cli.IndexExists(ctx, esIndex)
 		checkErr(err)
 		if !exists {
-			err := cli.createIndex(ctx, esIndex)
+			err := cli.CreateIndex(ctx, esIndex)
 			checkErr(err)
 		}
 	}
 	{
-		err := cli.writeDocs(
+		err := cli.WriteDocs(
 			ctx,
 			esIndex,
 			map[string]interface{}{
@@ -50,7 +51,7 @@ func Test_Es(t *testing.T) {
 		checkErr(err)
 	}
 	{
-		rst, err := cli.queryDocs(
+		rst, err := cli.QueryDocs(
 			ctx,
 			esIndex,
 			map[string]interface{}{
@@ -59,6 +60,6 @@ func Test_Es(t *testing.T) {
 			},
 		)
 		checkErr(err)
-		t.Logf("rst:%v", strings.Join(rst, "\n"))
+		log.Printf("rst:%v", strings.Join(rst, "\n"))
 	}
 }

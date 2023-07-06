@@ -2,11 +2,11 @@ package aliyun_test
 
 import (
 	"context"
+	"fmt"
 	"github.com/sqjian/go-kit/oss/aliyun"
-	"testing"
 )
 
-func Test_S3(t *testing.T) {
+func Example() {
 	checkErr := func(err error) {
 		if err != nil {
 			panic(err)
@@ -41,8 +41,8 @@ func Test_S3(t *testing.T) {
 			objectKey,
 		)
 		checkErr(err)
-		t.Log("eq:", len(data) == len(rst))
-		t.Log("rst:", string(rst))
-		t.Log("data:", string(data))
+		fmt.Println("eq:", len(data) == len(rst))
+		fmt.Println("rst:", string(rst))
+		fmt.Println("data:", string(data))
 	}
 }
