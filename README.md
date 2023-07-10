@@ -8,5 +8,4 @@
 
 ## TODO
 
-- support plugin dependency
-- update deps
+- support plugin dependency init

@@ -14,9 +14,9 @@ var awsConfig *aws.Config
 
 func init() {
 	cfg, err := s3.NewAwsConfig(
-		s3.WithAccessKey("root"),
-		s3.WithSecretKey("xylx1.t!@#"),
-		s3.WithEndpoint("http://192.168.56.7:9091"),
+		s3.WithAccessKey("xxx"),
+		s3.WithSecretKey("xxx"),
+		s3.WithEndpoint("http://x.x.x.x:xxxx"),
 	)
 	if err != nil {
 		panic(err)
@@ -38,7 +38,7 @@ func Example_bucketFiles() {
 	checkErr(err)
 
 	var (
-		bucket     = "sqjian"
+		bucket     = "xxx"
 		prefixHint = ""
 	)
 	{
@@ -66,8 +66,8 @@ func Example_uploadFile() {
 	checkErr(err)
 
 	var (
-		bucket    = "sqjian"
-		objectKey = "sqjian"
+		bucket    = "xxx"
+		objectKey = "xxx"
 		data      = bytes.Repeat([]byte("x"), 1024*1024*1024)
 	)
 	{
@@ -95,8 +95,8 @@ func Example_downloadFile() {
 	checkErr(err)
 
 	var (
-		bucket    = "sqjian"
-		objectKey = "sqjian"
+		bucket    = "xxx"
+		objectKey = "xxx"
 		buf       = manager.NewWriteAtBuffer(nil)
 	)
 	{
@@ -126,8 +126,8 @@ func Example_deleteFile() {
 	checkErr(err)
 
 	var (
-		bucket    = "sqjian"
-		objectKey = "sqjian"
+		bucket    = "xxx"
+		objectKey = "xxx"
 	)
 	{
 

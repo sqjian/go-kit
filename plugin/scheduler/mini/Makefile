@@ -1,9 +1,9 @@
 ARTIFACT:=${OUTPUT}/$(notdir ${CURDIR})
 
 ifeq ($(OS),Windows_NT)
-ARTIFACT:=${ARTIFACT}.exe
+	ARTIFACT:=${ARTIFACT}.exe
 else
-ARTIFACT:=${ARTIFACT}
+	ARTIFACT:=${ARTIFACT}
 endif
 
 .PHONY: test
