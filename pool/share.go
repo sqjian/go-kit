@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func newSharePool(cfg *Cfg) *SharePool {
+func newSharePool(cfg *Config) *SharePool {
 	return &SharePool{
 		Address:           cfg.Address,
 		Port:              cfg.Port,
@@ -38,7 +38,7 @@ type SharePool struct {
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
 	CreateNewInterval time.Duration
-	Logger            log.API
+	Logger            log.Log
 
 	alivePool       []interface{}
 	alivePoolOffset uint64
@@ -48,7 +48,7 @@ type SharePool struct {
 	isStopped bool
 }
 
-func NewSharePool(ctx context.Context, cfg *Cfg) (*SharePool, error) {
+func NewSharePool(ctx context.Context, cfg *Config) (*SharePool, error) {
 
 	pool := newSharePool(cfg)
 

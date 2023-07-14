@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func newExclusivePool(cfg *Cfg) *ExclusivePool {
+func newExclusivePool(cfg *Config) *ExclusivePool {
 	return &ExclusivePool{
 		Address:           cfg.Address,
 		Port:              cfg.Port,
@@ -40,7 +40,7 @@ type ExclusivePool struct {
 	KeepAliveInterval time.Duration
 	CleanInterval     time.Duration
 	DialRetryInterval time.Duration
-	Logger            log.API
+	Logger            log.Log
 
 	workConnCount  int32
 	newlyConnCount int32
@@ -51,7 +51,7 @@ type ExclusivePool struct {
 	isStoppedRwMu  sync.RWMutex
 }
 
-func NewExclusivePool(ctx context.Context, cfg *Cfg) (*ExclusivePool, error) {
+func NewExclusivePool(ctx context.Context, cfg *Config) (*ExclusivePool, error) {
 	id := genUniqueId(ctx)
 
 	pool := newExclusivePool(cfg)

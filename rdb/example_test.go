@@ -26,7 +26,7 @@ func Example_init() {
 		rdb.WithMaxLifeTime(time.Second),
 		rdb.WithMaxIdleConns(3),
 		rdb.WithDbName("test"),
-		rdb.WithLogger(log.TerminalLogger{}),
+		rdb.WithLogger(func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()),
 	)
 	checkErr(dbErr)
 
@@ -35,7 +35,6 @@ func Example_init() {
 
 func Example_insert() {
 	ctx := context.WithValue(context.Background(), "id", 1)
-	log.TerminalLogger{}.Debugf("begin to insert data.")
 	fmt.Println(db.Insert(ctx, "test", map[string]interface{}{"age": 1}))
 }
 

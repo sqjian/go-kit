@@ -1,4 +1,4 @@
-package unique
+package uid
 
 type OptionFunc func(*generator)
 

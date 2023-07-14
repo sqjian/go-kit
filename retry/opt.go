@@ -18,7 +18,7 @@ type Config struct {
 	onRetry   OnRetryFunc
 	delayType DelayTypeFunc
 	context   context.Context
-	logger    log.API
+	logger    log.Log
 }
 
 type Option func(*Config)

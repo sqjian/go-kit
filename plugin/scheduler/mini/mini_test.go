@@ -10,7 +10,7 @@ import (
 )
 
 type Test1 struct {
-	logger log.API
+	logger log.Log
 	viper  *viper.Viper
 }
 
@@ -52,7 +52,7 @@ func NewTest1Plug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 }
 
 type Test2 struct {
-	logger log.API
+	logger log.Log
 	viper  *viper.Viper
 }
 
@@ -96,7 +96,7 @@ func NewTest2Plug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 func Test_minimal(t *testing.T) {
 	minimalInst, minimalInstErr := mini.NewMinimal(func(cfg *mini.Cfg) {
 		cfg.Viper = viper.New()
-		cfg.Logger = log.TerminalLogger{}
+		cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()
 		cfg.Plugs = []schema.NewPlug{NewTest1Plug, NewTest2Plug}
 	})
 	if minimalInstErr != nil {

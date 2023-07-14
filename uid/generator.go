@@ -1,31 +1,34 @@
-package unique
+package uid
 
 import (
 	"github.com/google/uuid"
-	"github.com/sqjian/go-kit/unique/snowflake"
+	"github.com/sqjian/go-kit/uid/snowflake"
 )
 
 //go:generate stringer -type=KeyType  -linecomment
-type KeyType int
+type UidType int
 
 const (
-	Snowflake KeyType = iota
+	_ UidType = iota
+	Snowflake
 	UuidV1
 )
 
-type Generator interface {
-	UniqueKey(KeyType) (string, error)
+type Uid interface {
+	Gen() (string, error)
 }
 
 type generator struct {
+	uidType UidType
+
 	snowflake struct {
 		id   int64 /*current offers for the snowflake */
 		Node *snowflake.Node
 	}
 }
 
-func (g *generator) UniqueKey(keyType KeyType) (string, error) {
-	switch keyType {
+func (g *generator) Gen() (string, error) {
+	switch g.uidType {
 	case Snowflake:
 		{
 			id := g.snowflake.Node.Generate()
@@ -43,19 +46,18 @@ func (g *generator) UniqueKey(keyType KeyType) (string, error) {
 	return "", ErrWrapper(IllegalKeyType)
 }
 
-func NewGenerator(opts ...OptionFunc) (Generator, error) {
+func NewGenerator(keyType UidType, opts ...OptionFunc) (Uid, error) {
 
-	generatorInst := new(generator)
-
+	inst := &generator{uidType: keyType}
 	for _, opt := range opts {
-		opt(generatorInst)
+		opt(inst)
 	}
 
-	node, nodeErr := snowflake.NewNode(generatorInst.snowflake.id)
+	node, nodeErr := snowflake.NewNode(inst.snowflake.id)
 	if nodeErr != nil {
 		return nil, nodeErr
 	}
-	generatorInst.snowflake.Node = node
+	inst.snowflake.Node = node
 
-	return generatorInst, nil
+	return inst, nil
 }

@@ -2,7 +2,6 @@ package log
 
 import (
 	"encoding/json"
-	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -10,62 +9,13 @@ import (
 	"sync/atomic"
 )
 
-func newZapLogger(config *Config) (*zapLogger, error) {
-
-	zapInst := &zapLogger{
-		config: config,
-	}
-
-	err := zapInst.init()
-	if err != nil {
-		return nil, err
-	}
-
-	return zapInst, nil
-}
-
-type zapLogger struct {
-	config *Config
-	ready  bool
-	Logger *zap.SugaredLogger
-}
-
-func (l *zapLogger) String() string {
-
-	m := make(map[string]interface{})
-	m["config"] = l.config
-	res, _ := json.Marshal(m)
-
-	return string(res)
-}
-
-func (l *zapLogger) SetLevelOTF(Level Level) error {
-
-	if !l.ready {
-		return fmt.Errorf("zapLogger not ready,please init first")
-	}
-
-	atomic.StoreInt64((*int64)(&l.config.Level), int64(Level))
-
-	l.Errorf("reset the level,params:%v", l)
-
-	return nil
-}
-
-func (l *zapLogger) init() (err error) {
-
-	defer func() {
-		if err == nil {
-			l.ready = true
-		}
-	}()
-
+func newZapLogger(config *config) *zapLogger {
 	userFilePriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		if l.config.Level == Dummy {
+		if config.Level == Dummy {
 			return false
 		}
 		return lvl >= func() zapcore.Level {
-			switch l.config.Level {
+			switch config.Level {
 			case Debug:
 				{
 					return zapcore.DebugLevel
@@ -94,10 +44,10 @@ func (l *zapLogger) init() (err error) {
 	})
 
 	fileLogRotateUserWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   l.config.FileName,
-		MaxSize:    l.config.MaxSize,
-		MaxBackups: l.config.MaxBackups,
-		MaxAge:     l.config.MaxAge,
+		Filename:   config.FileName,
+		MaxSize:    config.MaxSize,
+		MaxBackups: config.MaxBackups,
+		MaxAge:     config.MaxAge,
 	})
 
 	consoleWriter := zapcore.Lock(os.Stdout)
@@ -118,7 +68,7 @@ func (l *zapLogger) init() (err error) {
 
 	var core zapcore.Core
 	switch {
-	case l.config.Console:
+	case config.Console:
 		{
 			core = zapcore.NewTee(
 				zapcore.NewCore(presetEncoder, fileLogRotateUserWriter, userFilePriority),
@@ -133,10 +83,10 @@ func (l *zapLogger) init() (err error) {
 		}
 	}
 
-	l.Logger = zap.New(
+	logInst := zap.New(
 		core,
-		zap.WithCaller(l.config.Caller),
-		zap.AddCallerSkip(l.config.CallerSkip),
+		zap.WithCaller(config.Caller),
+		zap.AddCallerSkip(config.CallerSkip),
 		zap.Fields(
 			zapcore.Field{
 				Key:     "pid",
@@ -146,21 +96,43 @@ func (l *zapLogger) init() (err error) {
 		),
 	).Sugar()
 
+	return &zapLogger{
+		config:        config,
+		SugaredLogger: logInst,
+	}
+
+}
+
+type zapLogger struct {
+	config *config
+	*zap.SugaredLogger
+}
+
+func (l *zapLogger) String() string {
+	res, _ := json.Marshal(l.config)
+	return string(res)
+}
+
+func (l *zapLogger) SetLevelOTF(Level Level) error {
+	atomic.StoreInt64((*int64)(&l.config.Level), int64(Level))
+
+	l.Errorf("reset the level,params:%v", l)
+
 	return nil
 }
 
 func (l *zapLogger) Debugf(template string, args ...interface{}) {
-	l.Logger.Debugf(template, args...)
+	l.SugaredLogger.Debugf(template, args...)
 }
 
 func (l *zapLogger) Infof(template string, args ...interface{}) {
-	l.Logger.Infof(template, args...)
+	l.SugaredLogger.Infof(template, args...)
 }
 
 func (l *zapLogger) Warnf(template string, args ...interface{}) {
-	l.Logger.Warnf(template, args...)
+	l.SugaredLogger.Warnf(template, args...)
 }
 
 func (l *zapLogger) Errorf(template string, args ...interface{}) {
-	l.Logger.Errorf(template, args...)
+	l.SugaredLogger.Errorf(template, args...)
 }

@@ -64,7 +64,7 @@ func Do(userFn UserFunc, opts ...Option) error {
 func newDefaultRetryConfig() *Config {
 	return &Config{
 		attempts: uint(10),
-		logger:   log.DummyLogger{},
+		logger:   func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
 		context:  context.Background(),
 		onRetry:  func(n uint, err error) {},
 		retryIf:  func(err error) bool { return true },

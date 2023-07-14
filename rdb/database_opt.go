@@ -7,7 +7,7 @@ import (
 
 type ConfigOptionFunc func(*Config)
 
-func WithLogger(logger log.API) ConfigOptionFunc {
+func WithLogger(logger log.Log) ConfigOptionFunc {
 	return func(m *Config) {
 		m.Logger = logger
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 type leave struct {
-	logger log.API
+	logger log.Log
 	viper  *viper.Viper
 }
 

@@ -23,9 +23,7 @@ func TestValidateJson(t *testing.T) {
 			os.Exit(0)
 		}
 	}
-	validatorInst, validatorInstErr := validator.NewValidator(
-		validator.WithValidatorType(validator.Json),
-	)
+	validatorInst, validatorInstErr := validator.NewValidator(validator.Json)
 	checkErr(validatorInstErr)
 	{
 		t.Log(validatorInst.Validate(testSchema, testExample))

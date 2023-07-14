@@ -5,18 +5,14 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	logger, loggerErr := newZapLogger(&Config{
-		FileName:   "go-kit.easylog",
+	logger := newZapLogger(&config{
+		FileName:   "go-kit.log",
 		MaxSize:    3,
 		MaxBackups: 3,
 		MaxAge:     3,
 		Level:      Debug,
 		Console:    true,
 	})
-
-	if loggerErr != nil {
-		t.Fatal(loggerErr)
-	}
 
 	{
 		t.Log(logger.SetLevelOTF(Warn))
@@ -35,8 +31,8 @@ func TestLogger(t *testing.T) {
 }
 
 func TestLoggerCaller(t *testing.T) {
-	logger, loggerErr := newZapLogger(&Config{
-		FileName:   "go-kit.easylog",
+	logger := newZapLogger(&config{
+		FileName:   "go-kit.log",
 		MaxSize:    3,
 		MaxBackups: 3,
 		MaxAge:     3,
@@ -45,10 +41,6 @@ func TestLoggerCaller(t *testing.T) {
 		Caller:     true,
 		CallerSkip: 4,
 	})
-
-	if loggerErr != nil {
-		t.Fatal(loggerErr)
-	}
 
 	{
 		logger.Debugf("testing infof...")

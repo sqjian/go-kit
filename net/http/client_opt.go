@@ -6,12 +6,11 @@ import (
 	"net/http"
 )
 
-type cliConfig struct {
-	logId string
+type clientConfig struct {
+	log.Log
 
 	retry   int
 	trace   bool
-	logger  log.API
 	client  *http.Client
 	context context.Context
 
@@ -20,52 +19,46 @@ type cliConfig struct {
 	header map[string]string
 }
 
-type CliOptionFunc func(*cliConfig)
+type CliOptionFunc func(*clientConfig)
 
 func WithCliHeader(header map[string]string) CliOptionFunc {
-	return func(options *cliConfig) {
+	return func(options *clientConfig) {
 		options.header = header
 	}
 }
 
 func WithCliQuery(query map[string]string) CliOptionFunc {
-	return func(options *cliConfig) {
+	return func(options *clientConfig) {
 		options.query = query
 	}
 }
 
 func WithCliBody(body []byte) CliOptionFunc {
-	return func(options *cliConfig) {
+	return func(options *clientConfig) {
 		options.body = body
 	}
 }
 
 func WithClient(client *http.Client) CliOptionFunc {
-	return func(options *cliConfig) {
+	return func(options *clientConfig) {
 		options.client = client
 	}
 }
 
-func WithCliUniqueId(uniqueId string) CliOptionFunc {
-	return func(options *cliConfig) {
-		options.logId = uniqueId
-	}
-}
-
 func WithCliRetry(retry int) CliOptionFunc {
-	return func(options *cliConfig) {
+	return func(options *clientConfig) {
 		options.retry = retry
 	}
 }
 
-func WithCliLogger(logger log.API) CliOptionFunc {
-	return func(options *cliConfig) {
-		options.logger = logger
+func WithCliLogger(logger log.Log) CliOptionFunc {
+	return func(options *clientConfig) {
+		options.Log = logger
 	}
 }
 
 func WithCliTrace(trace bool) CliOptionFunc {
-	return func(options *cliConfig) {
+	return func(options *clientConfig) {
 		options.trace = trace
 	}
 }

@@ -1,4 +1,4 @@
-package unique
+package uid
 
 import "fmt"
 
@@ -14,6 +14,6 @@ func ErrWrapper(err Err) error {
 }
 
 const (
-	UnknownErrCode Err = iota
+	UnknownKeyType Err = iota
 	IllegalKeyType
 )

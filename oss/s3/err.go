@@ -7,13 +7,13 @@ import "fmt"
 */
 
 //go:generate stringer -type=Err  -linecomment
-type err int
+type Err int
 
-func errWrapper(err err) error {
+func errWrapper(err Err) error {
 	return fmt.Errorf("code:%d,errDesc:%s", err, err.String())
 }
 
 const (
-	UnknownErrCode err = iota
+	UnknownErrCode Err = iota
 	IllegalParams      // wrong params
 )

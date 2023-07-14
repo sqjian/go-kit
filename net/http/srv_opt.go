@@ -6,24 +6,22 @@ import (
 	"time"
 )
 
-type srvCfg struct {
-	logId string
-
+type serverConfig struct {
 	limit          int
 	MaxHeaderBytes int
 
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
-	logger     log.API
+	logger     log.Log
 	gracefully time.Duration
 	context    context.Context
 }
 
-type SrvOptionFunc func(*srvCfg)
+type ServerOptionFunc func(*serverConfig)
 
-func WithSrvLogger(logger log.API) SrvOptionFunc {
-	return func(options *srvCfg) {
+func WithSrvLogger(logger log.Log) ServerOptionFunc {
+	return func(options *serverConfig) {
 		options.logger = logger
 	}
 }

@@ -10,12 +10,12 @@ import (
 	"github.com/sqjian/go-kit/plugin/proto"
 	"github.com/sqjian/go-kit/plugin/schema"
 	"github.com/sqjian/go-kit/plugin/tool"
-	"github.com/sqjian/go-kit/unique"
+	"github.com/sqjian/go-kit/uid"
 )
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.API
+	Logger log.Log
 	Plugs  []schema.NewPlug
 }
 
@@ -35,12 +35,12 @@ func NewMinimal(fn func(cfg *Cfg)) (*Mini, error) {
 }
 
 type Mini struct {
-	logger    log.API
+	logger    log.Log
 	viper     *viper.Viper
 	Plugs     []schema.NewPlug
 	container *container.Container
 
-	uniqueGenerator unique.Generator
+	uniqueGenerator uid.Uid
 }
 
 func (m *Mini) FInit() error {
@@ -60,7 +60,7 @@ func (m *Mini) Process(dag Dag, msg *proto.Msg, opts ...Opt) ([]byte, error) {
 	})
 
 	if len(dag.Id) == 0 {
-		dag.Id, _ = m.uniqueGenerator.UniqueKey(unique.Snowflake)
+		dag.Id, _ = m.uniqueGenerator.Gen()
 		m.logger.Infof("id:%v,use snowflake algorithm to generate dag.id:%v", dag.Id, dag.Id)
 	}
 	pluginTools.Set("dag.id", dag.Id)
@@ -160,8 +160,9 @@ func (m *Mini) Init() error {
 	}
 
 	{
-		generator, generatorErr := unique.NewGenerator(
-			unique.WithSnowflakeNodeId(1),
+		generator, generatorErr := uid.NewGenerator(
+			uid.Snowflake,
+			uid.WithSnowflakeNodeId(1),
 		)
 		if generatorErr != nil {
 			m.logger.Errorf(generatorErr.Error())

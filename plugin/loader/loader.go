@@ -9,13 +9,13 @@ import (
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.API
+	Logger log.Log
 }
 
 type Loader struct {
 	sync.RWMutex
 	viper  *viper.Viper
-	logger log.API
+	logger log.Log
 }
 
 func NewLoader(fn func(*Cfg)) *Loader {

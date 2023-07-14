@@ -1,7 +1,7 @@
-package unique_test
+package uid_test
 
 import (
-	"github.com/sqjian/go-kit/unique"
+	"github.com/sqjian/go-kit/uid"
 	"testing"
 )
 
@@ -11,12 +11,13 @@ func TestGenerator_NewSnowflake(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	generator, generatorErr := unique.NewGenerator(
-		unique.WithSnowflakeNodeId(1),
+	generator, generatorErr := uid.NewGenerator(
+		uid.Snowflake,
+		uid.WithSnowflakeNodeId(1),
 	)
 	checkErr(generatorErr)
 
-	snowflake, snowflakeErr := generator.UniqueKey(unique.Snowflake)
+	snowflake, snowflakeErr := generator.Gen()
 	checkErr(snowflakeErr)
 	t.Logf("snowflake:%v", snowflake)
 
@@ -27,10 +28,10 @@ func TestGenerator_NewUuidV1(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	generator, generatorErr := unique.NewGenerator()
+	generator, generatorErr := uid.NewGenerator(uid.Snowflake)
 	checkErr(generatorErr)
 
-	uuidV1, uuidV1Err := generator.UniqueKey(unique.UuidV1)
+	uuidV1, uuidV1Err := generator.Gen()
 	checkErr(uuidV1Err)
 	t.Logf("uuidV1:%v", uuidV1)
 }

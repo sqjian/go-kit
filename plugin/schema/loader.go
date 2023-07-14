@@ -9,7 +9,7 @@ var NewPlugObj NewPlug
 
 type Cfg struct {
 	Viper  *viper.Viper
-	Logger log.API
+	Logger log.Log
 }
 
 type NewPlug = func(func(*Cfg)) (Plug, error)

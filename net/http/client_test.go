@@ -83,7 +83,6 @@ func TestDoWithId(t *testing.T) {
 			"content": "你好",
 		}),
 		http.WithCliRetry(3),
-		http.WithCliUniqueId("xxx"),
 		http.WithCliLogger(logger),
 	)
 	checkErr(err)

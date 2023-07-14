@@ -15,12 +15,12 @@ type Config struct {
 	MaxIdleConns int
 	MaxLifeTime  time.Duration
 
-	Logger log.API
+	Logger log.Log
 }
 
 func newDefaultConfig() *Config {
 	return &Config{
-		Logger: log.DummyLogger{},
+		Logger: func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
 	}
 }
 

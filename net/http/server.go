@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/unique"
 	"golang.org/x/net/netutil"
 	"net"
 	"net/http"
@@ -12,16 +11,8 @@ import (
 	"time"
 )
 
-func newDefaultSrvCfg() *srvCfg {
-	return &srvCfg{
-		logId: func() string {
-			snowflake, snowflakeErr := defaultUniqueGenerator.UniqueKey(unique.Snowflake)
-			if snowflakeErr != nil {
-				panic(fmt.Sprintf("internal err:%v", snowflakeErr))
-			}
-			return snowflake
-		}(),
-
+func newDefaultSrvCfg() *serverConfig {
+	return &serverConfig{
 		limit:          1e2,
 		MaxHeaderBytes: 1 << 20,
 
@@ -29,12 +20,12 @@ func newDefaultSrvCfg() *srvCfg {
 		WriteTimeout: 10 * time.Second,
 
 		gracefully: time.Minute,
-		logger:     log.DummyLogger{},
+		logger:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
 		context:    context.Background(),
 	}
 }
 
-func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOptionFunc) error {
+func Serve(ctx context.Context, addr string, handle http.Handler, opts ...ServerOptionFunc) error {
 	cfg := newDefaultSrvCfg()
 	{
 		for _, opt := range opts {
@@ -44,13 +35,13 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOpt
 	}
 
 	if err := parseIp(addr); err != nil {
-		cfg.logger.Errorf("parseIp failed => id:%v,err:%v", cfg.logId, err)
+		cfg.logger.Errorf("parseIp failed =>err:%v", err)
 		return err
 	}
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		cfg.logger.Errorf("tcp listen:%v failed,id:%v,err:%v", addr, cfg.logId, err)
+		cfg.logger.Errorf("tcp listen:%v failed,err:%v", addr, err)
 		return err
 	}
 	defer listener.Close()
@@ -74,38 +65,29 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...SrvOpt
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.gracefully)
 		defer cancel()
 		if err := srv.Shutdown(ctx); nil != err {
-			cfg.logger.Errorf("server shutdown failed => id:%v,err:%v", cfg.logId, err)
+			cfg.logger.Errorf("server shutdown failed => err:%v", err)
 			return
 		}
-		cfg.logger.Infof("server gracefully shutdown => id:%v", cfg.logId)
+		cfg.logger.Infof("server gracefully shutdown")
 
 	}()
 
-	cfg.logger.Infof("About to listen on %v,id:%v", addr, cfg.logId)
+	cfg.logger.Infof("About to listen on %v", addr)
 	err = srv.Serve(listener)
 	wg.Wait()
 
 	if http.ErrServerClosed == err {
 		return nil
 	}
-	cfg.logger.Errorf("server not gracefully shutdown => id:%v,err:%v", cfg.logId, err)
+	cfg.logger.Errorf("server not gracefully shutdown => err:%v", err)
 
 	return err
 }
 
 func parseIp(ip string) error {
-	switch {
-	case net.ParseIP(ip).To4() == nil:
-		{
-			return nil
-		}
-	case net.ParseIP(ip).To16() == nil:
-		{
-			return nil
-		}
-	default:
-		{
-			return fmt.Errorf("illegal address")
-		}
+	if net.ParseIP(ip).To4() == nil ||
+		net.ParseIP(ip).To16() == nil {
+		return nil
 	}
+	return fmt.Errorf("illegal address")
 }
