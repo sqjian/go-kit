@@ -1,43 +1,47 @@
 package log
 
-import "strings"
+import (
+	"fmt"
+	"os"
+	"strings"
+)
 
 type OptionFunc func(*config)
 
-func WithFileName(FileName string) OptionFunc {
+func WithFileName(fileName string) OptionFunc {
 	return func(m *config) {
-		m.FileName = FileName
+		m.FileName = fileName
 	}
 }
 
-func WithCaller(Caller bool, CallerSkip int) OptionFunc {
+func WithCaller(caller bool, callerSkip int) OptionFunc {
 	return func(m *config) {
-		m.Caller = Caller
-		m.CallerSkip = CallerSkip
+		m.Caller = caller
+		m.CallerSkip = callerSkip
 	}
 }
 
-func WithMaxSize(MaxSize int) OptionFunc {
+func WithMaxSize(maxSize int) OptionFunc {
 	return func(m *config) {
-		m.MaxSize = MaxSize
+		m.MaxSize = maxSize
 	}
 }
 
-func WithMaxBackups(MaxBackups int) OptionFunc {
+func WithMaxBackups(maxBackups int) OptionFunc {
 	return func(m *config) {
-		m.MaxBackups = MaxBackups
+		m.MaxBackups = maxBackups
 	}
 }
 
-func WithMaxAge(MaxAge int) OptionFunc {
+func WithMaxAge(maxAge int) OptionFunc {
 	return func(m *config) {
-		m.MaxAge = MaxAge
+		m.MaxAge = maxAge
 	}
 }
 
-func WithLevel(Level string) OptionFunc {
+func WithLevel(level string) OptionFunc {
 	return func(m *config) {
-		switch strings.ToLower(Level) {
+		switch strings.ToLower(level) {
 		case "error":
 			{
 				m.Level = Error
@@ -60,14 +64,15 @@ func WithLevel(Level string) OptionFunc {
 			}
 		default:
 			{
-				m.Level = Error
+				fmt.Printf("illegal log level:%v", level)
+				os.Exit(-1)
 			}
 		}
 	}
 }
 
-func WithConsole(Console bool) OptionFunc {
+func WithConsole(console bool) OptionFunc {
 	return func(m *config) {
-		m.Console = Console
+		m.Console = console
 	}
 }
