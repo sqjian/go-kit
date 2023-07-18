@@ -13,6 +13,13 @@ func NewValidator(opts ...Option) (*Validator, error) {
 }
 
 func (v *Validator) Validate(schema []byte, data []byte) error {
+	if len(data) == 0 {
+		return fmt.Errorf("empty data")
+	}
+	if len(schema) == 0 {
+		return fmt.Errorf("empty schema")
+	}
+
 	return v.validateJson(schema, data)
 }
 func (v *Validator) validateJson(schema []byte, data []byte) error {
