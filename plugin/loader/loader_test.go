@@ -11,7 +11,7 @@ import (
 func Test_Loader(t *testing.T) {
 	loader := NewLoader(func(cfg *Cfg) {
 		cfg.Viper = viper.New()
-		cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()
+		cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()
 	})
 	if err := loader.Init(); err != nil {
 		t.Fatal(err)

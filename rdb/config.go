@@ -20,7 +20,7 @@ type Config struct {
 
 func newDefaultConfig() *Config {
 	return &Config{
-		Logger: func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
+		Logger: func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
 	}
 }
 

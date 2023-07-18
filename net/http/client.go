@@ -63,7 +63,7 @@ func newDefaultCliCfg() *clientConfig {
 	return &clientConfig{
 		retry:   3,
 		trace:   true,
-		Log:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
+		Log:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
 		client:  defaultHttpClient,
 		context: context.Background(),
 	}

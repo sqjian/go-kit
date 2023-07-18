@@ -21,7 +21,7 @@ func TestExclusivePool(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(log.Warn),
+		log.WithLevel("warn"),
 		log.WithConsole(false),
 	)
 

@@ -26,7 +26,7 @@ func Example_init() {
 		rdb.WithMaxLifeTime(time.Second),
 		rdb.WithMaxIdleConns(3),
 		rdb.WithDbName("test"),
-		rdb.WithLogger(func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()),
+		rdb.WithLogger(func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()),
 	)
 	checkErr(dbErr)
 

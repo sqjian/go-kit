@@ -20,7 +20,7 @@ func newDefaultSrvCfg() *serverConfig {
 		WriteTimeout: 10 * time.Second,
 
 		gracefully: time.Minute,
-		logger:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
+		logger:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
 		context:    context.Background(),
 	}
 }

@@ -21,7 +21,7 @@ func TestSharePool(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
+		log.WithLevel("debug"),
 		log.WithConsole(false),
 	)
 

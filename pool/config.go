@@ -17,7 +17,7 @@ var (
 func newDefaultCfg() *Config {
 	return &Config{
 		PoolType:          Exclusive,
-		Logger:            func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }(),
+		Logger:            func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
 		KeepAliveInterval: DefaultKeepAliveInterval,
 		CreateNewInterval: DefaultCreateNewInterval,
 		DialRetryCount:    DefaultDialRetryCount,

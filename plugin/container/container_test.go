@@ -15,7 +15,7 @@ func Test_Container(t *testing.T) {
 	c := func() *container.Container {
 		c := container.NewContainer(func(cfg *container.Config) {
 			cfg.Viper = viper.New()
-			cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()
+			cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()
 		})
 		if err := c.Init(); err != nil {
 			t.Fatal(err)
@@ -26,7 +26,7 @@ func Test_Container(t *testing.T) {
 	l := func() *loader.Loader {
 		l := loader.NewLoader(func(cfg *loader.Cfg) {
 			cfg.Viper = viper.New()
-			cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()
+			cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()
 		})
 		if err := l.Init(); err != nil {
 			t.Fatal(err)

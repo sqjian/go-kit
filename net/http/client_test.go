@@ -23,7 +23,7 @@ func TestDo(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
+		log.WithLevel("debug"),
 		log.WithConsole(false),
 	)
 
@@ -62,7 +62,7 @@ func TestDoWithId(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
+		log.WithLevel("debug"),
 		log.WithConsole(false),
 	)
 
@@ -101,7 +101,7 @@ func BenchmarkDo(b *testing.B) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(log.Debug),
+		log.WithLevel("debug"),
 		log.WithConsole(false),
 	)
 

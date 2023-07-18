@@ -96,7 +96,7 @@ func NewTest2Plug(fn func(cfg *schema.Cfg)) (schema.Plug, error) {
 func Test_minimal(t *testing.T) {
 	minimalInst, minimalInstErr := mini.NewMinimal(func(cfg *mini.Cfg) {
 		cfg.Viper = viper.New()
-		cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel(log.Dummy)); return inst }()
+		cfg.Logger = func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()
 		cfg.Plugs = []schema.NewPlug{NewTest1Plug, NewTest2Plug}
 	})
 	if minimalInstErr != nil {
