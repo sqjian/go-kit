@@ -11,7 +11,7 @@ func TestLogger(t *testing.T) {
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
-		log.WithLevel(log.Info),
+		log.WithLevel("info"),
 		log.WithConsole(false),
 		log.WithCaller(true, 1),
 	)

@@ -1,5 +1,7 @@
 package log
 
+import "strings"
+
 type OptionFunc func(*config)
 
 func WithFileName(FileName string) OptionFunc {
@@ -33,9 +35,34 @@ func WithMaxAge(MaxAge int) OptionFunc {
 	}
 }
 
-func WithLevel(Level Level) OptionFunc {
+func WithLevel(Level string) OptionFunc {
 	return func(m *config) {
-		m.Level = Level
+		switch strings.ToLower(Level) {
+		case "error":
+			{
+				m.Level = Error
+			}
+		case "warn":
+			{
+				m.Level = Warn
+			}
+		case "info":
+			{
+				m.Level = Info
+			}
+		case "debug":
+			{
+				m.Level = Debug
+			}
+		case "dummy":
+			{
+				m.Level = Dummy
+			}
+		default:
+			{
+				m.Level = Error
+			}
+		}
 	}
 }
 
