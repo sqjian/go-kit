@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/sqjian/go-kit/log"
 	"github.com/sqjian/go-kit/retry"
-	"github.com/sqjian/go-kit/uid"
 	"io"
 	"net"
 	"net/http"
@@ -17,8 +16,7 @@ import (
 )
 
 var (
-	defaultHttpClient      *http.Client
-	defaultUniqueGenerator uid.Uid
+	defaultHttpClient *http.Client
 )
 
 const (
@@ -46,23 +44,12 @@ func init() {
 		},
 		Timeout: defaultHttpTimeout,
 	}
-
-	defaultUniqueGenerator = func() uid.Uid {
-		uniqueGenerator, uniqueGeneratorErr := uid.NewGenerator(
-			uid.Snowflake,
-			uid.WithSnowflakeNodeId(1),
-		)
-		if uniqueGeneratorErr != nil {
-			panic(fmt.Sprintf("internal err:%v", uniqueGeneratorErr))
-		}
-		return uniqueGenerator
-	}()
 }
 
 func newDefaultCliCfg() *clientConfig {
 	return &clientConfig{
 		retry:   3,
-		trace:   true,
+		trace:   false,
 		Log:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
 		client:  defaultHttpClient,
 		context: context.Background(),

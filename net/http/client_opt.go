@@ -53,6 +53,9 @@ func WithCliRetry(retry int) CliOptionFunc {
 
 func WithCliLogger(logger log.Log) CliOptionFunc {
 	return func(options *clientConfig) {
+		if logger == nil {
+			panic("please check if the log is initialized")
+		}
 		options.Log = logger
 	}
 }
