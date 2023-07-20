@@ -153,6 +153,13 @@ func Do(ctx context.Context, method Method, target string, opts ...CliOptionFunc
 		opt(cfg)
 	}
 
+	{
+		cfg.Debugf(
+			"method:%v,target:%v,bodyLen:%v",
+			method, target, len(cfg.body),
+		)
+	}
+
 	if err := cfg.context.Err(); err != nil {
 		cfg.Errorf("context.Err not nil =>err:%v", err)
 		return nil, err
