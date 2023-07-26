@@ -1,7 +1,7 @@
 package aes_test
 
 import (
-	"github.com/sqjian/go-kit/enc/aes"
+	"github.com/sqjian/go-kit/crypto/aes"
 	"testing"
 )
 

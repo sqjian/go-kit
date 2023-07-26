@@ -19,7 +19,7 @@ func newDefaultValidatorConfig() *validator {
 func NewValidator(validateType ValidatorType, opts ...OptionFunc) (Validator, error) {
 
 	configInst := newDefaultValidatorConfig()
-	configInst.validatorType = Json
+	configInst.validatorType = validateType
 
 	for _, opt := range opts {
 		opt(configInst)

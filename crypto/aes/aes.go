@@ -2,11 +2,11 @@ package aes
 
 import (
 	"fmt"
-	"github.com/sqjian/go-kit/enc/aes/cbc"
-	"github.com/sqjian/go-kit/enc/aes/cfb"
-	"github.com/sqjian/go-kit/enc/aes/ctr"
-	"github.com/sqjian/go-kit/enc/aes/ecb"
-	"github.com/sqjian/go-kit/enc/aes/ofb"
+	"github.com/sqjian/go-kit/crypto/aes/cbc"
+	"github.com/sqjian/go-kit/crypto/aes/cfb"
+	"github.com/sqjian/go-kit/crypto/aes/ctr"
+	"github.com/sqjian/go-kit/crypto/aes/ecb"
+	"github.com/sqjian/go-kit/crypto/aes/ofb"
 )
 
 type AES interface {
