@@ -20,7 +20,9 @@ func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	_, _ = fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
 }
 
-func chat(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func echo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Printf("path:%v\n", r.RequestURI)
+
 	var upgrader = websocket.Upgrader{}
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -30,11 +32,20 @@ func chat(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	defer ws.Close()
 
-	processMsg := func(ws *websocket.Conn) {
-		_ = ws.WriteMessage(websocket.TextMessage, []byte("hello"))
+	for {
+		mt, message, err := ws.ReadMessage()
+		fmt.Printf("<- receive mt:%v,message:%v,err:%v\n", mt, string(message), err)
+		if err != nil {
+			fmt.Println("read:", err)
+			continue
+		}
+		err = ws.WriteMessage(mt, message)
+		fmt.Printf("-> write mt:%v,message:%v,err:%v\n", mt, string(message), err)
+		if err != nil {
+			fmt.Println("write:", err)
+			continue
+		}
 	}
-
-	processMsg(ws)
 }
 
 func TestServe(t *testing.T) {
@@ -58,7 +69,7 @@ func TestServe(t *testing.T) {
 	router := httprouter.New()
 	router.GET("/", index)
 	router.GET("/hello/:name", hello)
-	router.GET("/chat", chat)
+	router.GET("/echo", echo)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
