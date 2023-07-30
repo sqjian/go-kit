@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
 	"golang.org/x/net/netutil"
@@ -11,7 +12,7 @@ import (
 	"time"
 )
 
-func newDefaultSrvCfg() *serverConfig {
+func newDefaultServerCfg() *serverConfig {
 	return &serverConfig{
 		limit:          1e2,
 		MaxHeaderBytes: 1 << 20,
@@ -26,33 +27,33 @@ func newDefaultSrvCfg() *serverConfig {
 }
 
 func Serve(ctx context.Context, addr string, handle http.Handler, opts ...ServerOptionFunc) error {
-	cfg := newDefaultSrvCfg()
+	configInst := newDefaultServerCfg()
 	{
 		for _, opt := range opts {
-			opt(cfg)
+			opt(configInst)
 		}
-		cfg.context = ctx
+		configInst.context = ctx
 	}
 
 	if err := parseIp(addr); err != nil {
-		cfg.logger.Errorf("parseIp failed =>err:%v", err)
+		configInst.logger.Errorf("parseIp failed =>err:%v", err)
 		return err
 	}
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		cfg.logger.Errorf("tcp listen:%v failed,err:%v", addr, err)
+		configInst.logger.Errorf("tcp listen:%v failed,err:%v", addr, err)
 		return err
 	}
 	defer listener.Close()
 
-	listener = netutil.LimitListener(listener, cfg.limit)
+	listener = netutil.LimitListener(listener, configInst.limit)
 	srv := &http.Server{
 		Addr:           addr,
 		Handler:        handle,
-		ReadTimeout:    cfg.ReadTimeout,
-		WriteTimeout:   cfg.WriteTimeout,
-		MaxHeaderBytes: cfg.MaxHeaderBytes,
+		ReadTimeout:    configInst.ReadTimeout,
+		WriteTimeout:   configInst.WriteTimeout,
+		MaxHeaderBytes: configInst.MaxHeaderBytes,
 	}
 
 	var wg sync.WaitGroup
@@ -61,25 +62,25 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...Server
 	go func() {
 		defer wg.Done()
 
-		<-cfg.context.Done()
-		ctx, cancel := context.WithTimeout(context.Background(), cfg.gracefully)
+		<-configInst.context.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), configInst.gracefully)
 		defer cancel()
 		if err := srv.Shutdown(ctx); nil != err {
-			cfg.logger.Errorf("server shutdown failed => err:%v", err)
+			configInst.logger.Errorf("server shutdown failed => err:%v", err)
 			return
 		}
-		cfg.logger.Infof("server gracefully shutdown")
+		configInst.logger.Infof("server gracefully shutdown")
 
 	}()
 
-	cfg.logger.Infof("About to listen on %v", addr)
+	configInst.logger.Infof("About to listen on %v", addr)
 	err = srv.Serve(listener)
 	wg.Wait()
 
-	if http.ErrServerClosed == err {
+	if errors.Is(err, http.ErrServerClosed) {
 		return nil
 	}
-	cfg.logger.Errorf("server not gracefully shutdown => err:%v", err)
+	configInst.logger.Errorf("server not gracefully shutdown => err:%v", err)
 
 	return err
 }

@@ -47,7 +47,7 @@ func TestServe(t *testing.T) {
 		cancel()
 	}()
 
-	err := httpUtil.Serve(ctx, "0.0.0.0:8888", router, httpUtil.WithSrvLogger(logger))
+	err := httpUtil.Serve(ctx, "0.0.0.0:8888", router, httpUtil.WithServerLogger(logger))
 	if err != nil {
 		t.Fatal(err)
 	}

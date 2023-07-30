@@ -3,13 +3,16 @@ package http
 import (
 	"context"
 	"github.com/sqjian/go-kit/log"
+	"github.com/sqjian/go-kit/retry"
 	"net/http"
 )
 
 type clientConfig struct {
 	log.Log
 
-	retry   int
+	retry     int
+	delayType retry.DelayTypeFunc
+
 	trace   bool
 	client  *http.Client
 	context context.Context
@@ -19,39 +22,45 @@ type clientConfig struct {
 	header map[string]string
 }
 
-type CliOptionFunc func(*clientConfig)
+type ClientOptionFunc func(*clientConfig)
 
-func WithCliHeader(header map[string]string) CliOptionFunc {
+func WithClientHeader(header map[string]string) ClientOptionFunc {
 	return func(options *clientConfig) {
 		options.header = header
 	}
 }
 
-func WithCliQuery(query map[string]string) CliOptionFunc {
+func WithClientQuery(query map[string]string) ClientOptionFunc {
 	return func(options *clientConfig) {
 		options.query = query
 	}
 }
 
-func WithCliBody(body []byte) CliOptionFunc {
+func WithClientBody(body []byte) ClientOptionFunc {
 	return func(options *clientConfig) {
 		options.body = body
 	}
 }
 
-func WithClient(client *http.Client) CliOptionFunc {
+func WithClient(client *http.Client) ClientOptionFunc {
 	return func(options *clientConfig) {
 		options.client = client
 	}
 }
 
-func WithCliRetry(retry int) CliOptionFunc {
+func WithClientRetry(retry int) ClientOptionFunc {
 	return func(options *clientConfig) {
 		options.retry = retry
 	}
 }
 
-func WithCliLogger(logger log.Log) CliOptionFunc {
+func WithClientDelayFn(delayTypeFn retry.DelayTypeFunc) ClientOptionFunc {
+	return func(options *clientConfig) {
+		options.delayType = delayTypeFn
+	}
+}
+
+func WithClientLogger(logger log.Log) ClientOptionFunc {
 	return func(options *clientConfig) {
 		if logger == nil {
 			panic("please check if the log is initialized")
@@ -60,7 +69,7 @@ func WithCliLogger(logger log.Log) CliOptionFunc {
 	}
 }
 
-func WithCliTrace(trace bool) CliOptionFunc {
+func WithClientTrace(trace bool) ClientOptionFunc {
 	return func(options *clientConfig) {
 		options.trace = trace
 	}

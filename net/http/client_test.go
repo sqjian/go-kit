@@ -38,13 +38,13 @@ func TestDo(t *testing.T) {
 		context.Background(),
 		http.GET,
 		ts.URL,
-		http.WithCliQuery(map[string]string{
+		http.WithClientQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
 		}),
-		http.WithCliRetry(3),
-		http.WithCliLogger(logger),
+		http.WithClientRetry(3),
+		http.WithClientLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
@@ -77,13 +77,13 @@ func TestDoWithId(t *testing.T) {
 		context.Background(),
 		http.GET,
 		ts.URL,
-		http.WithCliQuery(map[string]string{
+		http.WithClientQuery(map[string]string{
 			"from":    "cn",
 			"to":      "en",
 			"content": "你好",
 		}),
-		http.WithCliRetry(3),
-		http.WithCliLogger(logger),
+		http.WithClientRetry(3),
+		http.WithClientLogger(logger),
 	)
 	checkErr(err)
 	t.Logf("rst:%v,err:%v", string(rst), err)
@@ -118,13 +118,13 @@ func BenchmarkDo(b *testing.B) {
 				context.Background(),
 				http.GET,
 				ts.URL,
-				http.WithCliQuery(map[string]string{
+				http.WithClientQuery(map[string]string{
 					"from":    "cn",
 					"to":      "en",
 					"content": "你好",
 				}),
-				http.WithCliRetry(3),
-				http.WithCliLogger(logger),
+				http.WithClientRetry(3),
+				http.WithClientLogger(logger),
 			)
 			if err != nil {
 				b.Fatal(err)

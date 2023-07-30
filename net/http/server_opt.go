@@ -20,7 +20,7 @@ type serverConfig struct {
 
 type ServerOptionFunc func(*serverConfig)
 
-func WithSrvLogger(logger log.Log) ServerOptionFunc {
+func WithServerLogger(logger log.Log) ServerOptionFunc {
 	return func(options *serverConfig) {
 		options.logger = logger
 	}

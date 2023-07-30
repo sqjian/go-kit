@@ -46,9 +46,12 @@ func init() {
 	}
 }
 
-func newDefaultCliCfg() *clientConfig {
+func newDefaultClientCfg() *clientConfig {
 	return &clientConfig{
-		retry:   3,
+		retry: 3,
+		delayType: func(n uint, err error, config *retry.Config) time.Duration {
+			return 1e2 * time.Millisecond
+		},
 		trace:   false,
 		Log:     func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
 		client:  defaultHttpClient,
@@ -145,8 +148,8 @@ func genReq(method Method, target string, cfg *clientConfig) (*http.Request, err
 	return req, nil
 }
 
-func Do(ctx context.Context, method Method, target string, opts ...CliOptionFunc) ([]byte, error) {
-	cfg := newDefaultCliCfg()
+func Do(ctx context.Context, method Method, target string, opts ...ClientOptionFunc) ([]byte, error) {
+	cfg := newDefaultClientCfg()
 	cfg.context = ctx
 
 	for _, opt := range opts {
@@ -200,6 +203,7 @@ func Do(ctx context.Context, method Method, target string, opts ...CliOptionFunc
 			return nil
 		},
 		retry.WithAttempts(uint(cfg.retry)),
+		retry.WithDelayFn(cfg.delayType),
 		retry.WithContext(cfg.context),
 	)
 	return rst, err
