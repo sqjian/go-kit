@@ -20,8 +20,8 @@ func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	_, _ = fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
 }
 
-func wsEcho(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	fmt.Printf("path:%v\n", r.RequestURI)
+func ws(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Printf("ws->path:%v\n", r.RequestURI)
 
 	var upgrader = websocket.Upgrader{}
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -37,13 +37,35 @@ func wsEcho(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		fmt.Printf("<- receive mt:%v,message:%v,err:%v\n", mt, string(message), err)
 		if err != nil {
 			fmt.Println("read:", err)
-			continue
+			break
+		}
+	}
+}
+
+func wsEcho(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fmt.Printf("wsEcho->path:%v\n", r.RequestURI)
+
+	var upgrader = websocket.Upgrader{}
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("upgrade:", err)
+		return
+	}
+
+	defer ws.Close()
+
+	for {
+		mt, message, err := ws.ReadMessage()
+		fmt.Printf("<- receive mt:%v,message:%v,err:%v\n", mt, string(message), err)
+		if err != nil {
+			fmt.Println("read:", err)
+			break
 		}
 		err = ws.WriteMessage(mt, message)
 		fmt.Printf("-> write mt:%v,message:%v,err:%v\n", mt, string(message), err)
 		if err != nil {
 			fmt.Println("write:", err)
-			continue
+			break
 		}
 	}
 }
@@ -72,15 +94,21 @@ func TestServe(t *testing.T) {
 	router := httprouter.New()
 	router.GET("/", index)
 	router.GET("/hello/:name", hello)
+	router.GET("/ws", ws)
 	router.GET("/ws_echo", wsEcho)
 	router.GET("/ws_proxy", func() httprouter.Handle {
 		wp, wpErr := (&httpUtil.WebsocketProxy{}).Init(
 			fmt.Sprintf("ws://%v/ws_echo", addr),
 			httpUtil.WithWebsocketProxyLogger(logger),
-			httpUtil.WithWebsocketProxyInterceptor(func(data []byte) []byte {
-				processed := append(data, []byte("->just a joke")...)
-				logger.Debugf("interceptor->data:%v,processed:%v", string(data), string(processed))
-				return processed
+			httpUtil.WithWebsocketProxyIncomeInterceptor(func(msgType int, msg []byte) (int, []byte) {
+				processed := append(msg, []byte("->from IncomeInterceptor")...)
+				logger.Debugf("incomeInterceptor->msg:%v,processed:%v", string(msg), string(processed))
+				return msgType, processed
+			}),
+			httpUtil.WithWebsocketProxyOutcomeInterceptor(func(msgType int, msg []byte) (int, []byte) {
+				processed := append(msg, []byte("->from OutcomeInterceptor")...)
+				logger.Debugf("outcomeInterceptor->msg:%v,processed:%v", string(msg), string(processed))
+				return msgType, processed
 			}),
 		)
 		checkErr(wpErr)

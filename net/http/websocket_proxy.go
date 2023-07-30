@@ -21,32 +21,27 @@ var (
 	defaultDialer = websocket.DefaultDialer
 )
 
-type Interceptor func([]byte) []byte
+type IncomeInterceptor func(int, []byte) (int, []byte)
+type OutcomeInterceptor func(int, []byte) (int, []byte)
 
 func newDefaultWebsocketProxyConfig() *WebsocketProxy {
 	return &WebsocketProxy{
-		Backend:      nil,
-		Upgrader:     defaultUpgrader,
-		Dialer:       defaultDialer,
-		Logger:       func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
-		Interceptors: []Interceptor{func(data []byte) []byte { return data }},
+		Backend:            nil,
+		Upgrader:           defaultUpgrader,
+		Dialer:             defaultDialer,
+		Logger:             func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
+		IncomeInterceptor:  func(msgType int, msg []byte) (int, []byte) { return msgType, msg },
+		OutcomeInterceptor: func(msgType int, msg []byte) (int, []byte) { return msgType, msg },
 	}
 }
 
 type WebsocketProxy struct {
-	Backend      *url.URL
-	Upgrader     *websocket.Upgrader
-	Dialer       *websocket.Dialer
-	Logger       log.Log
-	Interceptors []Interceptor
-}
-
-func (wp *WebsocketProxy) execInterceptors(data []byte) []byte {
-	wp.Logger.Debugf("interceptorsLen:%v,data:%v", len(wp.Interceptors), string(data))
-	for _, interceptor := range wp.Interceptors {
-		data = interceptor(data)
-	}
-	return data
+	Backend            *url.URL
+	Upgrader           *websocket.Upgrader
+	Dialer             *websocket.Dialer
+	Logger             log.Log
+	IncomeInterceptor  IncomeInterceptor
+	OutcomeInterceptor OutcomeInterceptor
 }
 
 func (wp *WebsocketProxy) Init(addr string, opts ...WebsocketProxyOptionFunc) (*WebsocketProxy, error) {
@@ -114,7 +109,7 @@ func (wp *WebsocketProxy) WebsocketProxyHandle(w http.ResponseWriter, r *http.Re
 				break
 			}
 
-			writeMessageErr := connBackend.WriteMessage(msgType, wp.execInterceptors(msg))
+			writeMessageErr := connBackend.WriteMessage(wp.IncomeInterceptor(msgType, msg))
 			if writeMessageErr != nil {
 				wp.Logger.Errorf("writeMessage failed,writeMessageErr:%v", writeMessageErr.Error())
 				break
@@ -143,7 +138,7 @@ func (wp *WebsocketProxy) WebsocketProxyHandle(w http.ResponseWriter, r *http.Re
 				wp.Logger.Infof("readMessage successfully")
 			}
 
-			writeMessageErr := connFrontend.WriteMessage(msgType, msg)
+			writeMessageErr := connFrontend.WriteMessage(wp.OutcomeInterceptor(msgType, msg))
 			if writeMessageErr != nil {
 				wp.Logger.Errorf("writeMessage failed,writeMessageErr:%v", writeMessageErr.Error())
 				break

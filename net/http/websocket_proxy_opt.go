@@ -12,12 +12,14 @@ func WithWebsocketProxyLogger(logger log.Log) WebsocketProxyOptionFunc {
 	}
 }
 
-func WithWebsocketProxyInterceptor(interceptor Interceptor) WebsocketProxyOptionFunc {
+func WithWebsocketProxyIncomeInterceptor(incomeInterceptor IncomeInterceptor) WebsocketProxyOptionFunc {
 	return func(options *WebsocketProxy) {
-		options.Interceptors = append(options.Interceptors, interceptor)
+		options.IncomeInterceptor = incomeInterceptor
 	}
 }
 
-//func Process(messageType int, data []byte) (int, []byte) {
-//
-//}
+func WithWebsocketProxyOutcomeInterceptor(outcomeInterceptor OutcomeInterceptor) WebsocketProxyOptionFunc {
+	return func(options *WebsocketProxy) {
+		options.OutcomeInterceptor = outcomeInterceptor
+	}
+}
