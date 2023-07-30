@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sync"
 )
 
 var (
@@ -41,6 +42,7 @@ type WebsocketProxy struct {
 }
 
 func (wp *WebsocketProxy) execInterceptors(data []byte) []byte {
+	wp.Logger.Debugf("interceptorsLen:%v,data:%v", len(wp.Interceptors), string(data))
 	for _, interceptor := range wp.Interceptors {
 		data = interceptor(data)
 	}
@@ -94,7 +96,9 @@ func (wp *WebsocketProxy) WebsocketProxyHandle(w http.ResponseWriter, r *http.Re
 	}
 	defer connFrontend.Close()
 
-	processInComeMsg := func(connFrontend, connBackend *websocket.Conn) {
+	processInComeMsg := func(wg *sync.WaitGroup, connFrontend, connBackend *websocket.Conn) {
+		defer wg.Done()
+
 		for {
 			msgType, msg, readMessageErr := connFrontend.ReadMessage()
 			if readMessageErr != nil {
@@ -114,10 +118,14 @@ func (wp *WebsocketProxy) WebsocketProxyHandle(w http.ResponseWriter, r *http.Re
 			if writeMessageErr != nil {
 				wp.Logger.Errorf("writeMessage failed,writeMessageErr:%v", writeMessageErr.Error())
 				break
+			} else {
+				wp.Logger.Errorf("writeMessage successfully")
 			}
 		}
 	}
-	processOutComeMsg := func(connFrontend, connBackend *websocket.Conn) {
+	processOutComeMsg := func(wg *sync.WaitGroup, connFrontend, connBackend *websocket.Conn) {
+		wg.Done()
+
 		for {
 			msgType, msg, readMessageErr := connBackend.ReadMessage()
 			if readMessageErr != nil {
@@ -132,10 +140,10 @@ func (wp *WebsocketProxy) WebsocketProxyHandle(w http.ResponseWriter, r *http.Re
 				connFrontend.WriteMessage(websocket.CloseMessage, m)
 				break
 			} else {
-				wp.Logger.Errorf("readMessage successfully")
+				wp.Logger.Infof("readMessage successfully")
 			}
 
-			writeMessageErr := connFrontend.WriteMessage(msgType, wp.execInterceptors(msg))
+			writeMessageErr := connFrontend.WriteMessage(msgType, msg)
 			if writeMessageErr != nil {
 				wp.Logger.Errorf("writeMessage failed,writeMessageErr:%v", writeMessageErr.Error())
 				break
@@ -145,8 +153,11 @@ func (wp *WebsocketProxy) WebsocketProxyHandle(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	processInComeMsg(connFrontend, connBackend)
-	processOutComeMsg(connFrontend, connBackend)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go processInComeMsg(&wg, connFrontend, connBackend)
+	go processOutComeMsg(&wg, connFrontend, connBackend)
+	wg.Wait()
 }
 
 func copyResponse(r http.ResponseWriter, resp *http.Response) error {

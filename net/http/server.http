@@ -11,3 +11,6 @@ WEBSOCKET ws://127.0.0.1:8888/ws_echo
 
 ###
 WEBSOCKET ws://127.0.0.1:8888/ws_proxy
+Content-Type: application/json // We use it for highlighting
+
+"sss"
