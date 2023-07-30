@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.26
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.71
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.36.0
+	github.com/buger/jsonparser v1.1.1
 	github.com/cheggaaa/pb v1.0.29
 	github.com/davecgh/go-spew v1.1.1
 	github.com/elgris/sqrl v0.0.0-20210727210741-7e0198b30236
