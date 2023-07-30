@@ -9,3 +9,4 @@
 ## TODO
 
 - support plugin dependency init
+- support sid

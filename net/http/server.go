@@ -27,13 +27,15 @@ func newDefaultServerCfg() *serverConfig {
 }
 
 func Serve(ctx context.Context, addr string, handle http.Handler, opts ...ServerOptionFunc) error {
-	configInst := newDefaultServerCfg()
-	{
+
+	configInst := func() *serverConfig {
+		inst := newDefaultServerCfg()
+		inst.context = ctx
 		for _, opt := range opts {
-			opt(configInst)
+			opt(inst)
 		}
-		configInst.context = ctx
-	}
+		return inst
+	}()
 
 	if err := parseIp(addr); err != nil {
 		configInst.logger.Errorf("parseIp failed =>err:%v", err)
@@ -48,7 +50,7 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...Server
 	defer listener.Close()
 
 	listener = netutil.LimitListener(listener, configInst.limit)
-	srv := &http.Server{
+	server := &http.Server{
 		Addr:           addr,
 		Handler:        handle,
 		ReadTimeout:    configInst.ReadTimeout,
@@ -65,7 +67,7 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...Server
 		<-configInst.context.Done()
 		ctx, cancel := context.WithTimeout(context.Background(), configInst.gracefully)
 		defer cancel()
-		if err := srv.Shutdown(ctx); nil != err {
+		if err := server.Shutdown(ctx); nil != err {
 			configInst.logger.Errorf("server shutdown failed => err:%v", err)
 			return
 		}
@@ -74,7 +76,7 @@ func Serve(ctx context.Context, addr string, handle http.Handler, opts ...Server
 	}()
 
 	configInst.logger.Infof("About to listen on %v", addr)
-	err = srv.Serve(listener)
+	err = server.Serve(listener)
 	wg.Wait()
 
 	if errors.Is(err, http.ErrServerClosed) {
