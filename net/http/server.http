@@ -7,5 +7,7 @@ GET http://127.0.0.1:8888/hello/name
 GET http://127.0.0.1:8888/hello/name
 
 ###
-WEBSOCKET ws://127.0.0.1:8888/echo
+WEBSOCKET ws://127.0.0.1:8888/ws_echo
 
+###
+WEBSOCKET ws://127.0.0.1:8888/ws_proxy

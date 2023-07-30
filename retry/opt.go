@@ -21,33 +21,33 @@ type Config struct {
 	logger    log.Log
 }
 
-type Option func(*Config)
+type retryOption func(*Config)
 
-func WithAttempts(attempts uint) Option {
+func WithAttempts(attempts uint) retryOption {
 	return func(c *Config) {
 		c.attempts = attempts
 	}
 }
 
-func WithDelayFn(delayTypeFn DelayTypeFunc) Option {
+func WithDelayFn(delayTypeFn DelayTypeFunc) retryOption {
 	return func(c *Config) {
 		c.delayType = delayTypeFn
 	}
 }
 
-func WithOnRetry(onRetry OnRetryFunc) Option {
+func WithOnRetry(onRetry OnRetryFunc) retryOption {
 	return func(c *Config) {
 		c.onRetry = onRetry
 	}
 }
 
-func WithIf(retryIf IfFunc) Option {
+func WithIf(retryIf IfFunc) retryOption {
 	return func(c *Config) {
 		c.retryIf = retryIf
 	}
 }
 
-func WithContext(ctx context.Context) Option {
+func WithContext(ctx context.Context) retryOption {
 	return func(c *Config) {
 		c.context = ctx
 	}

@@ -20,7 +20,7 @@ func hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	_, _ = fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
 }
 
-func echo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func wsEcho(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	fmt.Printf("path:%v\n", r.RequestURI)
 
 	var upgrader = websocket.Upgrader{}
@@ -55,13 +55,16 @@ func TestServe(t *testing.T) {
 		}
 	}
 
+	addr := "0.0.0.0:8888"
+
 	logger, loggerErr := log.NewLogger(
 		log.WithFileName("go-kit.easylog"),
 		log.WithMaxSize(3),
 		log.WithMaxBackups(3),
 		log.WithMaxAge(3),
 		log.WithLevel("debug"),
-		log.WithConsole(false),
+		log.WithConsole(true),
+		log.WithCaller(true, 1),
 	)
 
 	checkErr(loggerErr)
@@ -69,7 +72,20 @@ func TestServe(t *testing.T) {
 	router := httprouter.New()
 	router.GET("/", index)
 	router.GET("/hello/:name", hello)
-	router.GET("/echo", echo)
+	router.GET("/ws_echo", wsEcho)
+	router.GET("/ws_proxy", func() httprouter.Handle {
+		wp, wpErr := (&httpUtil.WebsocketProxy{}).Init(
+			fmt.Sprintf("ws://%v/ws_echo", addr),
+			httpUtil.WithWebsocketProxyLogger(logger),
+			httpUtil.WithWebsocketProxyInterceptor(func(data []byte) []byte {
+				processed := append(data, []byte("->just a joke")...)
+				logger.Debugf("interceptor->data:%v,processed:%v", string(data), string(processed))
+				return processed
+			}),
+		)
+		checkErr(wpErr)
+		return wp.WebsocketProxyHandle
+	}())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -77,7 +93,7 @@ func TestServe(t *testing.T) {
 		cancel()
 	}()
 
-	err := httpUtil.Serve(ctx, "0.0.0.0:8888", router, httpUtil.WithServerLogger(logger))
+	err := httpUtil.Serve(ctx, addr, router, httpUtil.WithServerLogger(logger))
 	if err != nil {
 		t.Fatal(err)
 	}

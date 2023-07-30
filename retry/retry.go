@@ -10,7 +10,7 @@ import (
 
 type UserFunc func() error
 
-func Do(userFn UserFunc, opts ...Option) error {
+func Do(userFn UserFunc, opts ...retryOption) error {
 	var n uint
 
 	config := newDefaultRetryConfig()
