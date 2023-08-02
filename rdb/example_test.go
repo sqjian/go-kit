@@ -35,7 +35,7 @@ func Example_init() {
 
 func Example_insert() {
 	ctx := context.WithValue(context.Background(), "id", 1)
-	fmt.Println(db.Insert(ctx, "test", map[string]interface{}{"age": 1}))
+	fmt.Println(db.Insert(ctx, "test", map[string]any{"age": 1}))
 }
 
 func Example_mysqlQuery() {
@@ -53,11 +53,11 @@ func Example_mysqlQuery() {
 func Example_update() {
 	ctx := context.WithValue(context.Background(), "id", 1)
 
-	fmt.Println(db.Update(ctx, "test", map[string]interface{}{"age": 5}, map[string]interface{}{"age": 1}))
+	fmt.Println(db.Update(ctx, "test", map[string]any{"age": 5}, map[string]any{"age": 1}))
 }
 
 func Example_delete() {
 	ctx := context.Background()
 
-	fmt.Println(db.Delete(ctx, "test", map[string]interface{}{"age": 5}))
+	fmt.Println(db.Delete(ctx, "test", map[string]any{"age": 5}))
 }

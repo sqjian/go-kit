@@ -30,9 +30,9 @@ func newExclusivePool(cfg *Config) *ExclusivePool {
 type ExclusivePool struct {
 	Address           string
 	Port              string
-	Dial              func(ctx context.Context, address, port string) (connection interface{}, err error)
-	Close             func(ctx context.Context, connection interface{}) (err error)
-	KeepAlive         func(ctx context.Context, connection interface{}) (err error)
+	Dial              func(ctx context.Context, address, port string) (connection any, err error)
+	Close             func(ctx context.Context, connection any) (err error)
+	KeepAlive         func(ctx context.Context, connection any) (err error)
 	InitialPoolSize   int
 	BestPoolSize      int
 	MaxPoolSize       int
@@ -44,8 +44,8 @@ type ExclusivePool struct {
 
 	workConnCount  int32
 	newlyConnCount int32
-	alivePool      chan interface{}
-	swapPool       chan interface{}
+	alivePool      chan any
+	swapPool       chan any
 	retryPool      chan int
 	isStopped      bool
 	isStoppedRwMu  sync.RWMutex
@@ -89,8 +89,8 @@ func NewExclusivePool(ctx context.Context, cfg *Config) (*ExclusivePool, error) 
 	}
 
 	pool.retryPool = make(chan int, pool.MaxPoolSize)
-	pool.alivePool = make(chan interface{}, pool.MaxPoolSize)
-	pool.swapPool = make(chan interface{}, pool.MaxPoolSize)
+	pool.alivePool = make(chan any, pool.MaxPoolSize)
+	pool.swapPool = make(chan any, pool.MaxPoolSize)
 
 	for i := 0; i < pool.InitialPoolSize; i++ {
 		if c, err := pool.Dial(ctx, pool.Address, pool.Port); err == nil {
@@ -113,7 +113,7 @@ func (p *ExclusivePool) start() {
 	go p.keepAliveLoop()
 }
 
-func (p *ExclusivePool) Get() (connection interface{}, err error) {
+func (p *ExclusivePool) Get() (connection any, err error) {
 
 	id := genUniqueId(context.Background())
 
@@ -165,7 +165,7 @@ func (p *ExclusivePool) Get() (connection interface{}, err error) {
 	return nil, ErrWrapper(GetConnTimeout)
 }
 
-func (p *ExclusivePool) Put(connection interface{}) (err error) {
+func (p *ExclusivePool) Put(connection any) (err error) {
 
 	id := genUniqueId(context.Background())
 

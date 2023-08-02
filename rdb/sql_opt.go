@@ -9,7 +9,7 @@ func newDefaultSqlOption() *SqlOption {
 	sqlOption.filter.limit = 1000
 
 	sqlOption.column = []string{}
-	sqlOption.where = make(map[string]interface{})
+	sqlOption.where = make(map[string]any)
 
 	return sqlOption
 }
@@ -23,7 +23,7 @@ type SqlOption struct {
 		limit  uint64
 	}
 	column []string
-	where  map[string]interface{}
+	where  map[string]any
 }
 
 type QueryOption interface {
@@ -42,7 +42,7 @@ func WithColumn(column []string) QueryOptionFunc {
 	})
 }
 
-func WithWhere(where map[string]interface{}) QueryOptionFunc {
+func WithWhere(where map[string]any) QueryOptionFunc {
 	return QueryOptionFunc(func(s *SqlOption) {
 		s.where = where
 	})

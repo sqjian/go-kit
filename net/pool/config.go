@@ -30,9 +30,9 @@ type Config struct {
 	PoolType          Type
 	Address           string
 	Port              string
-	Dial              func(ctx context.Context, address, port string) (connection interface{}, err error)
-	Close             func(ctx context.Context, connection interface{}) (err error)
-	KeepAlive         func(ctx context.Context, connection interface{}) (err error)
+	Dial              func(ctx context.Context, address, port string) (connection any, err error)
+	Close             func(ctx context.Context, connection any) (err error)
+	KeepAlive         func(ctx context.Context, connection any) (err error)
 	InitialPoolSize   int
 	BestPoolSize      int
 	MaxPoolSize       int
@@ -64,19 +64,19 @@ func WithPort(Port string) OptionFunc {
 	}
 }
 
-func WithDial(Dial func(ctx context.Context, address, port string) (connection interface{}, err error)) OptionFunc {
+func WithDial(Dial func(ctx context.Context, address, port string) (connection any, err error)) OptionFunc {
 	return func(options *Config) {
 		options.Dial = Dial
 	}
 }
 
-func WithClose(Close func(ctx context.Context, connection interface{}) (err error)) OptionFunc {
+func WithClose(Close func(ctx context.Context, connection any) (err error)) OptionFunc {
 	return func(options *Config) {
 		options.Close = Close
 	}
 }
 
-func WithKeepAlive(KeepAlive func(ctx context.Context, connection interface{}) (err error)) OptionFunc {
+func WithKeepAlive(KeepAlive func(ctx context.Context, connection any) (err error)) OptionFunc {
 	return func(options *Config) {
 		options.KeepAlive = KeepAlive
 	}

@@ -31,7 +31,7 @@ func WithPlaceholder(placeholder string) InstructOptionFunc {
 
 type Instruct struct {
 	Sql  string
-	Args []interface{}
+	Args []any
 }
 
 func newInstruct(sql sqrl.Sqlizer, opts ...InstructOptionFunc) (*Instruct, error) {
@@ -63,7 +63,7 @@ func instructsToString(instructs []*Instruct) string {
 	return strings.Join(rst, ",")
 }
 
-func genQuerySql(table []string, column []string, where map[string]interface{}, offset, limit uint64, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func genQuerySql(table []string, column []string, where map[string]any, offset, limit uint64, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.SelectBuilder
 
@@ -90,7 +90,7 @@ func genQuerySql(table []string, column []string, where map[string]interface{}, 
 	return newInstruct(sql, opts...)
 }
 
-func genInsertSql(table string, data map[string]interface{}, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func genInsertSql(table string, data map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.InsertBuilder
 
@@ -100,7 +100,7 @@ func genInsertSql(table string, data map[string]interface{}, opts ...InstructOpt
 		return nil, fmt.Errorf("empty data")
 	}
 	var columns []string
-	var values []interface{}
+	var values []any
 	for column, value := range data {
 		columns = append(columns, column)
 		values = append(values, value)
@@ -111,7 +111,7 @@ func genInsertSql(table string, data map[string]interface{}, opts ...InstructOpt
 	return newInstruct(sql, opts...)
 }
 
-func genDeleteSql(table string, where map[string]interface{}, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func genDeleteSql(table string, where map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.DeleteBuilder
 
@@ -125,7 +125,7 @@ func genDeleteSql(table string, where map[string]interface{}, opts ...InstructOp
 	return newInstruct(sql, opts...)
 }
 
-func genUpdateSql(table string, data map[string]interface{}, where map[string]interface{}, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func genUpdateSql(table string, data map[string]any, where map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.UpdateBuilder
 

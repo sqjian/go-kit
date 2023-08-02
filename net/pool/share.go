@@ -29,9 +29,9 @@ func newSharePool(cfg *Config) *SharePool {
 type SharePool struct {
 	Address           string
 	Port              string
-	Dial              func(ctx context.Context, address, port string) (connection interface{}, err error)
-	Close             func(ctx context.Context, connection interface{}) (err error)
-	KeepAlive         func(ctx context.Context, connection interface{}) (err error)
+	Dial              func(ctx context.Context, address, port string) (connection any, err error)
+	Close             func(ctx context.Context, connection any) (err error)
+	KeepAlive         func(ctx context.Context, connection any) (err error)
 	InitialPoolSize   int
 	DialRetryCount    int
 	KeepAliveInterval time.Duration
@@ -40,7 +40,7 @@ type SharePool struct {
 	CreateNewInterval time.Duration
 	Logger            log.Log
 
-	alivePool       []interface{}
+	alivePool       []any
 	alivePoolOffset uint64
 
 	retryPool chan int
@@ -93,13 +93,13 @@ func (s *SharePool) keepAliveLoop() {
 	s.Logger.Infof("addr:%v => keepAlive loop start.", s.Address)
 	defer s.Logger.Infof("addr:%v => keepAlive loop end.", s.Address)
 
-	remove := func(array []interface{}, offset int) []interface{} {
+	remove := func(array []any, offset int) []any {
 		for j := offset; j < len(array)-1; j++ {
 			array[j] = array[j+1]
 		}
 		return array[:len(array)-1]
 	}
-	pickOut := func(array []interface{}) int {
+	pickOut := func(array []any) int {
 		for offset, connection := range s.alivePool {
 			if err := s.KeepAlive(context.TODO(), connection); err != nil {
 				s.Logger.Errorf("addr:%v => Keepalive Pool Failed on %v\n",
@@ -170,7 +170,7 @@ func (s *SharePool) retryLoop() {
 		}
 	}
 }
-func (s *SharePool) Get() (connection interface{}, err error) {
+func (s *SharePool) Get() (connection any, err error) {
 	s.sync.RLock()
 	defer s.sync.RUnlock()
 
@@ -184,7 +184,7 @@ func (s *SharePool) Get() (connection interface{}, err error) {
 	return s.alivePool[atomic.AddUint64(&s.alivePoolOffset, 1)%uint64(len(s.alivePool))], nil
 }
 
-func (s *SharePool) Put(_ interface{}) (err error) {
+func (s *SharePool) Put(_ any) (err error) {
 	return nil
 }
 

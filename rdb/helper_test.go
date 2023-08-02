@@ -8,7 +8,7 @@ func Test_genQuerySql(t *testing.T) {
 	type args struct {
 		table  []string
 		column []string
-		where  map[string]interface{}
+		where  map[string]any
 	}
 	tests := []struct {
 		name string
@@ -19,7 +19,7 @@ func Test_genQuerySql(t *testing.T) {
 			args: args{
 				table:  []string{"table1"},
 				column: []string{"column1"},
-				where: map[string]interface{}{
+				where: map[string]any{
 					"whereKey1": "whereVal1",
 				},
 			},
@@ -44,7 +44,7 @@ func Test_genQuerySql(t *testing.T) {
 func Test_genInsertSql(t *testing.T) {
 	type args struct {
 		table string
-		data  map[string]interface{}
+		data  map[string]any
 	}
 	tests := []struct {
 		name string
@@ -54,7 +54,7 @@ func Test_genInsertSql(t *testing.T) {
 			name: "test1",
 			args: args{
 				table: "table1",
-				data: map[string]interface{}{
+				data: map[string]any{
 					"dataKey1": "dataVal1",
 				},
 			},

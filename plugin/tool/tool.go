@@ -27,10 +27,10 @@ type OptsImpl struct {
 	kvs sync.Map
 }
 
-func (o *OptsImpl) Set(k interface{}, v interface{}) {
+func (o *OptsImpl) Set(k any, v any) {
 	o.kvs.Store(k, v)
 }
 
-func (o *OptsImpl) Get(key interface{}) (interface{}, bool) {
+func (o *OptsImpl) Get(key any) (any, bool) {
 	return o.kvs.Load(key)
 }

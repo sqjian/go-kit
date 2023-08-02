@@ -54,7 +54,7 @@ func (m *Mini) Process(dag Dag, msg *proto.Msg, opts ...Opt) ([]byte, error) {
 	for _, opt := range opts {
 		opt.apply(schedulerOpts)
 	}
-	schedulerOpts.kvs.Range(func(key, value interface{}) bool {
+	schedulerOpts.kvs.Range(func(key, value any) bool {
 		pluginTools.Set(key, value)
 		return true
 	})

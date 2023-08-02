@@ -1,8 +1,8 @@
 package schema
 
 type Opts interface {
-	Set(interface{}, interface{})
-	Get(interface{}) (interface{}, bool)
+	Set(any, any)
+	Get(any) (any, bool)
 }
 
 type Buffer interface {

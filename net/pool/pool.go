@@ -1,7 +1,7 @@
 package pool
 
 type Pool interface {
-	Get() (connection interface{}, err error)
-	Put(connection interface{}) (err error)
+	Get() (connection any, err error)
+	Put(connection any) (err error)
 	Release()
 }

@@ -43,7 +43,7 @@ func Example() {
 		err := cli.WriteDocs(
 			ctx,
 			esIndex,
-			map[string]interface{}{
+			map[string]any{
 				"name": "sqjian",
 				"age":  18,
 			},
@@ -54,7 +54,7 @@ func Example() {
 		rst, err := cli.QueryDocs(
 			ctx,
 			esIndex,
-			map[string]interface{}{
+			map[string]any{
 				"name": "sqjian",
 				"age":  18,
 			},

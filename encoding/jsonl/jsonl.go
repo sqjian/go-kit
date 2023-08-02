@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func getOriginalSlice(ptrToSlice interface{}) (slice reflect.Value, err error) {
+func getOriginalSlice(ptrToSlice any) (slice reflect.Value, err error) {
 	ptr2sl := reflect.TypeOf(ptrToSlice)
 	if ptr2sl.Kind() != reflect.Ptr {
 		return reflect.ValueOf(nil), fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
@@ -22,7 +22,7 @@ func getOriginalSlice(ptrToSlice interface{}) (slice reflect.Value, err error) {
 	return originalSlice, nil
 }
 
-func Decode(r io.Reader, ptrToSlice interface{}) error {
+func Decode(r io.Reader, ptrToSlice any) error {
 	originalSlice, err := getOriginalSlice(ptrToSlice)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func Decode(r io.Reader, ptrToSlice interface{}) error {
 	return nil
 }
 
-func Encode(w io.Writer, ptrToSlice interface{}) error {
+func Encode(w io.Writer, ptrToSlice any) error {
 	originalSlice, err := getOriginalSlice(ptrToSlice)
 	if err != nil {
 		return err

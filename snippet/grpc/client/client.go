@@ -27,7 +27,7 @@ func (c credential) RequireTransportSecurity() bool {
 	return false
 }
 
-func interceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+func interceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	start := time.Now()
 	err := invoker(ctx, method, req, reply, cc, opts...)
 	log.Printf("method=%s req=%v rep=%v duration=%s error=%v	\n", method, req, reply, time.Since(start), err)

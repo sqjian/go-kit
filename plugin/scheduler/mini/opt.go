@@ -20,7 +20,7 @@ func (f optFn) apply(opts *opts) {
 	f(opts)
 }
 
-func WithKv(k interface{}, v interface{}) Opt {
+func WithKv(k any, v any) Opt {
 	return optFn(func(in *opts) {
 		in.kvs.Store(k, v)
 	})

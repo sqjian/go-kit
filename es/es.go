@@ -64,7 +64,7 @@ func (es *cli) CreateIndex(ctx context.Context, index string) error {
 	return rstErr
 }
 
-func (es *cli) WriteDocs(ctx context.Context, index string, docs ...map[string]interface{}) error {
+func (es *cli) WriteDocs(ctx context.Context, index string, docs ...map[string]any) error {
 	switch {
 	case len(docs) == 1:
 		{
@@ -100,7 +100,7 @@ func (es *cli) WriteDocs(ctx context.Context, index string, docs ...map[string]i
 
 func (es *cli) UpdateDocs(ctx context.Context, index string, docs ...struct {
 	id  string
-	doc map[string]interface{}
+	doc map[string]any
 }) error {
 	switch {
 	case len(docs) == 1:
@@ -137,7 +137,7 @@ func (es *cli) UpdateDocs(ctx context.Context, index string, docs ...struct {
 	}
 }
 
-func (es *cli) QueryDocs(ctx context.Context, index string, condition map[string]interface{}) ([]string, error) {
+func (es *cli) QueryDocs(ctx context.Context, index string, condition map[string]any) ([]string, error) {
 
 	boolQuery := elastic.NewBoolQuery()
 	for k, v := range condition {

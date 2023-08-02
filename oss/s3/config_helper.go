@@ -59,7 +59,7 @@ func NewAwsConfig(opts ...OptionFunc) (*aws.Config, error) {
 			)),
 		config.WithEndpointResolverWithOptions(
 			aws.EndpointResolverWithOptionsFunc(
-				func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+				func(service, region string, options ...any) (aws.Endpoint, error) {
 					return aws.Endpoint{
 						URL: s3cfg.endpoint,
 					}, nil

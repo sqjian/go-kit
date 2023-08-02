@@ -36,17 +36,17 @@ func TestExclusivePool(t *testing.T) {
 		pool2.WithType(pool2.Exclusive),
 		pool2.WithAddress(address),
 		pool2.WithPort(port),
-		pool2.WithDial(func(ctx context.Context, address, port string) (connection interface{}, err error) {
+		pool2.WithDial(func(ctx context.Context, address, port string) (connection any, err error) {
 			return net.Dial("tcp", fmt.Sprintf("%v:%v", address, port))
 		}),
-		pool2.WithClose(func(ctx context.Context, connection interface{}) (err error) {
+		pool2.WithClose(func(ctx context.Context, connection any) (err error) {
 			conn, connOk := connection.(net.Conn)
 			if !connOk {
 				return fmt.Errorf("can't convert to net.Conn")
 			}
 			return conn.Close()
 		}),
-		pool2.WithKeepAlive(func(ctx context.Context, connection interface{}) (err error) {
+		pool2.WithKeepAlive(func(ctx context.Context, connection any) (err error) {
 			return nil
 		}),
 		pool2.WithInitialPoolSize(1),

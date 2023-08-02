@@ -121,18 +121,18 @@ func (l *zapLogger) SetLevelOTF(Level Level) error {
 	return nil
 }
 
-func (l *zapLogger) Debugf(template string, args ...interface{}) {
+func (l *zapLogger) Debugf(template string, args ...any) {
 	l.SugaredLogger.Debugf(template, args...)
 }
 
-func (l *zapLogger) Infof(template string, args ...interface{}) {
+func (l *zapLogger) Infof(template string, args ...any) {
 	l.SugaredLogger.Infof(template, args...)
 }
 
-func (l *zapLogger) Warnf(template string, args ...interface{}) {
+func (l *zapLogger) Warnf(template string, args ...any) {
 	l.SugaredLogger.Warnf(template, args...)
 }
 
-func (l *zapLogger) Errorf(template string, args ...interface{}) {
+func (l *zapLogger) Errorf(template string, args ...any) {
 	l.SugaredLogger.Errorf(template, args...)
 }

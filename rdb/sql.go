@@ -57,7 +57,7 @@ func (r *Rdb) Engine() *sqlx.DB {
 	return r.db
 }
 
-func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc) ([]map[string]interface{}, error) {
+func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc) ([]map[string]any, error) {
 
 	sqlOpt := newDefaultSqlOption()
 	for _, opt := range opts {
@@ -81,9 +81,9 @@ func (r *Rdb) Query(ctx context.Context, table []string, opts ...QueryOptionFunc
 		return nil, rowsErr
 	}
 
-	var list []map[string]interface{}
+	var list []map[string]any
 	for rows.Next() {
-		item := make(map[string]interface{})
+		item := make(map[string]any)
 		scanErr := rows.MapScan(item)
 		if scanErr != nil {
 			r.config.Logger.Errorf("id:%v,fn:query=>scanErr:%v", ctx.Value("id"), scanErr)
@@ -140,7 +140,7 @@ func (r *Rdb) transaction(ctx context.Context, instructs ...*Instruct) (map[stri
 	return affectedRows, nil
 }
 
-func (r *Rdb) Delete(ctx context.Context, table string, where map[string]interface{}, opts ...QueryOptionFunc) (map[string]int64, error) {
+func (r *Rdb) Delete(ctx context.Context, table string, where map[string]any, opts ...QueryOptionFunc) (map[string]int64, error) {
 	if where == nil {
 		r.config.Logger.Errorf("id:%v,fn:Delete=>nil where", ctx.Value("id"))
 		return nil, errWrapper(IllegalParams)
@@ -164,7 +164,7 @@ func (r *Rdb) Delete(ctx context.Context, table string, where map[string]interfa
 	return r.transaction(ctx, instruct)
 }
 
-func (r *Rdb) Insert(ctx context.Context, table string, data map[string]interface{}, opts ...QueryOptionFunc) (map[string]int64, error) {
+func (r *Rdb) Insert(ctx context.Context, table string, data map[string]any, opts ...QueryOptionFunc) (map[string]int64, error) {
 	if data == nil {
 		r.config.Logger.Errorf("id:%v,fn:Insert=>nil data", ctx.Value("id"))
 		return nil, errWrapper(IllegalParams)
@@ -189,7 +189,7 @@ func (r *Rdb) Insert(ctx context.Context, table string, data map[string]interfac
 	return r.transaction(ctx, instruct)
 }
 
-func (r *Rdb) Update(ctx context.Context, table string, data map[string]interface{}, where map[string]interface{}, opts ...QueryOptionFunc) (map[string]int64, error) {
+func (r *Rdb) Update(ctx context.Context, table string, data map[string]any, where map[string]any, opts ...QueryOptionFunc) (map[string]int64, error) {
 	if data == nil {
 		r.config.Logger.Errorf("id:%v,fn:Update=>nil data", ctx.Value("id"))
 		return nil, errWrapper(IllegalParams)
