@@ -1,4 +1,4 @@
-package rdb
+package rds
 
 import (
 	"github.com/sqjian/go-kit/log"

@@ -1,4 +1,4 @@
-package rdb
+package rds
 
 //go:generate stringer -type=Type  -linecomment
 type Type int64

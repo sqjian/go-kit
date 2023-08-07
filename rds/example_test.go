@@ -1,14 +1,14 @@
-package rdb_test
+package rds_test
 
 import (
 	"context"
 	"fmt"
 	"github.com/sqjian/go-kit/log"
-	"github.com/sqjian/go-kit/rdb"
+	"github.com/sqjian/go-kit/rds"
 	"time"
 )
 
-var db *rdb.Rdb
+var db *rds.Rdb
 
 func checkErr(err error) {
 	if err != nil {
@@ -17,16 +17,16 @@ func checkErr(err error) {
 }
 
 func Example_init() {
-	_db, dbErr := rdb.NewRdb(
-		rdb.Mysql,
-		rdb.WithIp("192.168.6.6"),
-		rdb.WithPort("3306"),
-		rdb.WithUserName("root"),
-		rdb.WithPassWord("xylx1.t!@#"),
-		rdb.WithMaxLifeTime(time.Second),
-		rdb.WithMaxIdleConns(3),
-		rdb.WithDbName("test"),
-		rdb.WithLogger(func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()),
+	_db, dbErr := rds.NewRdb(
+		rds.Mysql,
+		rds.WithIp("192.168.6.6"),
+		rds.WithPort("3306"),
+		rds.WithUserName("root"),
+		rds.WithPassWord("xylx1.t!@#"),
+		rds.WithMaxLifeTime(time.Second),
+		rds.WithMaxIdleConns(3),
+		rds.WithDbName("test"),
+		rds.WithLogger(func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }()),
 	)
 	checkErr(dbErr)
 
