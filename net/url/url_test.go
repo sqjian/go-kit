@@ -1,6 +1,9 @@
-package helper
+package url_test
 
-import "testing"
+import (
+	"github.com/sqjian/go-kit/net/url"
+	"testing"
+)
 
 func TestIsValidUrl(t *testing.T) {
 	type args struct {
@@ -16,7 +19,7 @@ func TestIsValidUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := IsValidUrl(tt.args.u1); (err != nil) != tt.wantErr {
+			if err := url.IsValidUrl(tt.args.u1); (err != nil) != tt.wantErr {
 				t.Errorf("IsValidUrl() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
 				t.Logf("IsValidUrl() error = %v, wantErr %v", err, tt.wantErr)
