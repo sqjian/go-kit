@@ -31,12 +31,8 @@ type s3Config struct {
 	endpoint  string
 }
 
-func initS3config() *s3Config {
-	cfg := &s3Config{}
-	return cfg
-}
 func NewAwsConfig(opts ...OptionFunc) (*aws.Config, error) {
-	s3cfg := initS3config()
+	s3cfg := &s3Config{}
 	{
 		for _, opt := range opts {
 			opt(s3cfg)

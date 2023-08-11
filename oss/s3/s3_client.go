@@ -56,16 +56,15 @@ func initS3client() *S3client {
 
 func NewS3Cli(opts ...S3clientOpt) (*S3client, error) {
 	s3c := initS3client()
-	{
-		for _, opt := range opts {
-			opt.apply(s3c)
-		}
-		switch {
-		case s3c.config.awsConfig == nil:
-			return nil, errWrapper(IllegalParams)
-		case s3c.config.progressOutput == nil:
-			return nil, errWrapper(IllegalParams)
-		}
+
+	for _, opt := range opts {
+		opt.apply(s3c)
+	}
+	switch {
+	case s3c.config.awsConfig == nil:
+		return nil, errWrapper(IllegalParams)
+	case s3c.config.progressOutput == nil:
+		return nil, errWrapper(IllegalParams)
 	}
 
 	s3c.cli = s3.NewFromConfig(
