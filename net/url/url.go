@@ -6,13 +6,13 @@ import (
 	"net/url"
 )
 
-func IsValidUrl(u1 string) error {
-	_, err := url.ParseRequestURI(u1)
+func IsValidUrl(target string) error {
+	_, err := url.ParseRequestURI(target)
 	if err != nil {
 		return err
 	}
 
-	u, err := url.Parse(u1)
+	u, err := url.Parse(target)
 	if err != nil {
 		return err
 	}
@@ -25,4 +25,7 @@ func IsValidUrl(u1 string) error {
 	}
 
 	return nil
+}
+func CheckUrl[T []byte | string](target T) error {
+	return IsValidUrl(string(target))
 }
