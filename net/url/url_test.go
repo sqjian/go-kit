@@ -16,6 +16,7 @@ func TestIsValidUrl(t *testing.T) {
 	}{
 		{name: "test1", args: args{u1: "htt://x.x.x"}, wantErr: true},
 		{name: "test2", args: args{u1: "http://x.x.x"}, wantErr: false},
+		{name: "test3", args: args{u1: "x.x.x"}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
