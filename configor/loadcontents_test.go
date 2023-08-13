@@ -1,6 +1,9 @@
 package configor
 
-import "testing"
+import (
+	"github.com/davecgh/go-spew/spew"
+	"testing"
+)
 
 func TestLoadJsonContents(t *testing.T) {
 	type args struct {
@@ -15,9 +18,12 @@ func TestLoadJsonContents(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				obj: struct {
+				obj: &struct {
+					Name   string `validate:"required"`
+					Age    int    `validate:"gte=10,lte=130"`
+					Gender int
 				}{},
-				data: nil,
+				data: []byte(`{"name": "sqjian","age": 12}`),
 			},
 			wantErr: false,
 		}}
@@ -25,6 +31,8 @@ func TestLoadJsonContents(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := LoadJsonContents(tt.args.obj, tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("LoadJsonContents() error = %v, wantErr %v", err, tt.wantErr)
+			} else {
+				spew.Dump(tt.args.obj)
 			}
 		})
 	}
