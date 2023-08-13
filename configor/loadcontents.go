@@ -2,12 +2,31 @@ package configor
 
 import (
 	"fmt"
+	vd "github.com/bytedance/go-tagexpr/v2/validator"
 	"github.com/go-playground/validator/v10"
 	"github.com/sqjian/go-kit/helper"
 )
 
-func checkStruct(obj any) error {
-	return validator.New().Struct(obj)
+func validate(obj any) error {
+	{
+		validatorInst := validator.New()
+		if validatorErr := validatorInst.Struct(obj); validatorErr != nil {
+			return validatorErr
+		}
+	}
+	{
+		validatorInst := vd.New("expr").SetErrorFactory(func(failPath, msg string) error {
+			return &vd.Error{
+				FailPath: failPath,
+				Msg:      msg,
+			}
+		})
+		if exprErr := validatorInst.Validate(obj, true); exprErr != nil {
+			return exprErr
+		}
+	}
+
+	return nil
 }
 
 func LoadJsonContents(obj any, data []byte) error {
@@ -28,7 +47,7 @@ func LoadJsonContents(obj any, data []byte) error {
 		return unmarshalErr
 	}
 
-	return checkStruct(obj)
+	return validate(obj)
 }
 
 func LoadTomlContents(obj any, data []byte) error {
@@ -49,5 +68,5 @@ func LoadTomlContents(obj any, data []byte) error {
 		return unmarshalErr
 	}
 
-	return checkStruct(obj)
+	return validate(obj)
 }

@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.38.2
 	github.com/aws/smithy-go v1.14.1
 	github.com/buger/jsonparser v1.1.1
+	github.com/bytedance/go-tagexpr/v2 v2.9.8
 	github.com/davecgh/go-spew v1.1.1
 	github.com/elgris/sqrl v0.0.0-20210727210741-7e0198b30236
 	github.com/go-playground/validator/v10 v10.15.0
@@ -37,6 +38,8 @@ require (
 )
 
 require (
+	github.com/andeya/ameda v1.5.3 // indirect
+	github.com/andeya/goutil v1.0.1 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.12 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.8 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.38 // indirect
@@ -67,6 +70,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/nyaruka/phonenumbers v1.0.55 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
