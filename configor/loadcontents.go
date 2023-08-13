@@ -2,7 +2,7 @@ package configor
 
 import (
 	"fmt"
-	vd "github.com/bytedance/go-tagexpr/v2/validator"
+	expr "github.com/bytedance/go-tagexpr/v2/validator"
 	"github.com/go-playground/validator/v10"
 	"github.com/sqjian/go-kit/helper"
 )
@@ -15,8 +15,8 @@ func validate(obj any) error {
 		}
 	}
 	{
-		validatorInst := vd.New("expr").SetErrorFactory(func(failPath, msg string) error {
-			return &vd.Error{
+		validatorInst := expr.New("expr").SetErrorFactory(func(failPath, msg string) error {
+			return &expr.Error{
 				FailPath: failPath,
 				Msg:      msg,
 			}
