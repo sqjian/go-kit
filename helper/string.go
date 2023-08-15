@@ -1,10 +1,16 @@
 package helper
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/davecgh/go-spew/spew"
+)
 
 func SplitAfter(str string, sep []rune, min int) ([]string, error) {
 	if len(sep) == 0 {
-		return nil, fmt.Errorf("empty sep")
+		return nil, fmt.Errorf("illegal sep:%v", spew.Sdump(sep))
+	}
+	if min <= 0 {
+		return nil, fmt.Errorf("illegal min:%v", spew.Sdump(min))
 	}
 
 	strRune := []rune(str)
@@ -30,8 +36,8 @@ func SplitAfter(str string, sep []rune, min int) ([]string, error) {
 			}
 		}
 	}
-	if cnt != 0 {
-		rst = append(rst, string(strRune[len(strRune)-cnt:]))
+	if cnt > 0 {
+		return append(rst, string(strRune[len(strRune)-cnt:])), nil
 	}
 	return rst, nil
 }

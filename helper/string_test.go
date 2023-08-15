@@ -45,7 +45,7 @@ func TestSplitAfter(t *testing.T) {
 				sep: []rune{'，', '。', '!'},
 				min: 10,
 			},
-			want:    []string{"中秋佳节，月圆人团圆，", "。愿老师身体健康，！工作顺利。。"},
+			want:    []string{"中秋佳节，月圆人团圆，", "。愿老师身体健康，！工作顺利。", "。"},
 			wantErr: false,
 		},
 	}
