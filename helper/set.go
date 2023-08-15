@@ -3,8 +3,8 @@ package helper
 // Set is a set of any values.
 type Set[T comparable] map[T]struct{}
 
-// Make returns a set of some element type.
-func Make[T comparable]() Set[T] {
+// MakeSet returns a set of some element type.
+func MakeSet[T comparable]() Set[T] {
 	return make(Set[T])
 }
 

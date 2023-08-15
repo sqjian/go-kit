@@ -1,6 +1,9 @@
-package helper
+package helper_test
 
-import "testing"
+import (
+	"github.com/sqjian/go-kit/helper"
+	"testing"
+)
 
 func TestIsPtr(t *testing.T) {
 	type args struct {
@@ -16,7 +19,7 @@ func TestIsPtr(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsPtr(tt.args.v); got != tt.want {
+			if got := helper.IsPtr(tt.args.v); got != tt.want {
 				t.Errorf("IsPtr() = %v, want %v", got, tt.want)
 			}
 		})

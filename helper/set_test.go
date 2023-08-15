@@ -6,7 +6,7 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	set := helper.Make[int]()
+	set := helper.MakeSet[int]()
 
 	set.Add(1)
 	set.Add(3)
