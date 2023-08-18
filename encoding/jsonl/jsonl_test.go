@@ -1,7 +1,8 @@
-package jsonl
+package jsonl_test
 
 import (
 	"bytes"
+	"github.com/sqjian/go-kit/encoding/jsonl"
 	"strings"
 	"testing"
 )
@@ -16,7 +17,7 @@ type Person struct {
 
 func TestDecode(t *testing.T) {
 	var people []Person
-	err := Decode(strings.NewReader(data), &people)
+	err := jsonl.Decode(strings.NewReader(data), &people)
 	if err != nil {
 		t.Fatal("Decode returns error: ", err)
 	}
@@ -30,7 +31,7 @@ func TestDecode(t *testing.T) {
 
 func TestDecodeWrongTypes(t *testing.T) {
 	people := map[Person]int{}
-	err := Decode(strings.NewReader(data), &people)
+	err := jsonl.Decode(strings.NewReader(data), &people)
 	if err == nil {
 		t.Fatal("Decode doesn't returns error")
 	}
@@ -46,7 +47,7 @@ func TestEncode(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	err := Encode(&buf, &people)
+	err := jsonl.Encode(&buf, &people)
 	if err != nil {
 		t.Fatal("Encode returns error: ", err)
 	}
