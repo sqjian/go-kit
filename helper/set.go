@@ -30,3 +30,12 @@ func (s Set[T]) Contains(v T) bool {
 func (s Set[T]) Len() int {
 	return len(s)
 }
+
+// All return all elements.
+func (s Set[T]) All() []T {
+	var _t []T
+	for i := range s {
+		_t = append(_t, i)
+	}
+	return _t
+}
