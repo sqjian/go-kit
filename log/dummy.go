@@ -7,6 +7,18 @@ func newDummyLogger() *dummyLogger {
 type dummyLogger struct {
 }
 
+func (d dummyLogger) Debugw(msg string, keysAndValues ...interface{}) {
+}
+
+func (d dummyLogger) Infow(msg string, keysAndValues ...interface{}) {
+}
+
+func (d dummyLogger) Warnw(msg string, keysAndValues ...interface{}) {
+}
+
+func (d dummyLogger) Errorw(msg string, keysAndValues ...interface{}) {
+}
+
 func (d dummyLogger) Debugf(template string, args ...any) {
 }
 

@@ -20,6 +20,7 @@ func TestLogger(t *testing.T) {
 		logger.Infof("testing Infof...")
 		logger.Warnf("testing Warnf...")
 		logger.Errorf("testing Errorf...")
+		logger.Errorw("testing Errorf...", "key1", "val1", "key2", "val2", "key3", "val3")
 	}
 	{
 		t.Log(logger.SetLevelOTF(Warn))
@@ -27,6 +28,7 @@ func TestLogger(t *testing.T) {
 		logger.Infof("testing Infof...")
 		logger.Warnf("testing Warnf...")
 		logger.Errorf("testing Errorf...")
+		logger.Errorw("testing Errorf...", "key1", "val1", "key2", "val2", "key3", "val3")
 	}
 }
 
