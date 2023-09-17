@@ -55,6 +55,13 @@ func TestGet(t *testing.T) {
 				keys: []string{"city"},
 			},
 			wantErr: false,
+		}, {
+			name: "test2",
+			args: args{
+				data: []byte(`{"age": "儿童","appearance": "五官端正","character": ">甜美可爱","field": "自媒体","gender": "女"}`),
+				keys: []string{"age"},
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
