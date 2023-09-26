@@ -34,7 +34,7 @@ type Instruct struct {
 	Args []any
 }
 
-func newInstruct(sql sqrl.Sqlizer, opts ...InstructOptionFunc) (*Instruct, error) {
+func NewInstruct(sql sqrl.Sqlizer, opts ...InstructOptionFunc) (*Instruct, error) {
 
 	instructOptsInst := newDefaultInstructOpts()
 	for _, opt := range opts {
@@ -55,7 +55,7 @@ func newInstruct(sql sqrl.Sqlizer, opts ...InstructOptionFunc) (*Instruct, error
 	return &Instruct{sqlStr, sqlArgs}, nil
 }
 
-func instructsToString(instructs []*Instruct) string {
+func InstructsToString(instructs []*Instruct) string {
 	var rst []string
 	for _, instruct := range instructs {
 		rst = append(rst, fmt.Sprintf("%v", *instruct))
@@ -63,7 +63,7 @@ func instructsToString(instructs []*Instruct) string {
 	return strings.Join(rst, ",")
 }
 
-func genQuerySql(table []string, column []string, where map[string]any, offset, limit uint64, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func GenQuerySql(table []string, column []string, where map[string]any, offset, limit uint64, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.SelectBuilder
 
@@ -87,10 +87,10 @@ func genQuerySql(table []string, column []string, where map[string]any, offset, 
 		sql = sql.Limit(limit)
 	}
 
-	return newInstruct(sql, opts...)
+	return NewInstruct(sql, opts...)
 }
 
-func genInsertSql(table string, data map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func GenInsertSql(table string, data map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.InsertBuilder
 
@@ -108,10 +108,10 @@ func genInsertSql(table string, data map[string]any, opts ...InstructOptionFunc)
 	sql = sql.Columns(columns...)
 	sql = sql.Values(values...)
 
-	return newInstruct(sql, opts...)
+	return NewInstruct(sql, opts...)
 }
 
-func genDeleteSql(table string, where map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func GenDeleteSql(table string, where map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.DeleteBuilder
 
@@ -122,10 +122,10 @@ func genDeleteSql(table string, where map[string]any, opts ...InstructOptionFunc
 	}
 	sql = sql.Where(where)
 
-	return newInstruct(sql, opts...)
+	return NewInstruct(sql, opts...)
 }
 
-func genUpdateSql(table string, data map[string]any, where map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
+func GenUpdateSql(table string, data map[string]any, where map[string]any, opts ...InstructOptionFunc) (instruct *Instruct, err error) {
 
 	var sql *sqrl.UpdateBuilder
 
@@ -141,5 +141,5 @@ func genUpdateSql(table string, data map[string]any, where map[string]any, opts 
 	}
 	sql = sql.SetMap(data)
 
-	return newInstruct(sql, opts...)
+	return NewInstruct(sql, opts...)
 }

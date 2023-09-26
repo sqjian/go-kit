@@ -35,7 +35,7 @@ func Test_genQuerySql(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotRst, gotErr := genQuerySql(tt.args.table, tt.args.column, tt.args.where, 0, 1)
+			gotRst, gotErr := GenQuerySql(tt.args.table, tt.args.column, tt.args.where, 0, 1)
 			t.Logf("gotRst:%v, gotArgs:%v", gotRst, gotErr)
 		})
 	}
@@ -62,7 +62,7 @@ func Test_genInsertSql(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotRst, gotErr := genInsertSql(tt.args.table, tt.args.data)
+			gotRst, gotErr := GenInsertSql(tt.args.table, tt.args.data)
 			t.Logf("gotRst:%v, gotArgs:%v", gotRst, gotErr)
 		})
 	}

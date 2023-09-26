@@ -18,16 +18,12 @@ type Config struct {
 	Logger log.Log
 }
 
-func newDefaultConfig() *Config {
-	return &Config{
-		Logger: func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
-	}
-}
-
 func newConfig(opts ...ConfigOptionFunc) *Config {
-
-	config := newDefaultConfig()
-
+	config := func() *Config {
+		return &Config{
+			Logger: func() log.Log { inst, _ := log.NewLogger(log.WithLevel("dummy")); return inst }(),
+		}
+	}()
 	for _, opt := range opts {
 		opt(config)
 	}
