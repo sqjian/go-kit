@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -20,14 +19,19 @@ func TestExecRule(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				code: `sprintf(greet, names[0])`,
-				env: map[string]interface{}{
-					"greet":   "Hello, %v!",
-					"names":   []string{"world", "you"},
-					"sprintf": fmt.Sprintf,
+				//code: `get(fromJSON(ava_slot),"age")`,
+				//code: `get({"name": "John", "age": 30}, "name") `,
+				//code: `get({"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}, "age") `,
+				//code: "keys(fromJSON(ava_slot))",
+				//code: "get(keys(fromJSON(ava_slot)),0)",
+				//code: "keys(fromJSON(ava_slot))|get(0)",
+				//code: `fromJSON(ava_slot)|age`,
+				code: `(get(fromJSON(ava_slot),"age")=="青年")?"年轻人":"老头子"`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
 				},
 			},
-			want:    `Hello, world!`,
+			want:    nil,
 			wantErr: false,
 		},
 	}
