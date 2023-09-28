@@ -1,8 +1,12 @@
 package main
 
 import (
+	"github.com/antonmedv/expr"
+	"github.com/davecgh/go-spew/spew"
 	"reflect"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func TestExecRule(t *testing.T) {
@@ -19,19 +23,317 @@ func TestExecRule(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				//code: `get(fromJSON(ava_slot),"age")`,
-				//code: `get({"name": "John", "age": 30}, "name") `,
-				//code: `get({"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}, "age") `,
-				//code: "keys(fromJSON(ava_slot))",
-				//code: "get(keys(fromJSON(ava_slot)),0)",
-				//code: "keys(fromJSON(ava_slot))|get(0)",
-				//code: `fromJSON(ava_slot)|age`,
 				code: `(get(fromJSON(ava_slot),"age")=="青年")?"年轻人":"老头子"`,
 				env: map[string]any{
 					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
 				},
 			},
+			want:    "年轻人",
+			wantErr: false,
+		},
+		{
+			name: "test2",
+			args: args{
+				code: `(get(fromJSON(ava_slot),"age")=="青年")/*解析原始json*/?/*三目运算符*/"年轻人":"老头子"`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    "年轻人",
+			wantErr: false,
+		},
+		{
+			name: "test3",
+			args: args{
+				code: `(get(fromJSON(ava_slot),"age")=="青年")?"年轻人":"老头子"//测试用`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    "年轻人",
+			wantErr: false,
+		},
+		{
+			name: "test4",
+			args: args{
+				code: `(get(fromJSON(ava_slot),"age")=="青年")?"年轻人":"老头子"//测试用`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    "年轻人",
+			wantErr: false,
+		},
+		{
+			name: "test5",
+			args: args{
+				code: `true`,
+				env:  nil,
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test6",
+			args: args{
+				code: `6`,
+				env:  nil,
+			},
+			want:    6,
+			wantErr: false,
+		},
+		{
+			name: "test7",
+			args: args{
+				code: `[1,2,3]`,
+				env:  nil,
+			},
+			want:    []any{1, 2, 3},
+			wantErr: false,
+		},
+		{
+			name: "test8",
+			args: args{
+				code: `{a: 1, b: 2, c: 3}`,
+				env:  nil,
+			},
+			want:    map[string]any{"a": 1, "b": 2, "c": 3},
+			wantErr: false,
+		},
+		{
+			name: "test9",
+			args: args{
+				code: `nil`,
+				env:  nil,
+			},
 			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "test10",
+			args: args{
+				code: `(1+1)/2`,
+				env:  nil,
+			},
+			want:    float64(1),
+			wantErr: false,
+		},
+		{
+			name: "test11",
+			args: args{
+				code: `true?1:2`,
+				env:  nil,
+			},
+			want:    1,
+			wantErr: false,
+		},
+		{
+			name: "test12",
+			args: args{
+				code: `false?1:2`,
+				env:  nil,
+			},
+			want:    2,
+			wantErr: false,
+		},
+		{
+			name: "test13",
+			args: args{
+				code: `a?.B??"xxx"`,
+				env: map[string]any{
+					"a": struct {
+						B any
+					}{B: nil}},
+			},
+			want:    "xxx",
+			wantErr: false,
+		},
+		{
+			name: "test14",
+			args: args{
+				code: `fromJSON(ava_slot)["age"]`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    "青年",
+			wantErr: false,
+		},
+		{
+			name: "test15",
+			args: args{
+				code: `"age" in fromJSON(ava_slot)`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test16",
+			args: args{
+				code: `get(fromJSON(ava_slot),"age")`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    "青年",
+			wantErr: false,
+		},
+		{
+			name: "test17",
+			args: args{
+				code: `get(fromJSON(ava_slot),"age")+"xxx"`,
+				env: map[string]any{
+					"ava_slot": `{"age":"青年","appearance":"五官端正","character":"阳光温暖","field":"融媒体","gender":"女"}`,
+				},
+			},
+			want:    "青年xxx",
+			wantErr: false,
+		},
+		{
+			name: "test18",
+			args: args{
+				code: `"666" matches "\\d{3}"`,
+				env:  nil,
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test19",
+			args: args{
+				code: `Age in 18..45 and Name not in ["admin", "root"]`,
+				env: map[string]any{
+					"Age":  21,
+					"Name": "21",
+				},
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test20",
+			args: args{
+				code: `"a"|upper()`,
+				env:  nil,
+			},
+			want:    "A",
+			wantErr: false,
+		},
+		{
+			name: "test21",
+			args: args{
+				code: `date("2023-08-14") + duration("1h")`,
+				env:  nil,
+			},
+			want: func() time.Time {
+				t, _ := time.Parse("2006-01-02T15:04:05Z", "2023-08-14T01:00:00Z")
+				return t
+			}(),
+			wantErr: false,
+		},
+		{
+			name: "test22",
+			args: args{
+				code: `all([1,2,3],#>0)`,
+				env:  nil,
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test23",
+			args: args{
+				code: `any([1,2,3],#>0)`,
+				env:  nil,
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "test24",
+			args: args{
+				code: `one([1,2,3],#>0)`,
+				env:  nil,
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "test25",
+			args: args{
+				code: `none([1,2,3],#>0)`,
+				env:  nil,
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "test26",
+			args: args{
+				code: `map([1,2,3],#+1)`,
+				env:  nil,
+			},
+			want:    []any{2, 3, 4},
+			wantErr: false,
+		},
+		{
+			name: "test27",
+			args: args{
+				code: `filter([1,2,3],#>2)`,
+				env:  nil,
+			},
+			want:    []any{3},
+			wantErr: false,
+		},
+		{
+			name: "test28",
+			args: args{
+				code: `findIndex([1, 2, 3, 4], # > 20)`,
+				env:  nil,
+			},
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "test29",
+			args: args{
+				code: `groupBy([1,2,3], #>2)`,
+				env:  nil,
+			},
+			want: map[any][]any{
+				any(false): {1, 2},
+				any(true):  {3},
+			},
+			wantErr: false,
+		},
+		{
+			name: "test30",
+			args: args{
+				code: `reduce(1..9, #acc + #, 1)`,
+				env:  nil,
+			},
+			want:    46,
+			wantErr: false,
+		},
+		{
+			name: "test31",
+			args: args{
+				code: `type("hello")`,
+				env:  nil,
+			},
+			want:    "string",
+			wantErr: false,
+		},
+		{
+			name: "test32",
+			args: args{
+				code: `trim("__Hello__", "_")`,
+				env:  nil,
+			},
+			want:    "Hello",
 			wantErr: false,
 		},
 	}
@@ -43,8 +345,31 @@ func TestExecRule(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ExecRule() got = %v, want %v", got, tt.want)
+				t.Errorf("ExecRule() got = %v, want %v", spew.Sdump(got), spew.Sdump(tt.want))
 			}
 		})
 	}
+}
+
+func Test_Fn(t *testing.T) {
+	checkErr := func(err error) {
+		if err != nil {
+			panic(err)
+		}
+	}
+	program, programErr := expr.Compile(`atoi("42")+3`, expr.Function(
+		"atoi",
+		func(params ...any) (any, error) {
+			return strconv.Atoi(params[0].(string))
+		},
+		/*
+			1、输入校验参数数量和类型是否匹配
+			2、输出仅校验参数不为空或者参数量不大于2，其它比如参数一一对应和类型一一对应未校验
+		*/
+		new(func(string) any),
+	))
+	checkErr(programErr)
+	rst, rstErr := expr.Run(program, nil)
+	checkErr(rstErr)
+	spew.Dump(rst == 42)
 }
