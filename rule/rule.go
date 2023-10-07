@@ -1,4 +1,4 @@
-package main
+package rule
 
 import (
 	"github.com/antonmedv/expr"
