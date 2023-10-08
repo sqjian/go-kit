@@ -1,11 +1,9 @@
 package rule_test
 
 import (
-	"github.com/antonmedv/expr"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/sqjian/go-kit/rule"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 )
@@ -352,25 +350,38 @@ func TestExecRule(t *testing.T) {
 	}
 }
 
-func Test_Fn(t *testing.T) {
-	checkErr := func(err error) {
-		if err != nil {
-			panic(err)
-		}
+func TestExecRuleRet(t *testing.T) {
+	type args struct {
+		code string
+		env  any
 	}
-	program, programErr := expr.Compile(`atoi("42")+3`, expr.Function(
-		"atoi",
-		func(params ...any) (any, error) {
-			return strconv.Atoi(params[0].(string))
+	tests := []struct {
+		name    string
+		args    args
+		want    any
+		wantErr bool
+	}{
+
+		{
+			name: "test32",
+			args: args{
+				code: `1+1`,
+				env:  nil,
+			},
+			want:    "Hello",
+			wantErr: false,
 		},
-		/*
-			1、输入校验参数数量和类型是否匹配
-			2、输出仅校验参数不为空或者参数量不大于2，其它比如参数一一对应和类型一一对应未校验
-		*/
-		new(func(string) any),
-	))
-	checkErr(programErr)
-	rst, rstErr := expr.Run(program, nil)
-	checkErr(rstErr)
-	spew.Dump(rst == 42)
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := rule.ExecRule(tt.args.code, tt.args.env, rule.AsString())
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ExecRule() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ExecRule() got = %v, want %v", spew.Sdump(got), spew.Sdump(tt.want))
+			}
+		})
+	}
 }
