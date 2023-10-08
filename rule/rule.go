@@ -20,14 +20,6 @@ func CompileRule(code string) error {
 }
 
 func ExecRule(code string, env any) (any, error) {
-	p, o := buildCache.Load(code)
-	if !o {
-		return nil, errWrapper(NotFound)
-	}
-	return expr.Run(p.(*vm.Program), env)
-}
-
-func EvalRule(code string, env any) (any, error) {
 	program, _ := buildCache.LoadOrStore(code, func() *vm.Program {
 		_program, compileErr := expr.Compile(code)
 		if compileErr != nil {
