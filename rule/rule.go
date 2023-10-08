@@ -8,21 +8,32 @@ import (
 
 var buildCache sync.Map
 
-func Compile(code string) (*vm.Program, error) {
-	return expr.Compile(code)
-}
+func CompileRule(code string) error {
+	p, e := expr.Compile(code)
+	if e != nil {
+		return e
+	}
 
-func Run(program *vm.Program, env any) (any, error) {
-	return expr.Run(program, env)
+	buildCache.Store(code, p)
+
+	return nil
 }
 
 func ExecRule(code string, env any) (any, error) {
+	p, o := buildCache.Load(code)
+	if !o {
+		return nil, errWrapper(NotFound)
+	}
+	return expr.Run(p.(*vm.Program), env)
+}
+
+func EvalRule(code string, env any) (any, error) {
 	program, _ := buildCache.LoadOrStore(code, func() *vm.Program {
-		_program, compileErr := Compile(code)
+		_program, compileErr := expr.Compile(code)
 		if compileErr != nil {
 			panic(compileErr)
 		}
 		return _program
 	}())
-	return Run(program.(*vm.Program), env)
+	return expr.Run(program.(*vm.Program), env)
 }
