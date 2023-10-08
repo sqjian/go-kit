@@ -3,13 +3,20 @@ package rule
 import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"reflect"
 	"sync"
 )
 
 var buildCache sync.Map
 
-func CompileRule(code string) error {
-	p, e := expr.Compile(code)
+type Option = expr.Option
+
+func AsString() Option {
+	return expr.AsKind(reflect.String)
+}
+
+func CompileRule(code string, ops ...Option) error {
+	p, e := expr.Compile(code, ops...)
 	if e != nil {
 		return e
 	}
@@ -17,9 +24,9 @@ func CompileRule(code string) error {
 	return nil
 }
 
-func ExecRule(code string, env any) (rst any, err error) {
+func ExecRule(code string, env any, ops ...Option) (rst any, err error) {
 	program, _ := buildCache.LoadOrStore(code, func() *vm.Program {
-		_program, compileErr := expr.Compile(code)
+		_program, compileErr := expr.Compile(code, ops...)
 		if compileErr != nil {
 			err = compileErr
 		}
