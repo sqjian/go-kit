@@ -1,8 +1,8 @@
 package rule
 
 import (
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
+	"github.com/sqjian/expr"
+	"github.com/sqjian/expr/vm"
 	"reflect"
 	"sync"
 )

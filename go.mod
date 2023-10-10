@@ -3,7 +3,6 @@ module github.com/sqjian/go-kit
 go 1.20
 
 require (
-	github.com/antonmedv/expr v1.15.3
 	github.com/aws/aws-sdk-go-v2 v1.20.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.33
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.32
@@ -26,6 +25,7 @@ require (
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/spf13/cobra v1.7.0
+	github.com/sqjian/expr v0.0.0-20231010011504-8d12124cbe37
 	github.com/tailscale/hujson v0.0.0-20221223112325-20486734a56a
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/zap v1.25.0
