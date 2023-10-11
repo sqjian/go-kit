@@ -26,4 +26,7 @@ func TestLogger(t *testing.T) {
 		logger.Warnf("testing Warnf...")
 		logger.Errorf("testing Errorf...")
 	}
+	{
+		logger.Debugw("haha", "key1", "val1")
+	}
 }
