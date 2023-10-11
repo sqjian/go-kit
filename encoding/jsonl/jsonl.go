@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 )
 
 func getOriginalSlice(ptrToSlice any) (slice reflect.Value, err error) {
@@ -28,18 +29,46 @@ func Decode(r io.Reader, ptrToSlice any) error {
 		return err
 	}
 
+	var jsonBuffer string
+	bracketsCount := 0 // for {}
+	squareCount := 0   // for []
+
 	slElem := originalSlice.Type().Elem()
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		newObj := reflect.New(slElem).Interface()
-		item := scanner.Bytes()
-		err := json.Unmarshal(item, newObj)
-		if err != nil {
-			return err
+		line := strings.TrimSpace(scanner.Text())
+
+		if len(line) == 0 {
+			continue
 		}
-		ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
-		originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+
+		for _, char := range line {
+			switch char {
+			case '{':
+				bracketsCount++
+			case '}':
+				bracketsCount--
+			case '[':
+				squareCount++
+			case ']':
+				squareCount--
+			}
+		}
+
+		jsonBuffer += line
+
+		if bracketsCount == 0 && squareCount == 0 && len(jsonBuffer) > 0 {
+			err := json.Unmarshal([]byte(jsonBuffer), newObj)
+			if err != nil {
+				return err
+			}
+			ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
+			originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+			jsonBuffer = ""
+		}
 	}
+
 	if err := scanner.Err(); err != nil {
 		return err
 	}

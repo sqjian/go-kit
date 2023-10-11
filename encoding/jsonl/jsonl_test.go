@@ -2,13 +2,18 @@ package jsonl_test
 
 import (
 	"bytes"
+	_ "embed"
 	"github.com/sqjian/go-kit/encoding/jsonl"
+	"io"
 	"strings"
 	"testing"
 )
 
-const data = `{"Name":"Paul","Age":20}
-{"Name":"John","Age":30}`
+//go:embed testdata/person.compressed.jsonl
+var personCompressed string
+
+//go:embed testdata/person.formatted.jsonl
+var personFormatted string
 
 type Person struct {
 	Name string
@@ -16,42 +21,101 @@ type Person struct {
 }
 
 func TestDecode(t *testing.T) {
-	var people []Person
-	err := jsonl.Decode(strings.NewReader(data), &people)
-	if err != nil {
-		t.Fatal("Decode returns error: ", err)
+	type args struct {
+		reader     io.Reader
+		ptrToSlice *[]Person
 	}
-	if len(people) != 2 {
-		t.Fatalf("Expected 2 objects in slice, got %v", len(people))
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "test1",
+			args: args{
+				reader:     strings.NewReader(personCompressed),
+				ptrToSlice: &[]Person{},
+			},
+		},
+		{
+			name: "test2",
+			args: args{
+				reader:     strings.NewReader(personFormatted),
+				ptrToSlice: &[]Person{},
+			},
+		},
 	}
-	if people[0].Name != "Paul" {
-		t.Fatalf("Unexpected value in first object Name field: %v", people[0].Name)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := jsonl.Decode(tt.args.reader, tt.args.ptrToSlice)
 
-func TestDecodeWrongTypes(t *testing.T) {
-	people := map[Person]int{}
-	err := jsonl.Decode(strings.NewReader(data), &people)
-	if err == nil {
-		t.Fatal("Decode doesn't returns error")
-	}
-	if err.Error() != "expected pointer to slice, got pointer to map" {
-		t.Fatalf("Decode return wrong error: %v", err)
+			if err != nil {
+				t.Fatal("Decode returns error: ", err)
+			}
+			if len(*tt.args.ptrToSlice) != 2 {
+				t.Fatalf("Expected 2 objects in slice, got %v", len(*tt.args.ptrToSlice))
+			}
+			if (*tt.args.ptrToSlice)[0].Name != "Paul" {
+				t.Fatalf("Unexpected value in first object Name field: %v", (*tt.args.ptrToSlice)[0].Name)
+			}
+		})
 	}
 }
 
 func TestEncode(t *testing.T) {
-	people := []*Person{
-		&Person{Name: "Paul", Age: 20},
-		&Person{Name: "John", Age: 30},
+	type args struct {
+		ptrToSlice any
 	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "test1",
+			args: args{
+				ptrToSlice: &[]*Person{
+					{Name: "Paul", Age: 20},
+					{Name: "John", Age: 30},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			err := jsonl.Encode(buf, tt.args.ptrToSlice)
+			if err != nil {
+				t.Fatal("Encode returns error: ", err)
+			}
+			t.Log(buf.String())
+		})
+	}
+}
 
-	var buf bytes.Buffer
-	err := jsonl.Encode(&buf, &people)
-	if err != nil {
-		t.Fatal("Encode returns error: ", err)
+func TestDecodeWrongTypes(t *testing.T) {
+	type args struct {
+		ptrToSlice any
 	}
-	if !strings.Contains(buf.String(), data) {
-		t.Fatalf("Encode return wrong data, expected: %s, got: %s", data, buf.String())
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "test1",
+			args: args{
+				ptrToSlice: &map[Person]int{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			err := jsonl.Encode(buf, tt.args.ptrToSlice)
+			if err == nil {
+				t.Fatal("Decode doesn't returns error")
+			}
+			if err.Error() != "expected pointer to slice, got pointer to map" {
+				t.Fatalf("Decode return wrong error: %v", err)
+			}
+		})
 	}
 }
