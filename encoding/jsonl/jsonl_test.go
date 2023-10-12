@@ -1,28 +1,25 @@
 package jsonl_test
 
 import (
-	"bytes"
 	_ "embed"
 	"github.com/sqjian/go-kit/encoding/jsonl"
-	"io"
-	"strings"
 	"testing"
 )
 
 //go:embed testdata/person.compressed.jsonl
-var personCompressed string
+var personCompressed []byte
 
 //go:embed testdata/person.formatted.jsonl
-var personFormatted string
+var personFormatted []byte
 
 type Person struct {
 	Name string
 	Age  int64
 }
 
-func TestDecode(t *testing.T) {
+func TestUnmarshal(t *testing.T) {
 	type args struct {
-		reader     io.Reader
+		data       []byte
 		ptrToSlice *[]Person
 	}
 	tests := []struct {
@@ -30,38 +27,44 @@ func TestDecode(t *testing.T) {
 		args args
 	}{
 		{
-			name: "test1",
+			name: "personCompressed",
 			args: args{
-				reader:     strings.NewReader(personCompressed),
+				data:       personCompressed,
 				ptrToSlice: &[]Person{},
 			},
 		},
 		{
-			name: "test2",
+			name: "personFormatted",
 			args: args{
-				reader:     strings.NewReader(personFormatted),
+				data:       personFormatted,
 				ptrToSlice: &[]Person{},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := jsonl.Decode(tt.args.reader, tt.args.ptrToSlice)
+			err := jsonl.Unmarshal(tt.args.data, tt.args.ptrToSlice)
 
 			if err != nil {
-				t.Fatal("Decode returns error: ", err)
+				t.Fatalf("Unmarshal returns error:%v,data:%s", err, tt.args.data)
 			}
-			if len(*tt.args.ptrToSlice) != 2 {
+			if len(*tt.args.ptrToSlice) != 3 {
 				t.Fatalf("Expected 2 objects in slice, got %v", len(*tt.args.ptrToSlice))
 			}
 			if (*tt.args.ptrToSlice)[0].Name != "Paul" {
+				t.Fatalf("Unexpected value in first object Name field: %v", (*tt.args.ptrToSlice)[0].Name)
+			}
+			if (*tt.args.ptrToSlice)[1].Name != "John" {
+				t.Fatalf("Unexpected value in first object Name field: %v", (*tt.args.ptrToSlice)[0].Name)
+			}
+			if (*tt.args.ptrToSlice)[2].Name != "Maria" {
 				t.Fatalf("Unexpected value in first object Name field: %v", (*tt.args.ptrToSlice)[0].Name)
 			}
 		})
 	}
 }
 
-func TestEncode(t *testing.T) {
+func TestMarshal(t *testing.T) {
 	type args struct {
 		ptrToSlice any
 	}
@@ -70,7 +73,7 @@ func TestEncode(t *testing.T) {
 		args args
 	}{
 		{
-			name: "test1",
+			name: "person",
 			args: args{
 				ptrToSlice: &[]*Person{
 					{Name: "Paul", Age: 20},
@@ -81,41 +84,11 @@ func TestEncode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			err := jsonl.Encode(buf, tt.args.ptrToSlice)
+			data, err := jsonl.Marshal(tt.args.ptrToSlice)
 			if err != nil {
-				t.Fatal("Encode returns error: ", err)
+				t.Fatal("Marshal returns error: ", err)
 			}
-			t.Log(buf.String())
-		})
-	}
-}
-
-func TestDecodeWrongTypes(t *testing.T) {
-	type args struct {
-		ptrToSlice any
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "test1",
-			args: args{
-				ptrToSlice: &map[Person]int{},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			buf := &bytes.Buffer{}
-			err := jsonl.Encode(buf, tt.args.ptrToSlice)
-			if err == nil {
-				t.Fatal("Decode doesn't returns error")
-			}
-			if err.Error() != "expected pointer to slice, got pointer to map" {
-				t.Fatalf("Decode return wrong error: %v", err)
-			}
+			t.Log(string(data))
 		})
 	}
 }

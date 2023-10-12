@@ -2,9 +2,10 @@ package jsonl
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
+	. "github.com/sqjian/go-kit/encoding/json"
 	"reflect"
 	"strings"
 )
@@ -23,7 +24,7 @@ func getOriginalSlice(ptrToSlice any) (slice reflect.Value, err error) {
 	return originalSlice, nil
 }
 
-func Decode(r io.Reader, ptrToSlice any) error {
+func Unmarshal(data []byte, ptrToSlice any) error {
 	originalSlice, err := getOriginalSlice(ptrToSlice)
 	if err != nil {
 		return err
@@ -34,7 +35,7 @@ func Decode(r io.Reader, ptrToSlice any) error {
 	squareCount := 0   // for []
 
 	slElem := originalSlice.Type().Elem()
-	scanner := bufio.NewScanner(r)
+	scanner := bufio.NewScanner(bytes.NewReader(data))
 	for scanner.Scan() {
 		newObj := reflect.New(slElem).Interface()
 		line := strings.TrimSpace(scanner.Text())
@@ -59,9 +60,13 @@ func Decode(r io.Reader, ptrToSlice any) error {
 		jsonBuffer += line
 
 		if bracketsCount == 0 && squareCount == 0 && len(jsonBuffer) > 0 {
-			err := json.Unmarshal([]byte(jsonBuffer), newObj)
-			if err != nil {
-				return err
+			standardizeData, standardizeDataErr := Standardize([]byte(jsonBuffer))
+			if standardizeDataErr != nil {
+				return standardizeDataErr
+			}
+			unmarshalErr := json.Unmarshal(standardizeData, newObj)
+			if unmarshalErr != nil {
+				return unmarshalErr
 			}
 			ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
 			originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
@@ -75,19 +80,21 @@ func Decode(r io.Reader, ptrToSlice any) error {
 	return nil
 }
 
-func Encode(w io.Writer, ptrToSlice any) error {
+func Marshal(ptrToSlice any) ([]byte, error) {
 	originalSlice, err := getOriginalSlice(ptrToSlice)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	enc := json.NewEncoder(w)
+	buf := &bytes.Buffer{}
+
+	enc := json.NewEncoder(buf)
 	for i := 0; i < originalSlice.Len(); i++ {
 		elem := originalSlice.Index(i).Interface()
 		err = enc.Encode(elem)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return buf.Bytes(), nil
 }
