@@ -52,11 +52,7 @@ func Unmarshal(data []byte, ptrToSlice any) error {
 		jsonBuffer += line
 
 		if bracketsCount == 0 && squareCount == 0 && len(jsonBuffer) > 0 {
-			standardizeData, standardizeDataErr := Standardize([]byte(jsonBuffer))
-			if standardizeDataErr != nil {
-				return standardizeDataErr
-			}
-			unmarshalErr := json.Unmarshal(standardizeData, newObj)
+			unmarshalErr := json.Unmarshal(Standardize([]byte(jsonBuffer)), newObj)
 			if unmarshalErr != nil {
 				return unmarshalErr
 			}

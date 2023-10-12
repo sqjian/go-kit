@@ -2,7 +2,7 @@ package json
 
 import (
 	"github.com/buger/jsonparser"
-	"github.com/tailscale/hujson"
+	"github.com/sqjian/go-kit/encoding/json/internal/jsonc"
 )
 
 func Set(data []byte, setValue []byte, keys ...string) (value []byte, err error) {
@@ -13,11 +13,6 @@ func Get(data []byte, keys ...string) (value []byte, dataType jsonparser.ValueTy
 	return jsonparser.Get(data, keys...)
 }
 
-func Standardize(data []byte) ([]byte, error) {
-	ast, err := hujson.Parse(data)
-	if err != nil {
-		return data, err
-	}
-	ast.Standardize()
-	return ast.Pack(), nil
+func Standardize(data []byte) []byte {
+	return jsonc.Translate(data)
 }

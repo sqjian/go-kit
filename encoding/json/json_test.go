@@ -100,13 +100,9 @@ func TestStandardize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Standardize(tt.args.data)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Standardize() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := Standardize(tt.args.data)
 			v := make(map[string]any)
-			err = json.Unmarshal(got, &v)
+			err := json.Unmarshal(got, &v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Standardize() decode = %v, wantErr %v", err, tt.wantErr)
 				return

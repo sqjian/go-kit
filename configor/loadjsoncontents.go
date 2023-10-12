@@ -27,12 +27,7 @@ func LoadJsonContents(obj any, data []byte) error {
 		return fmt.Errorf("input data is empty")
 	}
 
-	standardizeData, standardizeDataErr := Standardize(data)
-	if standardizeDataErr != nil {
-		return standardizeDataErr
-	}
-
-	if unmarshalErr := json.Unmarshal(standardizeData, obj); unmarshalErr != nil {
+	if unmarshalErr := json.Unmarshal(Standardize(data), obj); unmarshalErr != nil {
 		return unmarshalErr
 	}
 
