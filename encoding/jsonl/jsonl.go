@@ -10,24 +10,16 @@ import (
 	"strings"
 )
 
-func getOriginalSlice(ptrToSlice any) (slice reflect.Value, err error) {
+func Unmarshal(data []byte, ptrToSlice any) error {
 	ptr2sl := reflect.TypeOf(ptrToSlice)
 	if ptr2sl.Kind() != reflect.Ptr {
-		return reflect.ValueOf(nil), fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
+		return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
 	}
 
 	originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
 	sliceType := originalSlice.Type()
 	if sliceType.Kind() != reflect.Slice {
-		return reflect.ValueOf(nil), fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
-	}
-	return originalSlice, nil
-}
-
-func Unmarshal(data []byte, ptrToSlice any) error {
-	originalSlice, err := getOriginalSlice(ptrToSlice)
-	if err != nil {
-		return err
+		return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
 	}
 
 	var jsonBuffer string
@@ -80,10 +72,13 @@ func Unmarshal(data []byte, ptrToSlice any) error {
 	return nil
 }
 
-func Marshal(ptrToSlice any) ([]byte, error) {
-	originalSlice, err := getOriginalSlice(ptrToSlice)
-	if err != nil {
-		return nil, err
+func Marshal(data any) ([]byte, error) {
+	originalSlice := reflect.ValueOf(data)
+	if originalSlice.Type().Kind() == reflect.Ptr {
+		originalSlice = reflect.Indirect(originalSlice)
+	}
+	if originalSlice.Kind() != reflect.Slice {
+		return nil, fmt.Errorf("expected slice, got %s", originalSlice.Kind())
 	}
 
 	buf := &bytes.Buffer{}
@@ -91,7 +86,7 @@ func Marshal(ptrToSlice any) ([]byte, error) {
 	enc := json.NewEncoder(buf)
 	for i := 0; i < originalSlice.Len(); i++ {
 		elem := originalSlice.Index(i).Interface()
-		err = enc.Encode(elem)
+		err := enc.Encode(elem)
 		if err != nil {
 			return nil, err
 		}

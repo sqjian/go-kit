@@ -75,6 +75,15 @@ func TestMarshal(t *testing.T) {
 		{
 			name: "person",
 			args: args{
+				ptrToSlice: []*Person{
+					{Name: "Paul", Age: 20},
+					{Name: "John", Age: 30},
+				},
+			},
+		},
+		{
+			name: "personPtr",
+			args: args{
 				ptrToSlice: &[]*Person{
 					{Name: "Paul", Age: 20},
 					{Name: "John", Age: 30},

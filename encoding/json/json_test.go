@@ -1,7 +1,9 @@
-package json_test
+package json
 
 import (
-	"github.com/sqjian/go-kit/encoding/json"
+	_ "embed"
+	"encoding/json"
+
 	"testing"
 )
 
@@ -28,7 +30,7 @@ func TestSet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotValue, err := json.Set(tt.args.data, tt.args.setValue, tt.args.keys...)
+			gotValue, err := Set(tt.args.data, tt.args.setValue, tt.args.keys...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Set() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -66,12 +68,50 @@ func TestGet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotValue, gotDataType, gotOffset, err := json.Get(tt.args.data, tt.args.keys...)
+			gotValue, gotDataType, gotOffset, err := Get(tt.args.data, tt.args.keys...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			t.Logf("gotValue:%v,gotDataType:%v,gotOffset:%v", string(gotValue), gotDataType.String(), gotOffset)
+		})
+	}
+}
+
+//go:embed testdata/person.jsonc
+var personCommented []byte
+
+func TestStandardize(t *testing.T) {
+	type args struct {
+		data []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "person.jsonc",
+			args: args{
+				data: personCommented,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Standardize(tt.args.data)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Standardize() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			v := make(map[string]any)
+			err = json.Unmarshal(got, &v)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Standardize() decode = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			t.Log(v)
 		})
 	}
 }
