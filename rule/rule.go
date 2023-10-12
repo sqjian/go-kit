@@ -14,6 +14,9 @@ type Option = expr.Option
 func AsString() Option {
 	return expr.AsKind(reflect.String)
 }
+func AsInt() Option {
+	return expr.AsInt()
+}
 
 func CompileRule(code string, ops ...Option) error {
 	p, e := expr.Compile(code, ops...)

@@ -117,7 +117,7 @@ func TestServe(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		time.Sleep(time.Hour)
+		time.Sleep(3*time.Second)
 		cancel()
 	}()
 
