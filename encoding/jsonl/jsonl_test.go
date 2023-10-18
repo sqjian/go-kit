@@ -12,6 +12,9 @@ var personCompressed []byte
 //go:embed testdata/person.formatted.jsonl
 var personFormatted []byte
 
+//go:embed testdata/person.formatted.commented.jsonl
+var personFormattedCommented []byte
+
 type Person struct {
 	Name string
 	Age  int64
@@ -37,6 +40,13 @@ func TestUnmarshal(t *testing.T) {
 			name: "personFormatted",
 			args: args{
 				data:       personFormatted,
+				ptrToSlice: &[]Person{},
+			},
+		},
+		{
+			name: "personFormattedCommented",
+			args: args{
+				data:       personFormattedCommented,
 				ptrToSlice: &[]Person{},
 			},
 		},

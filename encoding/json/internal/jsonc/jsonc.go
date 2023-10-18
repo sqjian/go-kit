@@ -3,13 +3,12 @@ package jsonc
 // 定义常量
 const (
 	ESCAPE   = 92 // 转义字符'\'
-	QUOTE    = 34 // 双引号
-	SPACE    = 32 // 空格
-	TAB      = 9  // 制表符
-	NEWLINE  = 10 // 换行符
-	ASTERISK = 42 // 星号 '*'
-	SLASH    = 47 // 斜线 '/'
-	HASH     = 35 // 井号 '#'
+	QUOTE    = 34 // 双引号'"'
+	NEWLINE  = 10 // 换行符'\n'
+	ASTERISK = 42 // 星号'*'
+	SLASH    = 47 // 斜线'/'
+	HASH     = 35 // 井号'#'
+	CARRIAGE = 13 // 回车符'\r'
 )
 
 // Translate 函数处理字节数组，主要是处理注释并返回新的字节数组
@@ -36,14 +35,16 @@ func Translate(s []byte) []byte {
 		if ch == QUOTE {
 			quote = !quote
 		}
-		// 忽略不在双引号中的空格和制表符
-		if (ch == SPACE || ch == TAB) && !quote {
-			continue
-		}
 		// 处理单行注释结束
-		if ch == NEWLINE {
+		if ch == NEWLINE || ch == CARRIAGE {
 			if comment.isSingleLined {
 				comment.stop()
+			}
+
+			if !comment.started {
+				// 保留非注释里的换行，这里 \r、\n会被逐次追加
+				j[i] = ch
+				i++
 			}
 			continue
 		}

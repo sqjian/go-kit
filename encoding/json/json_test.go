@@ -1,9 +1,9 @@
-package json
+package json_test
 
 import (
 	_ "embed"
 	"encoding/json"
-
+	easyjson "github.com/sqjian/go-kit/encoding/json"
 	"testing"
 )
 
@@ -30,7 +30,7 @@ func TestSet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotValue, err := Set(tt.args.data, tt.args.setValue, tt.args.keys...)
+			gotValue, err := easyjson.Set(tt.args.data, tt.args.setValue, tt.args.keys...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Set() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -68,7 +68,7 @@ func TestGet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotValue, gotDataType, gotOffset, err := Get(tt.args.data, tt.args.keys...)
+			gotValue, gotDataType, gotOffset, err := easyjson.Get(tt.args.data, tt.args.keys...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -100,7 +100,7 @@ func TestStandardize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Standardize(tt.args.data)
+			got := easyjson.Standardize(tt.args.data)
 			v := make(map[string]any)
 			err := json.Unmarshal(got, &v)
 			if (err != nil) != tt.wantErr {

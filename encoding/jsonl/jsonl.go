@@ -10,26 +10,16 @@ import (
 	"strings"
 )
 
-func Unmarshal(data []byte, ptrToSlice any) error {
-	ptr2sl := reflect.TypeOf(ptrToSlice)
-	if ptr2sl.Kind() != reflect.Ptr {
-		return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
-	}
+func splitJsonL(data []byte, callback func(string)) error {
+	var (
+		jsonBuffer string
+	)
 
-	originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
-	sliceType := originalSlice.Type()
-	if sliceType.Kind() != reflect.Slice {
-		return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
-	}
-
-	var jsonBuffer string
 	bracketsCount := 0 // for {}
 	squareCount := 0   // for []
 
-	slElem := originalSlice.Type().Elem()
-	scanner := bufio.NewScanner(bytes.NewReader(data))
+	scanner := bufio.NewScanner(bytes.NewReader(Standardize(data) /*这里去除注释的环节不满足流式要求*/))
 	for scanner.Scan() {
-		newObj := reflect.New(slElem).Interface()
 		line := strings.TrimSpace(scanner.Text())
 
 		if len(line) == 0 {
@@ -52,20 +42,40 @@ func Unmarshal(data []byte, ptrToSlice any) error {
 		jsonBuffer += line
 
 		if bracketsCount == 0 && squareCount == 0 && len(jsonBuffer) > 0 {
-			unmarshalErr := json.Unmarshal(Standardize([]byte(jsonBuffer)), newObj)
-			if unmarshalErr != nil {
-				return unmarshalErr
-			}
-			ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
-			originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+			callback(jsonBuffer)
 			jsonBuffer = ""
 		}
 	}
-
-	if err := scanner.Err(); err != nil {
-		return err
+	return scanner.Err()
+}
+func Unmarshal(data []byte, ptrToSlice any) error {
+	ptr2sl := reflect.TypeOf(ptrToSlice)
+	if ptr2sl.Kind() != reflect.Ptr {
+		return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
 	}
-	return nil
+
+	originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
+	sliceType := originalSlice.Type()
+	if sliceType.Kind() != reflect.Slice {
+		return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
+	}
+
+	slElem := originalSlice.Type().Elem()
+
+	var decodeErr error
+	jsonsErr := splitJsonL(data, func(jsonBuffer string) {
+		newObj := reflect.New(slElem).Interface()
+		unmarshalErr := json.Unmarshal(Standardize([]byte(jsonBuffer)), newObj)
+		if unmarshalErr != nil {
+			decodeErr = unmarshalErr
+		}
+		ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
+		originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+	})
+	if jsonsErr != nil {
+		return jsonsErr
+	}
+	return decodeErr
 }
 
 func Marshal(data any) ([]byte, error) {
