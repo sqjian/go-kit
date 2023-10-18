@@ -1,6 +1,7 @@
 package jsonc
 
 import (
+	"context"
 	"sync"
 )
 
@@ -57,25 +58,30 @@ func TrimCommentWrapper(s []byte) []byte {
 
 	processed := make(chan byte)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		TrimComment(unProcessed, processed)
-	}()
+	{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			TrimComment(context.Background(), unProcessed, processed)
+		}()
+	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for ch := range processed {
-			rst = append(rst, ch)
-		}
-	}()
+	{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for ch := range processed {
+				rst = append(rst, ch)
+			}
+		}()
+	}
+
 	wg.Wait()
 
 	return rst
 }
 
-func TrimComment(unProcessed <-chan byte, processed chan<- byte) {
+func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) {
 
 	// 初始化变量
 	var (
@@ -84,43 +90,49 @@ func TrimComment(unProcessed <-chan byte, processed chan<- byte) {
 	)
 	comment := &commentData{} // 注释数据
 
-	for ch := range unProcessed {
+	for char := range from {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		// 处理转义字符
-		if ch == ESCAPE || escaped {
+		if char == ESCAPE || escaped {
 			if !comment.started {
-				processed <- ch
+				to <- char
 			}
 			escaped = !escaped
 			continue
 		}
 		// 判断是否为双引号
-		if ch == QUOTE {
+		if char == QUOTE {
 			quote = !quote
 		}
 		// 处理单行注释结束
-		if ch == NEWLINE || ch == CARRIAGE {
+		if char == NEWLINE || char == CARRIAGE {
 			if comment.isSingleLined {
 				comment.stop()
 			}
 
 			if !comment.started {
 				// 保留非注释里的换行，这里 \r、\n会被逐次追加
-				processed <- ch
+				to <- char
 			}
 			continue
 		}
 		// 当在双引号内部且没有开始注释时，保留字符
 		if quote && !comment.started {
-			processed <- ch
+			to <- char
 			continue
 		}
 		// 处理多行注释结束
 		if comment.started {
-			if ch == ASTERISK && !comment.isSingleLined {
+			if char == ASTERISK && !comment.isSingleLined {
 				comment.canEnd = true
 				continue
 			}
-			if comment.canEnd && ch == SLASH && !comment.isSingleLined {
+			if comment.canEnd && char == SLASH && !comment.isSingleLined {
 				comment.stop()
 				continue
 			}
@@ -128,20 +140,20 @@ func TrimComment(unProcessed <-chan byte, processed chan<- byte) {
 			continue
 		}
 		// 判断是否可以开始注释
-		if comment.canStart && (ch == ASTERISK || ch == SLASH) {
-			comment.start(ch)
+		if comment.canStart && (char == ASTERISK || char == SLASH) {
+			comment.start(char)
 			continue
 		}
-		if ch == SLASH {
+		if char == SLASH {
 			comment.canStart = true
 			continue
 		}
-		if ch == HASH {
-			comment.start(ch)
+		if char == HASH {
+			comment.start(char)
 			continue
 		}
-		processed <- ch
+		to <- char
 	}
 
-	close(processed)
+	close(to)
 }

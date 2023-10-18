@@ -3,80 +3,148 @@ package jsonl
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	. "github.com/sqjian/go-kit/encoding/json"
+	"github.com/sqjian/go-kit/encoding/jsonc"
+	"io"
 	"reflect"
-	"strings"
+	"sync"
 )
 
-func splitJsonL(data []byte, callback func(string)) error {
+func Unmarshal(data []byte, ptrToSlice any) error {
+	return Decode(bytes.NewReader(data), ptrToSlice)
+}
+func Decode(data io.Reader, ptrToSlice any) error {
+	var wg sync.WaitGroup
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	// 读取原始数据
+	rawDataChan := func() chan byte {
+		ch := make(chan byte)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			buf := bufio.NewReader(data)
+
+			for {
+				char, err := buf.ReadByte()
+				if err != nil {
+					break
+				}
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					ch <- char
+				}
+			}
+			close(ch)
+		}()
+		return ch
+	}()
+
+	// 去除注释
+	commentTrimmedChan := make(chan byte)
+	{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			jsonc.TrimComment(ctx, rawDataChan, commentTrimmedChan)
+		}()
+	}
+
+	// 切分jsonl
+	jsonLSplitedChan := make(chan string)
+	{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			split(ctx, commentTrimmedChan, jsonLSplitedChan)
+		}()
+	}
+
+	// 解析json
+	{
+		ptr2sl := reflect.TypeOf(ptrToSlice)
+		if ptr2sl.Kind() != reflect.Ptr {
+			cancel()
+			return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
+		}
+
+		originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
+		sliceType := originalSlice.Type()
+		if sliceType.Kind() != reflect.Slice {
+			cancel()
+			return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
+		}
+
+		slElem := originalSlice.Type().Elem()
+
+		var decodeErr error
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for jsonBuffer := range jsonLSplitedChan {
+				newObj := reflect.New(slElem).Interface()
+				unmarshalErr := json.Unmarshal([]byte(jsonBuffer), newObj)
+				if unmarshalErr != nil {
+					cancel()
+					decodeErr = unmarshalErr
+				}
+				ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
+				originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+			}
+		}()
+
+		wg.Wait()
+
+		return decodeErr
+	}
+
+}
+
+func split(ctx context.Context, from <-chan byte, to chan<- string) {
+
 	var (
-		jsonBuffer string
+		jsonBuffer = &bytes.Buffer{}
 	)
 
 	bracketsCount := 0 // for {}
 	squareCount := 0   // for []
+	validCharacters := false
 
-	scanner := bufio.NewScanner(bytes.NewReader(Standardize(data) /*这里去除注释的环节不满足流式要求*/))
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-
-		if len(line) == 0 {
-			continue
+	for char := range from {
+		select {
+		case <-ctx.Done():
+			return
+		default:
 		}
 
-		for _, char := range line {
-			switch char {
-			case '{':
-				bracketsCount++
-			case '}':
-				bracketsCount--
-			case '[':
-				squareCount++
-			case ']':
-				squareCount--
-			}
+		jsonBuffer.WriteByte(char)
+		switch char {
+		case '{':
+			bracketsCount++
+			validCharacters = true
+		case '}':
+			bracketsCount--
+			validCharacters = true
+		case '[':
+			squareCount++
+			validCharacters = true
+		case ']':
+			squareCount--
+			validCharacters = true
 		}
-
-		jsonBuffer += line
-
-		if bracketsCount == 0 && squareCount == 0 && len(jsonBuffer) > 0 {
-			callback(jsonBuffer)
-			jsonBuffer = ""
+		if validCharacters && bracketsCount == 0 && squareCount == 0 && jsonBuffer.Len() > 2 {
+			to <- jsonBuffer.String()
+			jsonBuffer.Reset()
+			validCharacters = false
 		}
 	}
-	return scanner.Err()
-}
 
-func Unmarshal(data []byte, ptrToSlice any) error {
-	ptr2sl := reflect.TypeOf(ptrToSlice)
-	if ptr2sl.Kind() != reflect.Ptr {
-		return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
-	}
-
-	originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
-	sliceType := originalSlice.Type()
-	if sliceType.Kind() != reflect.Slice {
-		return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
-	}
-
-	slElem := originalSlice.Type().Elem()
-
-	var decodeErr error
-	jsonsErr := splitJsonL(data, func(jsonBuffer string) {
-		newObj := reflect.New(slElem).Interface()
-		unmarshalErr := json.Unmarshal(Standardize([]byte(jsonBuffer)), newObj)
-		if unmarshalErr != nil {
-			decodeErr = unmarshalErr
-		}
-		ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
-		originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
-	})
-	if jsonsErr != nil {
-		return jsonsErr
-	}
-	return decodeErr
+	close(to)
 }
 
 func Marshal(data any) ([]byte, error) {

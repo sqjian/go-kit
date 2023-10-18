@@ -1,6 +1,7 @@
 package jsonc
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
@@ -14,6 +15,9 @@ var personCommented []byte
 //go:embed testdata/comments.go
 var comments []byte
 
+//go:embed testdata/person.formatted.commented.jsonl
+var personFormattedCommented []byte
+
 func Test_Comments(t *testing.T) {
 	type args struct {
 		data []byte
@@ -26,6 +30,12 @@ func Test_Comments(t *testing.T) {
 			name: "test1",
 			args: args{
 				data: comments,
+			},
+		},
+		{
+			name: "test2",
+			args: args{
+				data: personFormattedCommented,
 			},
 		},
 	}
@@ -88,20 +98,25 @@ func Test_trimComment(t *testing.T) {
 
 	processed := make(chan byte)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		TrimComment(unProcessed, processed)
-	}()
+	{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			TrimComment(context.Background(), unProcessed, processed)
+		}()
+	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var rst []byte
-		for ch := range processed {
-			rst = append(rst, ch)
-		}
-		spew.Dump(string(rst))
-	}()
+	{
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var rst []byte
+			for ch := range processed {
+				rst = append(rst, ch)
+			}
+			spew.Dump(string(rst))
+		}()
+	}
+
 	wg.Wait()
 }
