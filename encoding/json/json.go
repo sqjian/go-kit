@@ -2,7 +2,7 @@ package json
 
 import (
 	"github.com/buger/jsonparser"
-	"github.com/sqjian/go-kit/encoding/json/internal/jsonc"
+	"github.com/sqjian/go-kit/encoding/jsonc"
 )
 
 func Set(data []byte, setValue []byte, keys ...string) (value []byte, err error) {
@@ -14,5 +14,5 @@ func Get(data []byte, keys ...string) (value []byte, dataType jsonparser.ValueTy
 }
 
 func Standardize(data []byte) []byte {
-	return jsonc.Translate(data)
+	return jsonc.TrimCommentWrapper(data)
 }
