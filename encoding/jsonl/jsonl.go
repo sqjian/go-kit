@@ -48,6 +48,7 @@ func splitJsonL(data []byte, callback func(string)) error {
 	}
 	return scanner.Err()
 }
+
 func Unmarshal(data []byte, ptrToSlice any) error {
 	ptr2sl := reflect.TypeOf(ptrToSlice)
 	if ptr2sl.Kind() != reflect.Ptr {

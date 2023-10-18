@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
+	"sync"
 	"testing"
 )
 
@@ -30,13 +31,13 @@ func Test_Comments(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Translate(tt.args.data)
+			got := TrimCommentWrapper(tt.args.data)
 			spew.Dump(string(got))
 		})
 	}
 }
 
-func Test_translate(t *testing.T) {
+func Test_TrimCommentWrapper(t *testing.T) {
 	type args struct {
 		data []byte
 	}
@@ -53,7 +54,7 @@ func Test_translate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Translate(tt.args.data)
+			got := TrimCommentWrapper(tt.args.data)
 			v := make(map[string]any)
 			if err := json.Unmarshal(got, &v); err != nil {
 				t.Fatalf("unmarshal failed,err:%v", err)
@@ -66,4 +67,41 @@ func Test_translate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_trimComment(t *testing.T) {
+	var wg sync.WaitGroup
+
+	unProcessed := func() chan byte {
+		ch := make(chan byte)
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for _, i := range personCommented {
+				ch <- i
+			}
+			close(ch)
+		}()
+		return ch
+	}()
+
+	processed := make(chan byte)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		TrimComment(unProcessed, processed)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var rst []byte
+		for ch := range processed {
+			rst = append(rst, ch)
+		}
+		spew.Dump(string(rst))
+	}()
+	wg.Wait()
 }
