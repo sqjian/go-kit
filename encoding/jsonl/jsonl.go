@@ -18,6 +18,12 @@ func splitJsonL(data []byte, callback func(string)) error {
 	bracketsCount := 0 // for {}
 	squareCount := 0   // for []
 
+	/*
+		1、流式去除注释
+		2、然后按需截取完整json
+		3、解析json
+		4、测试用例增加不按行分割的jsonl用例
+	*/
 	scanner := bufio.NewScanner(bytes.NewReader(Standardize(data) /*这里去除注释的环节不满足流式要求*/))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
