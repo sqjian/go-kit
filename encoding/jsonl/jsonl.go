@@ -15,6 +15,7 @@ import (
 func Unmarshal(data []byte, ptrToSlice any) error {
 	return Decode(bytes.NewReader(data), ptrToSlice)
 }
+
 func Decode(data io.Reader, ptrToSlice any) error {
 	var wg sync.WaitGroup
 
