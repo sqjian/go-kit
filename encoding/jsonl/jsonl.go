@@ -13,10 +13,34 @@ import (
 )
 
 func Unmarshal(data []byte, ptrToSlice any) error {
-	return Decode(bytes.NewReader(data), ptrToSlice)
+	ptr2sl := reflect.TypeOf(ptrToSlice)
+	if ptr2sl.Kind() != reflect.Ptr {
+		return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
+	}
+
+	originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
+	sliceType := originalSlice.Type()
+	if sliceType.Kind() != reflect.Slice {
+		return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
+	}
+
+	slElem := originalSlice.Type().Elem()
+
+	decoder := func(jsonBuffer []byte) error {
+		newObj := reflect.New(slElem).Interface()
+		var unmarshalErr = json.Unmarshal([]byte(jsonBuffer), newObj)
+		if unmarshalErr != nil {
+			return unmarshalErr
+		}
+		ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
+		originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+		return nil
+	}
+
+	return Decode(bytes.NewReader(data), decoder)
 }
 
-func Decode(data io.Reader, ptrToSlice any) error {
+func Decode(data io.Reader, decoder func([]byte) error) error {
 	var wg sync.WaitGroup
 
 	const chanQueue = 1024
@@ -69,42 +93,22 @@ func Decode(data io.Reader, ptrToSlice any) error {
 	}
 
 	// 解析json
-	{
-		ptr2sl := reflect.TypeOf(ptrToSlice)
-		if ptr2sl.Kind() != reflect.Ptr {
-			cancel()
-			return fmt.Errorf("expected pointer to slice, got %s", ptr2sl.Kind())
-		}
 
-		originalSlice := reflect.Indirect(reflect.ValueOf(ptrToSlice))
-		sliceType := originalSlice.Type()
-		if sliceType.Kind() != reflect.Slice {
-			cancel()
-			return fmt.Errorf("expected pointer to slice, got pointer to %s", sliceType.Kind())
-		}
-
-		slElem := originalSlice.Type().Elem()
-
-		var decodeErr error
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for jsonBuffer := range jsonLSplitedChan {
-				newObj := reflect.New(slElem).Interface()
-				unmarshalErr := json.Unmarshal([]byte(jsonBuffer), newObj)
-				if unmarshalErr != nil {
-					cancel()
-					decodeErr = unmarshalErr
-				}
-				ptrToNewObj := reflect.Indirect(reflect.ValueOf(newObj))
-				originalSlice.Set(reflect.Append(originalSlice, ptrToNewObj))
+	var decodeErr error
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for jsonBuffer := range jsonLSplitedChan {
+			decodeErr = decoder([]byte(jsonBuffer))
+			if decodeErr != nil {
+				cancel()
 			}
-		}()
+		}
+	}()
 
-		wg.Wait()
+	wg.Wait()
 
-		return decodeErr
-	}
+	return decodeErr
 
 }
 
