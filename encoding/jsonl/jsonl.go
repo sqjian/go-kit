@@ -28,7 +28,7 @@ func Unmarshal(data []byte, ptrToSlice any) error {
 
 	decoder := func(jsonBuffer []byte) error {
 		newObj := reflect.New(slElem).Interface()
-		var unmarshalErr = json.Unmarshal([]byte(jsonBuffer), newObj)
+		var unmarshalErr = json.Unmarshal(jsonBuffer, newObj)
 		if unmarshalErr != nil {
 			return unmarshalErr
 		}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	expr "github.com/bytedance/go-tagexpr/v2/validator"
-	"github.com/davecgh/go-spew/spew"
 	. "github.com/sqjian/go-kit/encoding/json"
 	"github.com/sqjian/go-kit/helper"
 )
@@ -30,8 +29,6 @@ func LoadJsonContents(obj any, data []byte) error {
 	if unmarshalErr := json.Unmarshal(Standardize(data), obj); unmarshalErr != nil {
 		return unmarshalErr
 	}
-
-	spew.Dump(obj)
 
 	return validate(obj)
 }

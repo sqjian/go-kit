@@ -1,7 +1,9 @@
 package jsonl_test
 
 import (
+	"bytes"
 	_ "embed"
+	"encoding/json"
 	"github.com/sqjian/go-kit/encoding/jsonl"
 	"testing"
 )
@@ -18,9 +20,73 @@ var personFormattedCommented []byte
 //go:embed testdata/person.formatted.commented.extra.jsonl
 var personFormattedCommentedExtra []byte
 
+//go:embed testdata/dev.jsonl
+var dev []byte
+
 type Person struct {
 	Name string
 	Age  int64
+}
+
+type Dev struct {
+	Input  string `json:"input" `
+	Target string `json:"target"`
+}
+
+func TestDecodeDev(t *testing.T) {
+	type args struct {
+		data       []byte
+		ptrToSlice *Dev
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "dev",
+			args: args{
+				data:       dev,
+				ptrToSlice: &Dev{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := jsonl.Decode(bytes.NewReader(tt.args.data), func(jsonBuffer []byte) error {
+				return json.Unmarshal(jsonBuffer, tt.args.ptrToSlice)
+			})
+			if err != nil {
+				t.Fatalf("Unmarshal returns error:%v,data:%s", err, tt.args.data)
+			}
+		})
+	}
+}
+
+func TestUnmarshalDev(t *testing.T) {
+	type args struct {
+		data       []byte
+		ptrToSlice *[]Dev
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "dev",
+			args: args{
+				data:       dev,
+				ptrToSlice: &[]Dev{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := jsonl.Unmarshal(tt.args.data, tt.args.ptrToSlice)
+			if err != nil {
+				t.Fatalf("Unmarshal returns error:%v,data:%s", err, tt.args.data)
+			}
+		})
+	}
 }
 
 func TestUnmarshal(t *testing.T) {
