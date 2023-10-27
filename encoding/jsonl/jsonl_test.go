@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/json"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sqjian/go-kit/encoding/jsonl"
 	"testing"
 )
@@ -53,11 +54,16 @@ func TestDecodeDev(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := jsonl.Decode(bytes.NewReader(tt.args.data), func(jsonBuffer []byte) error {
-				return json.Unmarshal(jsonBuffer, tt.args.ptrToSlice)
+				if err := json.Unmarshal(jsonBuffer, tt.args.ptrToSlice); err != nil {
+					t.Fatalf("unmarshal failed,data:%v,err:%v", string(jsonBuffer), err.Error())
+				}
+				spew.Dump(tt.args.ptrToSlice)
+				return nil
 			})
 			if err != nil {
 				t.Fatalf("Unmarshal returns error:%v,data:%s", err, tt.args.data)
 			}
+
 		})
 	}
 }
@@ -81,10 +87,10 @@ func TestUnmarshalDev(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := jsonl.Unmarshal(tt.args.data, tt.args.ptrToSlice)
-			if err != nil {
+			if err := jsonl.Unmarshal(tt.args.data, tt.args.ptrToSlice); err != nil {
 				t.Fatalf("Unmarshal returns error:%v,data:%s", err, tt.args.data)
 			}
+			spew.Dump(tt.args.ptrToSlice)
 		})
 	}
 }

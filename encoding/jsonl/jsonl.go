@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/sqjian/go-kit/encoding/jsonc"
 	"io"
 	"reflect"
@@ -41,6 +40,7 @@ func Unmarshal(data []byte, ptrToSlice any) error {
 	return Decode(bytes.NewReader(data), decoder)
 }
 
+// Decode data: 数据流，会按json进行拆分并使用decoder处理
 func Decode(data io.Reader, decoder func([]byte) error) error {
 	var wg sync.WaitGroup
 
@@ -81,7 +81,6 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 		wg.Add(1)
 		go func() {
 			defer func() {
-				spew.Dump("debug...............3")
 				wg.Done()
 			}()
 			trimCommentErr := jsonc.TrimComment(ctx, rawDataChan, trimmedCommentChan)
@@ -93,15 +92,15 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	}
 
 	// 切分jsonl
-	jsonLSplitedChan := make(chan string, chanQueue)
+	jsonLSplitChan := make(chan string, chanQueue)
 	{
 		wg.Add(1)
 		go func() {
 			defer func() {
 				wg.Done()
 			}()
-			splitErr := split(ctx, trimmedCommentChan, jsonLSplitedChan)
-			close(jsonLSplitedChan)
+			splitErr := split(ctx, trimmedCommentChan, jsonLSplitChan)
+			close(jsonLSplitChan)
 			if splitErr != nil {
 				cancel()
 			}
@@ -113,10 +112,9 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	wg.Add(1)
 	go func() {
 		defer func() {
-			spew.Dump("debug...............7")
 			wg.Done()
 		}()
-		for jsonBuffer := range jsonLSplitedChan {
+		for jsonBuffer := range jsonLSplitChan {
 			decodeErr = decoder([]byte(jsonBuffer))
 			if decodeErr != nil {
 				cancel()
@@ -155,12 +153,15 @@ func split(ctx context.Context, from <-chan byte, to chan<- string) error {
 
 	for char := range from {
 		jsonBuffer.WriteByte(char)
-		if quote {
-			continue
-		}
+
 		if char == jsonc.QUOTE {
 			quote = !quote
 		}
+
+		if quote {
+			continue
+		}
+
 		switch char {
 		case '{':
 			bracketsCount++
