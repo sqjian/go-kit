@@ -62,7 +62,7 @@ func TrimCommentWrapper(s []byte) []byte {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			TrimComment(context.Background(), unProcessed, processed)
+			_ = TrimComment(context.Background(), unProcessed, processed)
 		}()
 	}
 
@@ -81,7 +81,18 @@ func TrimCommentWrapper(s []byte) []byte {
 	return rst
 }
 
-func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) {
+func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) error {
+
+	sendBack := func(char byte) error {
+		select {
+		case <-ctx.Done():
+			close(to)
+			return ctx.Err()
+		default:
+			to <- char
+		}
+		return nil
+	}
 
 	// 初始化变量
 	var (
@@ -91,16 +102,12 @@ func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) {
 	comment := &commentData{} // 注释数据
 
 	for char := range from {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-		}
-
 		// 处理转义字符
 		if char == ESCAPE || escaped {
 			if !comment.started {
-				to <- char
+				if err := sendBack(char); err != nil {
+					return err
+				}
 			}
 			escaped = !escaped
 			continue
@@ -117,13 +124,17 @@ func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) {
 
 			if !comment.started {
 				// 保留非注释里的换行，这里 \r、\n会被逐次追加
-				to <- char
+				if err := sendBack(char); err != nil {
+					return err
+				}
 			}
 			continue
 		}
 		// 当在双引号内部且没有开始注释时，保留字符
 		if quote && !comment.started {
-			to <- char
+			if err := sendBack(char); err != nil {
+				return err
+			}
 			continue
 		}
 		// 处理多行注释结束
@@ -152,8 +163,10 @@ func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) {
 			comment.start(char)
 			continue
 		}
-		to <- char
+		if err := sendBack(char); err != nil {
+			return err
+		}
 	}
 
-	close(to)
+	return nil
 }

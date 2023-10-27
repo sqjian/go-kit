@@ -29,8 +29,8 @@ type Person struct {
 }
 
 type Dev struct {
-	Input  string `json:"input" `
-	Target string `json:"target"`
+	Input  string `json:"input"  validate:"len($)>1"`
+	Target string `json:"target"  validate:"len($)>1"`
 }
 
 func TestDecodeDev(t *testing.T) {

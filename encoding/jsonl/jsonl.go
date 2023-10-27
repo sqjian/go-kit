@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sqjian/go-kit/encoding/jsonc"
 	"io"
 	"reflect"
@@ -52,7 +53,10 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 		ch := make(chan byte, chanQueue)
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
+			defer func() {
+				close(ch)
+				wg.Done()
+			}()
 			buf := bufio.NewReader(data)
 
 			for {
@@ -67,18 +71,23 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 					ch <- char
 				}
 			}
-			close(ch)
 		}()
 		return ch
 	}()
 
 	// 去除注释
-	commentTrimmedChan := make(chan byte, chanQueue)
+	trimmedCommentChan := make(chan byte, chanQueue)
 	{
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
-			jsonc.TrimComment(ctx, rawDataChan, commentTrimmedChan)
+			defer func() {
+				spew.Dump("debug...............3")
+				wg.Done()
+			}()
+			trimCommentErr := jsonc.TrimComment(ctx, rawDataChan, trimmedCommentChan)
+			if trimCommentErr != nil {
+				cancel()
+			}
 		}()
 	}
 
@@ -87,8 +96,13 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	{
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
-			split(ctx, commentTrimmedChan, jsonLSplitedChan)
+			defer func() {
+				wg.Done()
+			}()
+			splitErr := split(ctx, trimmedCommentChan, jsonLSplitedChan)
+			if splitErr != nil {
+				cancel()
+			}
 		}()
 	}
 
@@ -97,7 +111,9 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	var decodeErr error
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
+		defer func() {
+			wg.Done()
+		}()
 		for jsonBuffer := range jsonLSplitedChan {
 			decodeErr = decoder([]byte(jsonBuffer))
 			if decodeErr != nil {
@@ -112,7 +128,19 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 
 }
 
-func split(ctx context.Context, from <-chan byte, to chan<- string) {
+func split(ctx context.Context, from <-chan byte, to chan<- string) error {
+
+	sendBack := func(str string) error {
+		select {
+		case <-ctx.Done():
+			spew.Dump("debug..............3")
+			close(to)
+			return ctx.Err()
+		default:
+			to <- str
+		}
+		return nil
+	}
 
 	var (
 		jsonBuffer = &bytes.Buffer{}
@@ -123,12 +151,6 @@ func split(ctx context.Context, from <-chan byte, to chan<- string) {
 	validCharacters := false
 
 	for char := range from {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-		}
-
 		jsonBuffer.WriteByte(char)
 		switch char {
 		case '{':
@@ -145,13 +167,15 @@ func split(ctx context.Context, from <-chan byte, to chan<- string) {
 			validCharacters = true
 		}
 		if validCharacters && bracketsCount == 0 && squareCount == 0 && jsonBuffer.Len() > 2 {
-			to <- jsonBuffer.String()
+			if err := sendBack(jsonBuffer.String()); err != nil {
+				return err
+			}
 			jsonBuffer.Reset()
 			validCharacters = false
 		}
 	}
 
-	close(to)
+	return nil
 }
 
 func Marshal(data any) ([]byte, error) {

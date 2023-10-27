@@ -102,7 +102,7 @@ func Test_trimComment(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			TrimComment(context.Background(), unProcessed, processed)
+			_ = TrimComment(context.Background(), unProcessed, processed)
 		}()
 	}
 
