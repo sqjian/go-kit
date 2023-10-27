@@ -63,6 +63,7 @@ func TrimCommentWrapper(s []byte) []byte {
 		go func() {
 			defer wg.Done()
 			_ = TrimComment(context.Background(), unProcessed, processed)
+			close(processed)
 		}()
 	}
 
@@ -86,7 +87,6 @@ func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) error {
 	sendBack := func(char byte) error {
 		select {
 		case <-ctx.Done():
-			close(to)
 			return ctx.Err()
 		default:
 			to <- char

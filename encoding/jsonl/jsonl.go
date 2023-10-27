@@ -85,6 +85,7 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 				wg.Done()
 			}()
 			trimCommentErr := jsonc.TrimComment(ctx, rawDataChan, trimmedCommentChan)
+			close(trimmedCommentChan)
 			if trimCommentErr != nil {
 				cancel()
 			}
@@ -100,6 +101,7 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 				wg.Done()
 			}()
 			splitErr := split(ctx, trimmedCommentChan, jsonLSplitedChan)
+			close(jsonLSplitedChan)
 			if splitErr != nil {
 				cancel()
 			}
@@ -107,11 +109,11 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	}
 
 	// 解析json
-
 	var decodeErr error
 	wg.Add(1)
 	go func() {
 		defer func() {
+			spew.Dump("debug...............7")
 			wg.Done()
 		}()
 		for jsonBuffer := range jsonLSplitedChan {
@@ -125,7 +127,6 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	wg.Wait()
 
 	return decodeErr
-
 }
 
 func split(ctx context.Context, from <-chan byte, to chan<- string) error {
@@ -133,14 +134,16 @@ func split(ctx context.Context, from <-chan byte, to chan<- string) error {
 	sendBack := func(str string) error {
 		select {
 		case <-ctx.Done():
-			spew.Dump("debug..............3")
-			close(to)
 			return ctx.Err()
 		default:
 			to <- str
 		}
 		return nil
 	}
+
+	var (
+		quote bool // 判断是否在双引号内部
+	)
 
 	var (
 		jsonBuffer = &bytes.Buffer{}
@@ -152,6 +155,12 @@ func split(ctx context.Context, from <-chan byte, to chan<- string) error {
 
 	for char := range from {
 		jsonBuffer.WriteByte(char)
+		if quote {
+			continue
+		}
+		if char == jsonc.QUOTE {
+			quote = !quote
+		}
 		switch char {
 		case '{':
 			bracketsCount++
