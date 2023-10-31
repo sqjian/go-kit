@@ -27,6 +27,6 @@ func TestValidateJson(t *testing.T) {
 	checkErr(validatorInstErr)
 	{
 		t.Log(validatorInst.Validate(testSchema, testExample))
-		t.Log(validatorInst.Validate(testSchema, testExampleFake))
+		t.Log(validatorInst.Validate(testSchema, testExampleFake) != nil)
 	}
 }
