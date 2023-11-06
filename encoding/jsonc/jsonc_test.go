@@ -1,11 +1,9 @@
 package jsonc
 
 import (
-	"context"
 	_ "embed"
 	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
-	"sync"
 	"testing"
 )
 
@@ -77,46 +75,4 @@ func Test_TrimCommentWrapper(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test_trimComment(t *testing.T) {
-	var wg sync.WaitGroup
-
-	unProcessed := func() chan byte {
-		ch := make(chan byte)
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for _, i := range personCommented {
-				ch <- i
-			}
-			close(ch)
-		}()
-		return ch
-	}()
-
-	processed := make(chan byte)
-
-	{
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			_ = TrimComment(context.Background(), unProcessed, processed)
-		}()
-	}
-
-	{
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			var rst []byte
-			for ch := range processed {
-				rst = append(rst, ch)
-			}
-			spew.Dump(string(rst))
-		}()
-	}
-
-	wg.Wait()
 }
