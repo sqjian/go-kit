@@ -40,6 +40,43 @@ func TestSet(t *testing.T) {
 	}
 }
 
+func TestMustGet(t *testing.T) {
+	type args struct {
+		data []byte
+		keys []string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		expect []byte
+	}{
+		{
+			name: "test1",
+			args: args{
+				data: []byte(`{"name":"John","age":30,"city":"New York"}`),
+				keys: []string{"city"},
+			},
+			expect: []byte("New York"),
+		}, {
+			name: "test2",
+			args: args{
+				data: []byte(`{"age": "儿童","appearance": "五官端正","character": ">甜美可爱","field": "自媒体","gender": "女"}`),
+				keys: []string{"age"},
+			},
+			expect: []byte("儿童"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotValue := easyjson.MustGet(tt.args.data, tt.args.keys...)
+			if string(gotValue) != string(tt.expect) {
+				t.Errorf("MustGet() failed, gotVal:%s,expect:%s", gotValue, tt.expect)
+				return
+			}
+		})
+	}
+}
+
 func TestGet(t *testing.T) {
 	type args struct {
 		data []byte
