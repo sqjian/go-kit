@@ -30,6 +30,9 @@ var case2 []byte
 //go:embed testdata/case3.jsonl
 var case3 []byte
 
+//go:embed testdata/case4.jsonl
+var case4 []byte
+
 type Person struct {
 	Name string
 	Age  int64
@@ -101,6 +104,13 @@ func TestUnmarshalDev(t *testing.T) {
 			name: "case3",
 			args: args{
 				data:       case3,
+				ptrToSlice: &[]Dev{},
+			},
+		},
+		{
+			name: "case4",
+			args: args{
+				data:       case4,
 				ptrToSlice: &[]Dev{},
 			},
 		},
