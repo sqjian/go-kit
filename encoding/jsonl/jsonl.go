@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sqjian/go-kit/encoding/jsonc"
+	"github.com/sqjian/go-kit/helper"
 	"io"
 	"reflect"
 	"sync"
@@ -28,7 +29,7 @@ func Unmarshal(data []byte, ptrToSlice any) error {
 
 	decoder := func(jsonBuffer []byte) error {
 		newObj := reflect.New(slElem).Interface()
-		var unmarshalErr = json.Unmarshal(jsonBuffer, newObj)
+		var unmarshalErr = json.Unmarshal(helper.RemoveZWNBS(jsonBuffer), newObj)
 		if unmarshalErr != nil {
 			return unmarshalErr
 		}
