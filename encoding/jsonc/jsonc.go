@@ -32,19 +32,19 @@ func (c *commentData) stop() {
 }
 
 // start方法用于开始注释
-func (c *commentData) start(ch byte) {
+func (c *commentData) start(ch rune) {
 	c.started = true
 	c.isSingleLined = ch == SLASH || ch == HASH
 }
 
 // TrimCommentWrapper 函数处理字节数组，主要是处理注释并返回新的字节数组\
-func TrimCommentWrapper(s []byte) []byte {
+func TrimCommentWrapper(s []rune) []rune {
 
-	var rst []byte
+	var rst []rune
 	var wg sync.WaitGroup
 
-	unProcessed := func() chan byte {
-		ch := make(chan byte)
+	unProcessed := func() chan rune {
+		ch := make(chan rune)
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -56,7 +56,7 @@ func TrimCommentWrapper(s []byte) []byte {
 		return ch
 	}()
 
-	processed := make(chan byte)
+	processed := make(chan rune)
 
 	{
 		wg.Add(1)
@@ -82,9 +82,9 @@ func TrimCommentWrapper(s []byte) []byte {
 	return rst
 }
 
-func TrimComment(ctx context.Context, from <-chan byte, to chan<- byte) error {
+func TrimComment(ctx context.Context, from <-chan rune, to chan<- rune) error {
 
-	sendBack := func(char byte) error {
+	sendBack := func(char rune) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

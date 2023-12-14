@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/sqjian/go-kit/helper"
 	"testing"
 )
 
@@ -39,7 +40,7 @@ func Test_Comments(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := TrimCommentWrapper(tt.args.data)
+			got := TrimCommentWrapper(helper.BytesToRunes(tt.args.data))
 			spew.Dump(string(got))
 		})
 	}
@@ -62,9 +63,9 @@ func Test_TrimCommentWrapper(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := TrimCommentWrapper(tt.args.data)
+			got := TrimCommentWrapper(helper.BytesToRunes(tt.args.data))
 			v := make(map[string]any)
-			if err := json.Unmarshal(got, &v); err != nil {
+			if err := json.Unmarshal(helper.RunesToBytes(got), &v); err != nil {
 				t.Fatalf("unmarshal failed,err:%v", err)
 			}
 			if (v["Name"].(string)) != "Maria" {

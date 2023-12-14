@@ -49,8 +49,8 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// 读取原始数据
-	rawDataChan := func() chan byte {
-		ch := make(chan byte, chanQueue)
+	rawDataChan := func() chan rune {
+		ch := make(chan rune, chanQueue)
 		wg.Add(1)
 		go func() {
 			defer func() {
@@ -60,7 +60,7 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 			buf := bufio.NewReader(data)
 
 			for {
-				char, err := buf.ReadByte()
+				char, _, err := buf.ReadRune()
 				if err != nil {
 					break
 				}
@@ -76,7 +76,7 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	}()
 
 	// 去除注释
-	trimmedCommentChan := make(chan byte, chanQueue)
+	trimmedCommentChan := make(chan rune, chanQueue)
 	{
 		wg.Add(1)
 		go func() {
@@ -127,7 +127,7 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 	return decodeErr
 }
 
-func split(ctx context.Context, from <-chan byte, to chan<- string) error {
+func split(ctx context.Context, from <-chan rune, to chan<- string) error {
 
 	sendBack := func(str string) error {
 		select {
@@ -151,12 +151,15 @@ func split(ctx context.Context, from <-chan byte, to chan<- string) error {
 	squareCount := 0   // for []
 	validCharacters := false
 
+	var preChar rune
 	for char := range from {
-		jsonBuffer.WriteByte(char)
+		jsonBuffer.WriteRune(char)
 
-		if char == jsonc.QUOTE {
+		if preChar != jsonc.ESCAPE && char == jsonc.QUOTE {
 			quote = !quote
 		}
+
+		preChar = char
 
 		if quote {
 			continue

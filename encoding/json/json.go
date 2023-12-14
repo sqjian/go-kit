@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/sqjian/go-kit/encoding/jsonc"
+	"github.com/sqjian/go-kit/helper"
 	"strings"
 )
 
@@ -23,5 +24,5 @@ func Get(data []byte, keys ...string) (value []byte, dataType jsonparser.ValueTy
 }
 
 func Standardize(data []byte) []byte {
-	return jsonc.TrimCommentWrapper(data)
+	return helper.RunesToBytes(jsonc.TrimCommentWrapper(helper.BytesToRunes(data)))
 }

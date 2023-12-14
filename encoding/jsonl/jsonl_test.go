@@ -21,8 +21,14 @@ var personFormattedCommented []byte
 //go:embed testdata/person.formatted.commented.extra.jsonl
 var personFormattedCommentedExtra []byte
 
-//go:embed testdata/dev.jsonl
-var dev []byte
+//go:embed testdata/case1.jsonl
+var case1 []byte
+
+//go:embed testdata/case2.jsonl
+var case2 []byte
+
+//go:embed testdata/case3.jsonl
+var case3 []byte
 
 type Person struct {
 	Name string
@@ -34,7 +40,7 @@ type Dev struct {
 	Target string `json:"target"  validate:"len($)>1"`
 }
 
-func TestDecodeDev(t *testing.T) {
+func TestDecodeCase(t *testing.T) {
 	type args struct {
 		data       []byte
 		ptrToSlice *Dev
@@ -44,9 +50,9 @@ func TestDecodeDev(t *testing.T) {
 		args args
 	}{
 		{
-			name: "dev",
+			name: "case",
 			args: args{
-				data:       dev,
+				data:       case1,
 				ptrToSlice: &Dev{},
 			},
 		},
@@ -55,7 +61,7 @@ func TestDecodeDev(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			err := jsonl.Decode(bytes.NewReader(tt.args.data), func(jsonBuffer []byte) error {
 				if err := json.Unmarshal(jsonBuffer, tt.args.ptrToSlice); err != nil {
-					t.Fatalf("unmarshal failed,data:%v,err:%v", string(jsonBuffer), err.Error())
+					t.Fatalf("unmarshal failed,err:%v,data:%v", err.Error(), string(jsonBuffer))
 				}
 				spew.Dump(tt.args.ptrToSlice)
 				return nil
@@ -78,9 +84,23 @@ func TestUnmarshalDev(t *testing.T) {
 		args args
 	}{
 		{
-			name: "dev",
+			name: "case1",
 			args: args{
-				data:       dev,
+				data:       case1,
+				ptrToSlice: &[]Dev{},
+			},
+		},
+		{
+			name: "case2",
+			args: args{
+				data:       case2,
+				ptrToSlice: &[]Dev{},
+			},
+		},
+		{
+			name: "case3",
+			args: args{
+				data:       case3,
 				ptrToSlice: &[]Dev{},
 			},
 		},
