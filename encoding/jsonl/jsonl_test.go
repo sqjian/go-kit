@@ -36,6 +36,15 @@ var case4 []byte
 //go:embed testdata/case5.jsonl
 var case5 []byte
 
+//go:embed testdata/case6.jsonl
+var case6 []byte
+
+//go:embed testdata/case7.jsonl
+var case7 []byte
+
+//go:embed testdata/case8.jsonl
+var case8 []byte
+
 type Person struct {
 	Name string
 	Age  int64
@@ -66,6 +75,36 @@ func TestDecodeCase(t *testing.T) {
 			name: "case5",
 			args: args{
 				data: case5,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+			},
+		},
+		{
+			name: "case6",
+			args: args{
+				data: case6,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+			},
+		},
+		{
+			name: "case7",
+			args: args{
+				data: case7,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+			},
+		},
+		{
+			name: "case8",
+			args: args{
+				data: case8,
 				ptrToSlice: func() any {
 					var tmp interface{}
 					return &tmp
