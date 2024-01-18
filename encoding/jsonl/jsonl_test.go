@@ -33,6 +33,9 @@ var case3 []byte
 //go:embed testdata/case4.jsonl
 var case4 []byte
 
+//go:embed testdata/case5.jsonl
+var case5 []byte
+
 type Person struct {
 	Name string
 	Age  int64
@@ -46,7 +49,7 @@ type Dev struct {
 func TestDecodeCase(t *testing.T) {
 	type args struct {
 		data       []byte
-		ptrToSlice *Dev
+		ptrToSlice interface{}
 	}
 	tests := []struct {
 		name string
@@ -57,6 +60,16 @@ func TestDecodeCase(t *testing.T) {
 			args: args{
 				data:       case1,
 				ptrToSlice: &Dev{},
+			},
+		},
+		{
+			name: "case5",
+			args: args{
+				data: case5,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
 			},
 		},
 	}

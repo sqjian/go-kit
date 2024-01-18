@@ -116,7 +116,7 @@ func Decode(data io.Reader, decoder func([]byte) error) error {
 			wg.Done()
 		}()
 		for jsonBuffer := range jsonLSplitChan {
-			decodeErr = decoder([]byte(jsonBuffer))
+			decodeErr = decoder([]byte(helper.RemoveZWNBS(jsonBuffer)))
 			if decodeErr != nil {
 				cancel()
 			}
