@@ -26,7 +26,6 @@ require (
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/spf13/cobra v1.7.0
 	github.com/sqjian/expr v0.0.0-20231010011504-8d12124cbe37
-	github.com/tailscale/hujson v0.0.0-20221223112325-20486734a56a
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.uber.org/zap v1.25.0
 	golang.org/x/exp v0.0.0-20230811145659-89c5cff77bcb
