@@ -1,6 +1,8 @@
 package json
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/buger/jsonparser"
 	"github.com/sqjian/go-kit/encoding/jsonc"
@@ -25,4 +27,18 @@ func Get(data []byte, keys ...string) (value []byte, dataType jsonparser.ValueTy
 
 func Standardize(data []byte) []byte {
 	return helper.RunesToBytes(jsonc.TrimCommentWrapper(helper.BytesToRunes(data)))
+}
+
+func Marshal(data any) ([]byte, error) {
+
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false) // 不对HTML特殊字符进行转义
+
+	if err := encoder.Encode(data); err != nil {
+		fmt.Println("Error encoding JSON:", err)
+		return nil, fmt.Errorf("error encoding JSON:%v", err)
+	}
+
+	return buf.Bytes(), nil
 }

@@ -162,3 +162,38 @@ func TestStandardize(t *testing.T) {
 		})
 	}
 }
+
+func TestMarshal(t *testing.T) {
+	type args struct {
+		data any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "test1",
+			args: args{
+				data: map[string]string{"key": "<val>"},
+			},
+			want:    []byte(`{"key":"<val>"}`),
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := easyjson.Marshal(tt.args.data)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Marshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if bytes.Contains(got, []byte("<")) || bytes.Contains(got, []byte(">")) {
+				return
+			} else {
+				t.Logf("do not contains < or >")
+			}
+		})
+	}
+}
