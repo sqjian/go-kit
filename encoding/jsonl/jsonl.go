@@ -204,6 +204,7 @@ func Marshal(data any) ([]byte, error) {
 	buf := &bytes.Buffer{}
 
 	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false) // 不对HTML特殊字符进行转义
 	for i := 0; i < originalSlice.Len(); i++ {
 		elem := originalSlice.Index(i).Interface()
 		err := enc.Encode(elem)
