@@ -40,5 +40,11 @@ func Marshal(data any) ([]byte, error) {
 		return nil, fmt.Errorf("error encoding JSON:%v", err)
 	}
 
-	return buf.Bytes(), nil
+	// 去除末尾默认添加的换行符
+	result := buf.Bytes()
+	if len(result) > 0 && result[len(result)-1] == '\n' {
+		result = result[:len(result)-1]
+	}
+
+	return result, nil
 }
