@@ -76,5 +76,6 @@ This project is licensed under the Apache-2.0 License - see the [LICENSE](https:
 
 - Our heartfelt gratitude goes to the myriad of open-source projects and contributors that have laid the foundation for this toolkit.
 - A big thank you to our community of users and contributors for your trust, feedback, and valuable contributions.
+- Special thanks to [JetBrains](https://jb.gg/OpenSourceSupport) for providing an open-source license for their development tools.
 
 Join us in our quest to simplify Go development, making it more efficient and enjoyable for everyone.
