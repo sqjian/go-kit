@@ -45,6 +45,9 @@ var case7 []byte
 //go:embed testdata/case8.jsonl
 var case8 []byte
 
+//go:embed testdata/case9.jsonl
+var case9 []byte
+
 type Person struct {
 	Name string
 	Age  int64
@@ -59,6 +62,7 @@ func TestDecodeCase(t *testing.T) {
 	type args struct {
 		data       []byte
 		ptrToSlice interface{}
+		linesCnt   int
 	}
 	tests := []struct {
 		name string
@@ -67,8 +71,12 @@ func TestDecodeCase(t *testing.T) {
 		{
 			name: "case",
 			args: args{
-				data:       case1,
-				ptrToSlice: &Dev{},
+				data: case1,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+				linesCnt: 2,
 			},
 		},
 		{
@@ -79,6 +87,7 @@ func TestDecodeCase(t *testing.T) {
 					var tmp interface{}
 					return &tmp
 				}(),
+				linesCnt: 2,
 			},
 		},
 		{
@@ -89,6 +98,7 @@ func TestDecodeCase(t *testing.T) {
 					var tmp interface{}
 					return &tmp
 				}(),
+				linesCnt: 15,
 			},
 		},
 		{
@@ -99,6 +109,7 @@ func TestDecodeCase(t *testing.T) {
 					var tmp interface{}
 					return &tmp
 				}(),
+				linesCnt: 15,
 			},
 		},
 		{
@@ -109,18 +120,41 @@ func TestDecodeCase(t *testing.T) {
 					var tmp interface{}
 					return &tmp
 				}(),
+				linesCnt: 15,
+			},
+		},
+		{
+			name: "case9",
+			args: args{
+				data: case9,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+				linesCnt: 2,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			linesCnt := 0
 			err := jsonl.Decode(bytes.NewReader(tt.args.data), func(jsonBuffer []byte) error {
 				if err := json.Unmarshal(jsonBuffer, tt.args.ptrToSlice); err != nil {
 					t.Fatalf("unmarshal failed,err:%v,data:%v", err.Error(), string(jsonBuffer))
 				}
-				spew.Dump(tt.args.ptrToSlice)
+				ptrData := tt.args.ptrToSlice.(*any)
+				ptrDataMap := (*ptrData).(map[string]interface{})
+				if len(ptrDataMap) != 0 {
+					linesCnt++
+				}
+				spew.Dump(ptrDataMap)
 				return nil
 			})
+
+			if linesCnt != tt.args.linesCnt {
+				t.Fatalf("linesCnt error->expect:%v,actual:%v", tt.args.linesCnt, linesCnt)
+			}
+
 			if err != nil {
 				t.Fatalf("Unmarshal returns error:%v,data:%s", err, tt.args.data)
 			}
