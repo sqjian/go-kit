@@ -48,6 +48,12 @@ var case8 []byte
 //go:embed testdata/case9.jsonl
 var case9 []byte
 
+//go:embed testdata/case10.jsonl
+var case10 []byte
+
+//go:embed testdata/case11.jsonl
+var case11 []byte
+
 type Person struct {
 	Name string
 	Age  int64
@@ -134,6 +140,28 @@ func TestDecodeCase(t *testing.T) {
 				linesCnt: 2,
 			},
 		},
+		{
+			name: "case10",
+			args: args{
+				data: case10,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+				linesCnt: 1,
+			},
+		},
+		{
+			name: "case11",
+			args: args{
+				data: case11,
+				ptrToSlice: func() any {
+					var tmp interface{}
+					return &tmp
+				}(),
+				linesCnt: 1,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -147,7 +175,6 @@ func TestDecodeCase(t *testing.T) {
 				if len(ptrDataMap) != 0 {
 					linesCnt++
 				}
-				spew.Dump(ptrDataMap)
 				return nil
 			})
 

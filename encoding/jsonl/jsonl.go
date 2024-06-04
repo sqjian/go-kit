@@ -152,17 +152,24 @@ func split(ctx context.Context, from <-chan rune, to chan<- string) error {
 	squareCount := 0   // for []
 	validCharacters := false
 
-	var prePreChar rune
-	var preChar rune
+	var needSkip bool
+
 	for char := range from {
 		jsonBuffer.WriteRune(char)
 
-		if (char == jsonc.QUOTE && preChar != jsonc.ESCAPE) ||
-			(char == jsonc.QUOTE && prePreChar == jsonc.ESCAPE) {
+		if needSkip {
+			needSkip = false
+			continue
+		}
+
+		if char == jsonc.ESCAPE {
+			needSkip = true
+			continue
+		}
+
+		if char == jsonc.QUOTE {
 			quote = !quote
 		}
-		prePreChar = preChar
-		preChar = char
 
 		if quote {
 			continue
