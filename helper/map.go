@@ -1,6 +1,9 @@
 package helper
 
-import "golang.org/x/exp/constraints"
+import (
+	"golang.org/x/exp/constraints"
+	"sort"
+)
 
 // Keys returns the keys of the map m in a slice.
 // The keys will be returned in an unpredictable order.
@@ -22,4 +25,17 @@ func Sum[K comparable, V constraints.Float | constraints.Integer](m map[K]V) V {
 		s += v
 	}
 	return s
+}
+
+func SortedMap[K comparable, V any](m map[K]V, less func(a, b K) bool, f func(k K, v V)) {
+	var keys []K
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return less(keys[i], keys[j])
+	})
+	for _, k := range keys {
+		f(k, m[k])
+	}
 }

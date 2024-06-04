@@ -62,3 +62,39 @@ func TestSum(t *testing.T) {
 		})
 	}
 }
+
+func TestSortedMap(t *testing.T) {
+	type Payload struct{}
+
+	type args[K comparable, V any] struct {
+		m    map[K]V
+		less func(a, b K) bool
+		f    func(k K, v V)
+	}
+	type testCase[K comparable, V any] struct {
+		name string
+		args args[K, V]
+	}
+	tests := []testCase[int, *Payload]{
+		{
+			name: "test1",
+			args: args[int, *Payload]{
+				m: map[int]*Payload{
+					2: {},
+					1: {},
+				},
+				less: func(a, b int) bool {
+					return a < b
+				},
+				f: func(k int, v *Payload) {
+					t.Logf("k:%v,v:%v\n", k, v)
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			helper.SortedMap(tt.args.m, tt.args.less, tt.args.f)
+		})
+	}
+}
